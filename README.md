@@ -3,7 +3,7 @@ MLib
 
 __MLib__ is a math library that does math functions for you. It is designed to be __easy to use__ and __intuitive__. It has many <a href="http://github.com/davisdude/mlib#function-list">functions</a>. 
 
-__MLib__ is written in mostly pure <a href="http://lua.org">Lua</a> with some drawing functions using <a href="http://love2d.org">LÖVE</a>, which can be changed if need be. 
+__MLib__ is written in mostly pure <a href="http://lua.org">Lua</a> with some drawing functions using <a href="http://love2d.org">LÃ–VE</a>, which can be changed if need be. 
 
 ##Installation
 You can get the most recent version of MLib by:
@@ -14,7 +14,7 @@ git clone git://github.com/davisdude/mlib.git
 ````
 
 ###Download
-The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/2.0.0">here</a> or <a href="http://love2d.org/forums/viewtopic.php?f=5&t=36552">here</a> (link is at the bottom of the first post).
+The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/2.0.1">here</a> or <a href="http://love2d.org/forums/viewtopic.php?f=5&t=36552">here</a> (link is at the bottom of the first post).
 
 ##Usage of MLib##
 Download the file called <a href="https://github.com/davisdude/mlib/blob/master/mlib.lua">`mlib.lua`</a> and put it somewhere in the file for the process you want it in. Use the *require* function to import the module into the library.
