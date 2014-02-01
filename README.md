@@ -79,6 +79,7 @@ print( "Line 2: \n\tSlope: "..m2.."\n\tY-Intercept: "..b2 )
 ####<a href="http://github.com/davisdude/mlib#mlibcircle-1">mlib.circle</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclearea-1">mlib.circle.area</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclecheckpoint-1">mlib.circle.checkPoint</a>
+#####<a href="http://github.com/davisdude/mlib#mlibcircleincircle-1">mlib.circle.inCircle</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclecircumference-1">mlib.circle.circumference</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclesecant-1">mlib.circle.secant</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclesegmentsecant-1">mlib.circle.segmentSecant</a>
@@ -101,6 +102,7 @@ print( "Line 2: \n\tSlope: "..m2.."\n\tY-Intercept: "..b2 )
 ####<a href="http://github.com/davisdude/mlib#mlibshape-1">mlib.shape</a>
 #####<a href="http://github.com/davisdude/mlib#mlibshapenew-1">mlib.shape.new</a>
 #####<a href="http://github.com/davisdude/mlib#mlibshapecheckcollisions-1">mlib.shape.checkCollisions</a>
+#####<a href="http://github.com/davisdude/mlib#mlibshaperemove-1">mlib.shape.remove/a>
 
 #Functions
 ####mlib.line
@@ -598,11 +600,28 @@ Handles functions dealing with circles.
   - `x`: Number. The x of the point you are testing.
   - `y`: Number. The y of the point you are testing.
 - Returns:
-  - `true` if the point is within the circle.
-  - `false` if the point is not within the circle.
+  - `true` if the point is along the edge of the circle.
+  - `false` if the point is not along the edge of the circle.
 - Example:
   - Checks whether the circle has the point ( 1, 4 ) with its center at ( 3, 4 ) and a radius of ( 2 ), which it is. 
     - `mlib.circle.checkPoint( 3, 4, 2, 1, 4 )`
+
+#####mlib.circle.inCircle
+- Checks whether or not a point is inside a circle. 
+- Synopsis:
+  - `mlib.circle.inCircle( cx, cy, r, x, y )`
+- Arguments:
+  - `cx`: Number. The circle's x (where the center of the circle is).
+  - `cy`: Number. The circle's y (where the center of the circle is).
+  - `r`: Number. The radius of the circle.
+  - `x`: Number. The x of the point you are testing.
+  - `y`: Number. The y of the point you are testing.
+- Returns:
+  - `true` if the point is inside of the circle.
+  - `false` if the point is not inside of the circle.
+- Example:
+  - Checks whether the circle has the point ( 1, 4 ) with its center at ( 3, 4 ) and a radius of ( 2 ), which it is. 
+    - `mlib.circle.inCircle( 3, 4, 2, 1, 4 )`
   
 #####mlib.circle.circumference
 - Gives the circumference of a circle.
@@ -942,26 +961,39 @@ Handles shape collision/intersection.
 #####mlib.shape:checkCollisions
 - Checks collisions between shapes. 
 - Synopsis:
-  - `mlib.shape.checkCollisions( dt )`
-  - `mlib.shape.checkCollisions( dt, shapes )`
-  - `shape:checkCollisions( dt )`
-  - `shape:checkCollisions( dt, shapes )`
+  - `mlib.shape.checkCollisions()`
+  - `mlib.shape.checkCollisions( shapes )`
+  - `shape:checkCollisions()`
+  - `shape:checkCollisions( shapes )`
 - Arguments: 
-  - `mlib.shape.checkCollisions( dt )`
-    - `dt`: Number. The delta time.
-  - `mlib.shape.checkCollisions( dt, shapes )`
-    - `dt`: Number. The delta time.
+  - `mlib.shape.checkCollisions()`
+  - `mlib.shape.checkCollisions( shapes )`
     - `shapes`: Table. A table containing all of the shapes you want to check for collisions (the shapes excluded will not be checked for collisions).
       - __Note__: The shapes must be enclosed in a table, like follows: `{ shape1, shape2, ... }`.
-  - `shape:checkCollisions( dt )`
+  - `shape:checkCollisions()`
     - `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">mlib.shape.new</a>.
-    - `dt`: Number. The delta time.
-  - `shape:checkCollisions( dt, shapes )`
+  - `shape:checkCollisions( shapes )`
     - `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">mlib.shape.new</a>.
-    - `dt`: Number. The delta time.
     - `shapes`: Tables. All the shapes being checked against `shape` (this checks if any of the `shapes` collide with `shape`).
       - __Note__: Unlike other ones, the shapes in this one must be done seperately, like follows: `shape1, shape2, ...`.
 - See <a href="https://github.com/davisdude/mlib#mlibshape-example">the example</a>.
+
+#####mlib.shape:remove
+- Removes a table from testing. 
+- Synopsis:
+  - `mlib.shape.remove()`
+  - `mlib.shape.remove( shapes )`
+  - `shape:remove()`
+  - `shape:remove( shapes )`
+- Arguments:
+  - `mlib.shape.remove()`
+  - `mlib.shape.remove( shapes )`
+    - `shapes`: Table. A table containing all of the shapes you want to remove. 
+  - `shape:remove()`
+	- `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">mlib.shape.new</a>.
+  - `shape:remove( shapes )`
+	- `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">mlib.shape.new</a>.
+	- `shapes`: Table. A table containing all of the shapes you want to remove. 
 
 ##mlib.shape Example
 Here is an example of how to use mlib.shape.
