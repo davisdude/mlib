@@ -492,4 +492,35 @@ context( 'the module', function()
 			assert_multiple_fuzzy_equal( { _.line.segmentIntersects( 4, 6, 8, 8, 5, 8, 9, 8 ) }, { 8, 8 } )
 		end )
 	end )
+	
+	context( 'polygon.lineIntersects', function()
+		test( 'returns true if the line (segment) intersects with the polygon.', function()
+			assert_true( _.polygon.lineIntersects( 3, 7, 5, 4, 3, 5, 4, 4, 5, 5, 6, 4, 6, 6, 3, 6 ) )
+			assert_true( _.polygon.lineIntersects( 2, 5, 7, 6, 3, 5, 4, 4, 5, 5, 6, 4, 6, 6, 3, 6 ) )
+		end )
+		
+		test( 'returns fasle if the line does not intersect with the polygon.', function()
+			assert_false( _.polygon.lineIntersects( 2, 5, 3, 7, 3, 5, 4, 4, 5, 5, 6, 4, 6, 6, 3, 6 ) )
+		end )
+	end )
+	
+	context( 'polygon.polygonIntersects', function()
+		test( 'returns true if the polygons intersect.', function()
+			assert_true( _.polygon.polygonIntersects( { 2, 6, 3, 8, 4, 6 }, { 3, 7, 2, 9, 4, 9 } ) )
+		end )
+		
+		test( 'returns false if the polygons don\'t intersect.', function()
+			assert_false( _.polygon.polygonIntersects( { 2, 6, 3, 8, 4, 6 }, { 4, 7, 3, 9, 5, 9 } ) )
+		end )
+	end )
+	
+	context( 'polygon.circleIntersects', function()
+		test( 'returns true if the polygon intersects the circle.', function()
+			assert_true( _.polygon.circleIntersects( 3, 5, 2, 2, 6, 4, 6, 3, 8 ) )
+		end )
+		
+		test( 'returns false if the polygon does not intersect the circle.', function(
+			assert_false( _.polygon.circleIntersects( 3, 3, 2, 2, 6, 4, 6, 3, 8 ) )
+		end )
+	end )
 end )
