@@ -14,7 +14,7 @@ git clone git://github.com/davisdude/mlib.git
 ````
 
 ###Download
-The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/2.0.1">here</a> or <a href="http://love2d.org/forums/viewtopic.php?f=5&t=36552">here</a> (link is at the bottom of the first post).
+The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/2.0.2">here</a> or <a href="http://love2d.org/forums/viewtopic.php?f=5&t=36552">here</a> (link is at the bottom of the first post).
 
 ##Usage of MLib##
 Download the file called <a href="https://github.com/davisdude/mlib/blob/master/mlib.lua">`mlib.lua`</a> and put it somewhere in the file for the process you want it in. Use the *require* function to import the module into the library.
