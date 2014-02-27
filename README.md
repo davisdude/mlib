@@ -1,0 +1,1 @@
+Basic utilities of mine made for LÖVE. Feel free to use/improve if you so compelled to do so. 
