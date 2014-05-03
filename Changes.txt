@@ -1,0 +1,49 @@
+MLib changelog- accurate since 3.0.0, short description from 3.0.0 to 2.0.0.
+
+3.0.0
+-----
+ADDED:
+- Added function GetSignedArea. 
+REMOVED:
+- Removed drawing functions.
+- Removed MLib.Line.Functions entirely.
+CHANGED:
+- Changed all the names to CamelCase.
+- Changed module name to MLib. 
+- Changed return order of GetPerpendicualrBisector from Slope, Midpoint to Midpoint, Slope. 
+- Changed returned string of MLib.circle.isLineSecant to be upper-case.
+- Changed IsPrime to accept only one number at a time. 
+- Changed NewShape's type to Capitals. 
+
+Related to code:
+- Added more accuarate comments. 
+- Made code more DRY. 
+- Made code monkey-patchable and saved space (by declaring all functions as local values then inserted them into a large table.
+
+TODO:
+- Make LineIntersectsPolygon return where intersection occurs. 
+- Ditto with PolygonIntersectsPolygon. 
+- Add:
+  - Frequency
+  - Binomial Probability
+  - Standard Deviation
+  - Conditional Probability
+
+
+Not as accurately maintained before 2.0.2
+-----------------------------------------
+
+2.0.2
+-----
+- Cleaned up code, mostly.
+
+2.0.1
+-----
+- Bug fixes, mlib.shape:remove & demos added.
+
+2.0.0
+-----
+- Added mlib.shape and various bug fixes.
+
+
+No record exists before 2.0.0
