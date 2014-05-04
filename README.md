@@ -3,7 +3,7 @@ MLib
 
 __MLib__ is a math library that does math functions for you. It is designed to be __easy to use__ and __intuitive__. It has many <a href="http://github.com/davisdude/mlib#function-list">functions</a>. 
 
-__MLib__ is written in mostly pure <a href="http://lua.org">Lua</a> with some drawing functions using <a href="http://love2d.org">LÖVE</a>, which can be changed if need be. 
+__MLib__ is written in pure <a href="http://lua.org">Lua</a>, and can easily be dropped into any project! Examples are done with the *awesome* framework of <a href="love2d.org">LÖVE</a>, but should also work with other frameworks. 
 
 ##Installation
 You can get the most recent version of MLib by:
@@ -14,30 +14,39 @@ git clone git://github.com/davisdude/mlib.git
 ````
 
 ###Download
-The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/3.0.0">here</a> or <a href="http://love2d.org/forums/viewtopic.php?f=5&t=36552">here</a> (link is at the bottom of the first post).
+The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/1.0.0.1">here</a>, and previous releases <a href="https://github.com/davisdude/mlib/releases">here</a>. 
 
 ##Usage of MLib
 Download the file called <a href="https://github.com/davisdude/mlib/blob/master/mlib.lua">`mlib.lua`</a> and put it somewhere in the file for the process you want it in. Use the *require* function to import the module into the library.
 
-##An Example of Use
+##An Example of Usage
 Here is an example of how to use MLib:
 ```lua
 -- Require libraries:
 MLib = require 'path/mlib' 
--- The first "MLib" can be whatever you want it to be.
--- "path" is how you get to the file from the main directory of the application. 
+-- The first "MLib" can be whatever you want to call it.
+-- "path" is how you get to the file from the main directory of the application.
+-- See http://www.lua.org/pil/8.1.html for more information on the require function.  
 
 -- Make your data:
-local line1 = { 0, 1, 1, 2 }
-local line2 = { { x = 0, y = 0 }, { x = 1, y = 1 } }
--- You can set up the data any way. line1 is more compatable with the library, but line2 will work, too.
+local Line1 = { 0, 1, 1, 2 }
+local Line2 = { { x = 0, y = 0 }, { x = 1, y = 1 } }
+-- You can set up the data any way. Line1 is more compatable with the library, but line2 will work, too.
 
 -- Get the slope and y-intercept for the data.
-local m1, b1 = MLib.Line.GetSlope( unpack( line1 ) ), MLib.Line.GetIntercept( unpack( line1 ) )
-local m2, b2 = MLib.Line.GetSlope( line2[1].x, line2[1].y, line2[2].x, line2[2].y ), MLib.Line.GetIntercept( line2[1].x, line2[1].y, line2[2].x, line2[2].y )
+local Slope1, Intercept1 = MLib.Line.GetSlope( unpack( Line1 ) ), MLib.Line.GetIntercept( unpack( Line1 ) )
+local Slope2, Intercept2 = MLib.Line.GetSlope( Line2[1].x, Line2[1].y, Line2[2].x, Line2[2].y ), MLib.Line.GetIntercept( Line2[1].x, Line2[1].y, Line2[2].x, Line2[2].y )
 
-print( "Line 1: \n\tSlope: "..m1.."\n\tY-Intercept: "..b1 )
-print( "Line 2: \n\tSlope: "..m2.."\n\tY-Intercept: "..b2 )
+print( string.format( 'Line 1: \n\tSlope: %s \n\tY-Intercept: %s', Slope1, Intercept1 ) )
+print( string.format( 'Line 2: \n\tSlope: %s \n\tY-Intercept: %s', Slope2, Intercept2 ) )
+
+--> Output: 
+--> Line 1
+-->   Slope: 1
+-->   Y-Intercept: 1
+--> Line 2
+-->   Slope: 1
+-->   Y-Intercept: 0
 
 --> Output: 
 --> Line 1
@@ -53,15 +62,15 @@ print( "Line 2: \n\tSlope: "..m2.."\n\tY-Intercept: "..b2 )
 #####<a href="http://github.com/davisdude/mlib#mliblinegetlength-1">MLib.Line.GetLength</a>
 #####<a href="http://github.com/davisdude/mlib#mliblinegetmidpoint-1">MLib.Line.GetMidpoint</a>
 #####<a href="http://github.com/davisdude/mlib#mliblinegetslope-1">MLib.Line.GetSlope</a>
-#####<a href="http://github.com/davisdude/mlib#mliblinepergetpendicularslope-1">MLib.Line.GetPerpendicularSlope</a>
-#####<a href="http://github.com/davisdude/mlib#mliblinepergetpendicularbisector-1">MLib.Line.GetPerpendicularBisector</a>
+#####<a href="http://github.com/davisdude/mlib#mliblinegetperpendicularslope-1">MLib.Line.GetPerpendicularSlope</a>
+#####<a href="http://github.com/davisdude/mlib#mliblinegetperpendicularbisector-1">MLib.Line.GetPerpendicularBisector</a>
 #####<a href="http://github.com/davisdude/mlib#mliblinegetintercept-1">MLib.Line.GetIntercept</a>
 #####<a href="http://github.com/davisdude/mlib#mliblinegetintersection-1">MLib.Line.GetIntersection</a>
 #####<a href="http://github.com/davisdude/mlib#mliblinegetclosestpoint-1">MLib.Line.GetClosestPoint</a>
 #####<a href="http://github.com/davisdude/mlib#mliblinegetsegmentintersection-1">MLib.Line.GetSegmentIntersection</a>
 ####<a href="http://github.com/davisdude/mlib#mliblinesegment-1">MLib.Line.Segment</a>
 #####<a href="http://github.com/davisdude/mlib#mliblinesegmentcheckpoint-1">MLib.Line.Segment.CheckPoint</a>
-#####<a href="http://github.com/davisdude/mlib#mliblinesegmentintersection-1">MLib.Line.Segment.GetIntersection</a>
+#####<a href="https://github.com/davisdude/mlib#mliblinesegmentgetintersection-1">MLib.Line.Segment.GetIntersection</a>
 ####<a href="http://github.com/davisdude/mlib#mlibpolygon-1">MLib.Polygon</a>
 #####<a href="http://github.com/davisdude/mlib#mlibpolygongettriangleheight-1">MLib.Polygon.GetTriangleHeight</a>
 #####<a href="http://github.com/davisdude/mlib#mlibpolygongetsignedarea-1">MLib.Polygon.GetSignedArea</a>
@@ -74,16 +83,16 @@ print( "Line 2: \n\tSlope: "..m2.."\n\tY-Intercept: "..b2 )
 ####<a href="http://github.com/davisdude/mlib#mlibcircle-1">MLib.Circle</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclegetarea-1">MLib.Circle.GetArea</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclecheckpoint-1">MLib.Circle.CheckPoint</a>
-#####<a href="http://github.com/davisdude/mlib#mlibcirclecheckpoint-1">MLib.Circle.CheckPoint</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclegetcircumference-1">MLib.Circle.GetCircumference</a>
-#####<a href="http://github.com/davisdude/mlib#mlibcircleislinesecanttocircle-1">MLib.Circle.IsLineSecant</a>
-#####<a href="http://github.com/davisdude/mlib#mlibcircleissegmentsecanttocircle-1">MLib.Circle.IsSegmentSecant</a>
+#####<a href="https://github.com/davisdude/mlib#mlibcircleislinesecant-1">MLib.Circle.IsLineSecant</a>
+#####<a href="https://github.com/davisdude/mlib#mlibcircleissegmentsecant-1">MLib.Circle.IsSegmentSecant</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclecircleintersects-1">MLib.Circle.CircleIntersects</a>
+#####<a href="http://github.com/davisdude/mlib#mlibcircleispointincircle-1">MLib.Circle.IsPointInCircle</a>
 ####<a href="http://github.com/davisdude/mlib#mlibstatistics-1">MLib.Statistics</a>
-#####<a href="http://github.com/davisdude/mlib#mlibstatisticssgetmean-1">MLib.Statistics.GetMean</a>
-#####<a href="http://github.com/davisdude/mlib#mlibstatisticssgetmedian-1">MLib.Statistics.GetMedian</a>
-#####<a href="http://github.com/davisdude/mlib#mlibstatisticssgetmode-1">MLib.Statistics.GetMode</a>
-#####<a href="http://github.com/davisdude/mlib#mlibstatisticssgetrange-1">MLib.Statistics.GetRange</a>
+#####<a href="http://github.com/davisdude/mlib#mlibstatisticsgetmean-1">MLib.Statistics.GetMean</a>
+#####<a href="http://github.com/davisdude/mlib#mlibstatisticsgetmedian-1">MLib.Statistics.GetMedian</a>
+#####<a href="http://github.com/davisdude/mlib#mlibstatisticsgetmode-1">MLib.Statistics.GetMode</a>
+#####<a href="http://github.com/davisdude/mlib#mlibstatisticsgetrange-1">MLib.Statistics.GetRange</a>
 ####<a href="http://github.com/davisdude/mlib#mlibmath-1">MLib.Math</a>
 #####<a href="http://github.com/davisdude/mlib#mlibmathgetroot-1">MLib.Math.GetRoot</a>
 #####<a href="http://github.com/davisdude/mlib#mlibmathisprime-1">MLib.Math.IsPrime</a>
@@ -96,7 +105,7 @@ print( "Line 2: \n\tSlope: "..m2.."\n\tY-Intercept: "..b2 )
 ####<a href="http://github.com/davisdude/mlib#mlibshape-1">MLib.Shape</a>
 #####<a href="http://github.com/davisdude/mlib#mlibshapenewshape-1">MLib.Shape.NewShape</a>
 #####<a href="http://github.com/davisdude/mlib#mlibshapecheckcollisions-1">MLib.Shape.CheckCollisions</a>
-#####<a href="http://github.com/davisdude/mlib#mlibshaperemove-1">MLib.Shape.Remove/a>
+#####<a href="http://github.com/davisdude/mlib#mlibshaperemove-1">MLib.Shape.Remove</a>
 
 #Functions
 ####MLib.Line
@@ -575,8 +584,8 @@ Handles functions dealing with circles.
 - Returns: 
   - `type`:
     - String:
-      - `'secant'` if the line is a <a href="http://en.wikipedia.org/wiki/Secant_line">secant</a> to the circle.
-      - `'tangent'` if the line is tangental<a href="http://en.wikipedia.org/wiki/Tangent">tangent</a>
+      - `'Secant'` if the line is a <a href="http://en.wikipedia.org/wiki/Secant_line">secant</a> to the circle.
+      - `'Tangent'` if the line is tangental<a href="http://en.wikipedia.org/wiki/Tangent">tangent</a>
     - Boolean:
       - `false` if the line is neither a secant not a tangent.
   - `x1`: Number. The first x-coordinate of where the intersection occurs.
@@ -586,10 +595,10 @@ Handles functions dealing with circles.
 - Example:
   - A line with points on ( 0, 9 ), ( 6, 9 ), and a circle center on ( 4, 9 ) and a radius of 1. 
     - `type, x1, y1, x2, y2 = MLib.Circle.IsLineSecant( 4, 9, 1, 0, 9, 6, 9 )`
-      - Output: `'secant', 3, 9, 5, 9.`
+      - Output: `'Secant', 3, 9, 5, 9.`
   - A line with a slope of 0 and a y-intercept of 9 and a a circle center on ( 4, 9 ) and a radius of 1.
     - `type, x1, y1, x2, y2 = MLib.Circle.IsLineSecant( 4, 9, 1, 0, 9 )`
-      - Output: `'secant', 3, 9, 5, 9. `
+      - Output: `'Secant', 3, 9, 5, 9. `
 
 #####MLib.Circle.IsSegmentSecant
 - Checks whether the line is a <a href="http://en.wikipedia.org/wiki/Secant_line">secant</a>, a <a href="http://en.wikipedia.org/wiki/Tangent">tangent</a> or neither.
@@ -606,8 +615,8 @@ Handles functions dealing with circles.
 - Returns: 
   - `type`:
     - String:
-      - `'secant'` if the line is a <a href="http://en.wikipedia.org/wiki/Secant_line">secant</a> to the circle.
-      - `'tangent'` if the line is tangental<a href="http://en.wikipedia.org/wiki/Tangent">tangent</a>
+      - `'Secant'` if the line is a <a href="http://en.wikipedia.org/wiki/Secant_line">secant</a> to the circle.
+      - `'Tangent'` if the line is tangental<a href="http://en.wikipedia.org/wiki/Tangent">tangent</a>
     - Boolean:
       - `false` if the line is neither a secant not a tangent.
   - `x1`: Number. The first x-coordinate of where the intersection occurs.
@@ -617,7 +626,7 @@ Handles functions dealing with circles.
 - Example:
   - A line segment with points on ( 0, 9 ), ( 6, 9 ), and a circle center on ( 4, 9 ) and a radius of 1. 
     - `type, x1, y1, x2, y2 = MLib.Circle.IsLineSecant( 4, 9, 1, 0, 9, 6, 9 )`
-      - Output: `'secant', 3, 9, 5, 9.`
+      - Output: `'Secant', 3, 9, 5, 9.`
 
 #####MLib.Circle.CircleIntersects
 - Returns the point that intersects the circles.
@@ -636,6 +645,24 @@ Handles functions dealing with circles.
 - Example:
   - Checks whether circle 1, at ( 1, 1 ) and a radius of 1, and circle 2 at ( 2, 2 ) and a radius of 1 intersect. It does, at ( 2, 1 ), ( 1, 2 ). 
     - `MLib.Circle.CircleIntersects( 1, 1, 1, 2, 2, 1 )`
+
+#####MLib.Circle.IsPointInCircle
+- Returns if the point is in the circle.
+- Synopsis:
+  - `MLib.Circle.IsPointInCircle( CircleX, CircleY, Radius, x, y )
+- Arguments:
+  - `CircleX`: Number. The x-coordinate of the center of the circle.
+  - `CircleY`: Number. The y-coordinate of the center of the circle. 
+  - `Radius`: Number. The radius of the circle. 
+  - `x`: Number. The x-position of the point being checked. 
+  - `y`: Number. The y-position of the point being checked. 
+- Returns:
+  - Boolean:
+	- `true` if the point is inside the circle. 
+    - `false` if the point is not inside the circle. 
+- Example:
+  - Checks if the point ( 0, 1 ) is inside a circle with a center of ( 0, 0 ) and a radius of 2. 
+	- `MLib.Circle.IsPointInsideCircle( 0, 0, 2, 0, 1 )`
 
 ####MLib.Statistics
 Handles functions dealing with statisticsistics.
@@ -815,7 +842,7 @@ Handles functions that have to do with math in general.
 - Returns:
   - The angle from point 1 to point 2 (and possibly point 3) in radians.
 - Example:
-  - `angle = MLib.Math.GetAngle( 0, 0, 3, 3, 'up' ), 2.35619449 )`
+  - `angle = MLib.Math.GetAngle( 0, 0, 3, 3, 'Up' ), 2.35619449 )`
 
 ###MLib.Shape
 Handles shape collision/intersection. 
@@ -840,7 +867,7 @@ Handles shape collision/intersection.
 - Returns:
   - A table containing information regarding the shape registered. 
     - All:
-      - `table.type`: String. The type of the shape (`'circle'`, `'line'`, or `'polygon'`).
+      - `table.type`: String. The type of the shape (`'Circle'`, `'Line'`, or `'Polygon'`).
       - `table.collided`: Boolean. `true` if the shape is collided with anything, `false` otherwise. 
         - __Note__: You must call <a href="http://github.com/davisdude/mlib#mlibshapecheckcollisions-1">MLib.Shape.CheckCollisions</a> in <a href="http://www.love2d.org/wiki/love.update">love.update</a>.
       - `table.index`: Number. The reference of the shape. 
@@ -862,40 +889,40 @@ Handles shape collision/intersection.
 - Example:
   - See <a href="https://github.com/davisdude/mlib#mlibshape-example">the example</a>.
 
-#####MLib.Shape:checkCollisions
+#####MLib.Shape:CheckCollisions
 - Checks collisions between shapes. 
 - Synopsis:
   - `MLib.Shape.CheckCollisions()`
-  - `MLib.Shape.CheckCollisions( shapes )`
-  - `shape:checkCollisions()`
-  - `shape:checkCollisions( shapes )`
+  - `MLib.Shape.CheckCollisions( Shapes )`
+  - `Shape:CheckCollisions()`
+  - `Shape:CheckCollisions( Shapes )`
 - Arguments: 
   - `MLib.Shape.CheckCollisions()`
-  - `MLib.Shape.CheckCollisions( shapes )`
+  - `MLib.Shape.CheckCollisions( Shapes )`
     - `shapes`: Table. A table containing all of the shapes you want to check for collisions (the shapes excluded will not be checked for collisions).
       - __Note__: The shapes must be enclosed in a table, like follows: `{ shape1, shape2, ... }`.
-  - `shape:checkCollisions()`
+  - `Shape:CheckCollisions()`
     - `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
-  - `shape:checkCollisions( shapes )`
+  - `Shape:CheckCollisions( Shapes )`
     - `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
     - `shapes`: Tables. All the shapes being checked against `shape` (this checks if any of the `shapes` collide with `shape`).
       - __Note__: Unlike other ones, the shapes in this one must be done seperately, like follows: `shape1, shape2, ...`.
 - See <a href="https://github.com/davisdude/mlib#mlibshape-example">the example</a>.
 
-#####MLib.Shape:remove
+#####MLib.Shape:Remove
 - Removes a table from testing. 
 - Synopsis:
   - `MLib.Shape.Remove()`
-  - `MLib.Shape.Remove( shapes )`
-  - `shape:remove()`
-  - `shape:remove( shapes )`
+  - `MLib.Shape.Remove( Shapes )`
+  - `Shape:Remove()`
+  - `Shape:Remove( Shapes )`
 - Arguments:
   - `MLib.Shape.Remove()`
-  - `MLib.Shape.Remove( shapes )`
+  - `MLib.Shape.Remove( Shapes )`
     - `shapes`: Table. A table containing all of the shapes you want to remove. 
-  - `shape:remove()`
+  - `Shape:Remove()`
 	- `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
-  - `shape:remove( shapes )`
+  - `Shape:Remove( Shapes )`
 	- `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
 	- `shapes`: Table. A table containing all of the shapes you want to remove. 
 
@@ -908,40 +935,46 @@ MLib = require 'path/mlib'
 -- "path" is how you get to the file from the main directory of the application. 
 
 function love.load()
-	circle = MLib.Shape.NewShape( 300, 300, 10 )
-	rectangle = MLib.Shape.NewShape( 400, 300, 400, 200, 600, 200, 600, 300 )
-	line = MLib.Shape.NewShape( 400, 200, 300, 400 )
+	Circle = MLib.Shape.NewShape( 300, 300, 10 )
+	Rectangle = MLib.Shape.NewShape( 400, 300, 400, 200, 600, 200, 600, 300 )
+	Line = MLib.Shape.NewShape( 400, 200, 300, 400 )
 end
 
 function love.draw()
-  love.graphics.Circle( 'fill', circle.x, circle.y, circle.radius )
-	love.graphics.Polygon( 'fill', unpack( rectangle.points ) )
-	love.graphics.Line( line.x1, line.y1, line.x2, line.y2 )
+	love.graphics.circle( 'fill', Circle.x, Circle.y, Circle.Radius )
+	love.graphics.polygon( 'fill', unpack( Rectangle.Points ) )
+	love.graphics.line( Line.x1, Line.y1, Line.x2, Line.y2 )
 end
 
 function love.update( dt )
-  MLib.Shape.CheckCollisions( dt )
-    -- This checks all collisions, between rectangle, circle and line. 
-  print( rectangle.collided, line.collided, circle.collided ) --> true, true, false
+  MLib.Shape.CheckCollisions()
+  -- This checks all collisions, between Rectangle, Circle and Line. 
   
-  MLib.Shape.CheckCollisions( dt, { rectangle, circle } ) 
-    -- This checks collisions between rectangle and circle only.
-  print( rectangle.collided, line.collided, circle.collided ) --> false, false, false
+  print( Rectangle.collided, Line.collided, Circle.collided ) --> true, true, false
   
-  MLib.Shape.CheckCollisions( dt, { rectangle, line } ) 
-    -- This checks collisions between rectangle and line only.
-  print( rectangle.collided, line.collided, circle.collided ) --> true, true, false
+  MLib.Shape.CheckCollisions( { Rectangle, Circle } ) 
+  -- This checks collisions between Rectangle and Circle only.
   
-  rectangle:checkCollisions( dt )
-    -- This checks all collisions of rectangle. 
-  print( rectangle.collided, line.collided, circle.collided ) --> true, true, false
+  print( Rectangle.collided, Line.collided, Circle.collided ) --> false, false, false
   
-  rectangle:checkCollisions( dt, circle )
-    -- This checks collisions between circle and rectangle only. 
-  print( rectangle.collided, line.collided, circle.collided ) --> false, false, false
+  MLib.Shape.CheckCollisions( { Rectangle, Line } ) 
+  -- This checks collisions between Rectangle and Line only.
   
-  rectangle:checkCollisions( dt, line )
-    -- This checks collisions between line and rectangle only. 
-  print( rectangle.collided, line.collided, circle.collided ) --> true, true, false
+  print( Rectangle.collided, Line.collided, Circle.collided ) --> true, true, false
+  
+  Rectangle:CheckCollisions()
+  -- This checks all collisions of Rectangle. 
+  
+  print( Rectangle.collided, Line.collided, Circle.collided ) --> true, true, false
+  
+  Rectangle:CheckCollisions( Circle )
+  -- This checks collisions between Circle and Rectangle only. 
+  
+  print( Rectangle.collided, Line.collided, Circle.collided ) --> false, false, false
+  
+  Rectangle:CheckCollisions( Line )
+  -- This checks collisions between Line and Rectangle only. 
+  
+  print( Rectangle.collided, Line.collided, Circle.collided ) --> true, true, false
 end
 ````

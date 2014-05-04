@@ -1,4 +1,39 @@
-MLib changelog- accurate since 3.0.0, short description from 3.0.0 to 2.0.0.
+MLib changelog- accurate since 0.3.0.0 (previously known as 3.0.0), short description from before then. 
+
+1.0.0.1
+====
+Added:
+----
+
+Removed:
+----
+
+Changed:
+----
+- Changes.txt now expanded to include short excertps from all previous commits. 
+- Changed release number from 3.0.0 to 1.0.0.1
+- Math.Round now can round to decimal places as the second argument.
+- Commented unnecessary call of Segment.CheckPoint in Polygon.LineIntersects. 
+- Polygon.LineIntersects now returns where the lines intersect.
+	- false if not intersection. 
+	- A table with all of the intersections { { px, py } }
+- Same with Polygon.PolygonIntersects, Polygon.CircleIntersects, 
+
+Fixed:
+----
+- Error with GetSlope being called incorrectly. 
+- README.md Line.GetPerpendicularSlope misdirection. 
+- Same with Line.GetPerpendicularBisector, Line.Segment.GetIntersection, Circle.IsLineSecant, Circle.IsSegmentSecant, Statistics.GetMean, Median, Mode, and Range, and Shape:Remove, and fixed the naming for Shape:CheckCollisions and Shape:Remove. 
+- Clarified README.md
+- Made util SortWithReferences local.
+- Errors caused by local functions. 
+
+TODO:
+- Add:
+  - Frequency
+  - Binomial Probability
+  - Standard Deviation
+  - Conditional Probability
 
 3.0.0
 -----
@@ -45,5 +80,135 @@ Not as accurately maintained before 2.0.2
 -----
 - Added mlib.shape and various bug fixes.
 
+2.0.0 
+-----
+- Made mlib.shape and made numberous bug fixes. 
 
-No record exists before 2.0.0
+1.9.4
+-----
+- Made mlib.math.prime faster and removed ability to test multiple numbers at once. Thanks Robin!
+
+1.9.3
+-----
+- Fixed polygon.area and polygon.centroid
+
+1.9.2
+-----
+- Updated to LOVE 0.9.0.
+
+1.9.1 
+-----
+- Made mlib.line.closestPoint able to take either two points on the slope or the slope and intercept.
+
+1.9.0
+-----
+- Added mlib.lineSegmentIntersects (no affiliation with previous one (changed to mlib.line.segment.intersect)) and mlib.line.closestPoint
+
+1.8.3 
+-----
+- Changed naming mechanism to be more organized.
+
+1.8.2 
+-----
+- "Fixed" mlib.lineSegmentsIntersect AGAIN!!!!  :x
+
+1.8.1
+-----
+- Removed a print statement.
+
+1.8.0
+-----
+- mlib.pointInPolygon added
+
+1.7.5
+-----
+- mlib.lineSegmentsIntersect vertical lines fixed again. This time for real. I promise... or hope, at least...  :P
+
+1.7.4
+-----
+- mlib.lineSegmentsIntersect vertical parallels fixed
+
+1.7.3
+-----
+- mlib.lineSegmentsIntersect parallels fixed
+
+1.7.2
+-----
+- mlib.lineSegmentsIntersect now handles vertical lines
+
+1.7.1
+-----
+- mlib.lineSegmentsIntersect now returns the two places in between where the line segments begin to intersect.
+
+1.7.0
+-----
+- Added mlib.circlesIntersect, mlib.pointOnLineSegment, mlib.linesIntersect, and mlib.lineSegmentsIntersect
+
+1.6.1 
+-----
+- Employed usage of summations for mlib.getPolygonArea and mlib.getPolygonCentroid and removed area as an argument for mlib.getPolygonCentroid.
+
+1.6.0 
+-----
+- Added several functions.
+
+1.5.0
+-----
+- Made lots of changes to syntax to make it easier to use (hopefully). I also put out specs.
+
+1.4.1
+-----
+- Localized mlib. Thanks, Yonaba!
+
+1.4.0
+-----
+- Added mlib.getPolygonCentroid (gets the midpoint of a non-self-intersecting polygons)
+
+1.3.2
+-----
+- Made mlib.getPrime take tables as arguments, so you can check all the values of a table.
+
+1.3.1
+-----
+- Changed name method to mlib.getPolygonArea
+
+1.3.0
+-----
+- Added mlib.get_polygon_area and removed mlib.get_convex_area and mlib.get_triangle_area since they are repetitive.
+
+1.2.2
+-----
+- Made functions return faster, functions that previously returned tables now return multiple arguments.
+
+1.2.1
+----- 
+- Localized functions, made tables acceptable as arguments, refined function speed, mlib.get_mode now returns number most repeated as well as how many times.
+
+1.2.0 
+-----
+- Added mlib.get_angle
+
+1.1.0 
+-----
+- Added mlib.get_convex_area
+
+1.0.4 
+----- 
+- Fixed get_mode to handle bimodials.
+
+1.0.3 
+-----
+- Prime Checker optimized (hopefully final update on this.)
+
+1.0.2 
+-----
+- Prime checker now works! (At least to 1000. I haven't tested any 
+further)
+
+1.0.1
+-----
+- 'Fixed' the prime checker
+
+1.0.0
+-----
+- Initial release
