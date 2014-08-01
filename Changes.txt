@@ -1,4 +1,39 @@
-MLib changelog- accurate since 0.3.0.0 (previously known as 3.0.0), short description from before then. 
+MLib changelog- accurate since 3.0.0 (now known as 0.3.0.0), short description from before then. 
+
+1.0.0.2
+====
+Added:
+----
+
+Removed:
+----
+- Ability to use a direction for Math.GetAngle's 5th argument instead of having a third point. See Fixed for more. 
+
+Changed:
+----
+- Changed README.md for clarity and consistency.
+- Updated spec.lua
+- See Fixed for more. 
+
+Fixed:
+----
+- Circle.IsSegmentSecant now properly accounts for chords actually being chords, and not secants. 
+- Circle.CircleIntersects now can return 'Colinear' or 'Equal' if the circles have same x and y but different radii (Colinear) or are exactly the same (Equal). 
+- Statistics.GetMode now returns a table with the modes, and the second argument as the number of times they appear. 
+- Math.GetRoot now returns the negative number as a second argument. 
+- Math.GetPercentOfChange now works for 0 to 0 (previously false).
+- Math.GetAngle now takes only three points and no direction option. 
+- Typos in Shape.CheckCollisions and Shape.Remove. 
+- Fixed nil problems in Shape.CheckCollisions. 
+- Improved readablility and DRYness of Shape.CheckCollisions. 
+- Bugs in Shape.Remove and Shape.CheckCollisions regarding passing tables as arguments. 
+
+TODO:
+- Add:
+  - Frequency
+  - Binomial Probability
+  - Standard Deviation
+  - Conditional Probability
 
 1.0.0.1
 ====

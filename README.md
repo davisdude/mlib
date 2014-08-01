@@ -14,7 +14,7 @@ git clone git://github.com/davisdude/mlib.git
 ````
 
 ###Download
-The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/1.0.0.1">here</a>, and previous releases <a href="https://github.com/davisdude/mlib/releases">here</a>. 
+The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/3.0.0">here</a>, and previous releases <a href="https://github.com/davisdude/mlib/releases">here</a>. 
 
 ##Usage of MLib
 Download the file called <a href="https://github.com/davisdude/mlib/blob/master/mlib.lua">`mlib.lua`</a> and put it somewhere in the file for the process you want it in. Use the *require* function to import the module into the library.
@@ -123,7 +123,7 @@ Deals with linear aspects, such as slope. Also handles line segments.
   - The distance between the two points. 
 - Example:
   - Gets the length from ( 1, 1 ) to ( 2, 1 ), which is 1.
-    - `length = MLib.Line.GetLength( 1, 1, 2, 1 )`
+    - `Length = MLib.Line.GetLength( 1, 1, 2, 1 )`
 
 #####MLib.Line.GetMidpoint
 - Gets the <a href="http://en.wikipedia.org/wiki/Midpoint">midpoint</a> of a two points. 
@@ -194,7 +194,7 @@ Deals with linear aspects, such as slope. Also handles line segments.
 - Returns:
   - The perpendicular slope and the midpoint of the line.
 - Example:
-  - Gets the perpendicular biisector of ( 1, 1 ) and ( 3, 3 ), which will be -1, 2, 2.
+  - Gets the perpendicular biisector of ( 1, 1 ) and ( 3, 3 ), which will be 2, 2, -1.
     - `x, y, PerpendicularSlope = MLib.Line.GetPerpendicularBisector( 1, 1, 3, 3 )`
 
 #####MLib.Line.GetIntercept
@@ -227,6 +227,7 @@ Deals with linear aspects, such as slope. Also handles line segments.
 - Synopsis:
   - `MLib.Line.GetIntersection( Slope, Intercept, x1, y1, x2, y2 )`
   - `MLib.Line.GetIntersection( Slope1, Intercept1, Slope2, Intercept2 )`
+  - `MLib.Line.GetIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )`
 - Arguments:
   - `MLib.Line.GetIntersection( Slope, Intercept, x1, y1, x2, y2 )`
     - `Slope`: Number. The slope of the first line. 
@@ -240,6 +241,15 @@ Deals with linear aspects, such as slope. Also handles line segments.
     - `Intercept1`: Number. The y-intercept of the first line. 
     - `Slope2`: Number. The slope of the second line.
     - `Intercept2`: Number. The y-intercept of the second line. 
+  - `MLib.Line.GetIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )`
+    - `x1`: Number. The one x-coordinate of the first line.
+    - `y1`: Number. The one y-coordinate of the first line.
+    - `x2`: Number. The the other x-coordinate of the second line.
+    - `y2`: Number. The the other y-coordinate of the second line.
+	- `x3`: Number. The one x-coordinate of the third line.
+    - `y3`: Number. The one y-coordinate of the third line.
+    - `x4`: Number. The the other x-coordinate of the fourth line.
+    - `y4`: Number. The the other y-coordinate of the fourth line.
 - Returns:
   - Where the lines intersect.
   - __IMPORTANT__: If the lines are parallel, it will return false.
@@ -381,15 +391,15 @@ Handles polygon-related functions.
     - `Base`: Number. Length of the base of the triangle.
     - `Area`: Number. Area of the triangle.
 - Returns:
-  - The height of the triangle.
+  - The height and area of the triangle.
 - Example:
-  - Gives the height of a triangle at ( 0, 0 ), ( 0, 4 ) and  ( 3, 0 ) and a base of 3. The height is 4.
-    - `Height = MLib.Polygon.GetTriangleHeight( 3, 0, 0, 0, 4, 3, 0 )`
-  - Gives the height of a triangle with a base of 3 and a and area of 6. The height is 4.
-    - `Height = MLib.Polygon.GetTriangleHeight( 3, 6 )
+  - Gives the height of a triangle at ( 0, 0 ), ( 0, 4 ) and  ( 3, 0 ) and a base of 3. The height is 4, area is 6.
+    - `Height, Area = MLib.Polygon.GetTriangleHeight( 3, 0, 0, 0, 4, 3, 0 )`
+  - Gives the height of a triangle with a base of 3 and an area of 6. The height is 4.
+    - `Height, Area = MLib.Polygon.GetTriangleHeight( 3, 6 )`
 
 #####MLib.Polygon.GetSignedArea
-- Gives the area of any <a href="http://en.wikipedia.org/wiki/Simple_polygon">simple polygon</a>.
+- Gives the signed area of any <a href="http://en.wikipedia.org/wiki/Simple_polygon">simple polygon</a>.
 - Synopsis:
   - `MLib.Polygon.GetArea( Verticies )`
 - Arguments:
@@ -434,10 +444,10 @@ Handles polygon-related functions.
   - The centroid x and y of the polygon.
 - Example:
   - Gives the centroid of the polygon with points at ( 0, 0 ), ( 0, 6 ), ( 3, 0 ), which is at ( 1, 2 )
-    - Vverticies = { 0, 0, 0, 6, 3, 0 }`
+    - `Verticies = { 0, 0, 0, 6, 3, 0 }`
     - `CentroidX, CentroidY = MLib.Polygon.GetCentroid( Verticies )`
   - Gives centroid of a polygon with points at ( 0, 0 ), ( 0, 4 ), ( 4, 4 ), ( 4, 0 )
-    - `CentroidX, a = MLib.Polygon.GetCentroid( 0, 0, 0, 4, 4, 4, 4, 0 )`
+    - `CentroidX, CentroidY = MLib.Polygon.GetCentroid( 0, 0, 0, 4, 4, 4, 4, 0 )`
 
 #####MLib.Polygon.CheckPoint
 - Checks whether or not a point is inside a <a href="http://en.wikipedia.org/wiki/Simple_polygon">simple polygon</a>.
@@ -469,11 +479,11 @@ Handles polygon-related functions.
   - `y2`: Number. Another y-coordinate on the line. 
   - `...`: Table. The points of the polygon.
 - Returns:
-  - `true` if the line intersects the polygon. 
+  - `Collisions`: Table. The spots where the line intersects the polygon if the line intersects the polygon. 
   - `false` if the line does not intersect the polygon.
 - Example:
-  - Check if a line with the points ( 3, 7 ) and ( 5, 4 ) intersects with the polygon. It does. 
-    - `LineIntersects = MLib.Polygon.LineIntersects( 3, 7, 5, 4, 3, 5, 4, 4, 5, 5, 6, 4, 6, 6, 3, 6 )`
+  - Check if a line with the points ( 3, 7 ) and ( 5, 4 ) intersects with the polygon. It does, at ( 3.8, 5.8 ), ( 4.6, 4.6 ).
+    - `Collision = MLib.Polygon.LineIntersects( 3, 7, 5, 4, 3, 5, 4, 4, 5, 5, 6, 4, 6, 6, 3, 6 )`
   - Checks if a line with the points ( 2, 5 ) and ( 3, 7 ) intersects with the polygon. It does not. 
     - `LineIntersects = MLib.Polygon.LineIntersects( 2, 5, 3, 7, 3, 5, 4, 4, 5, 5, 6, 4, 6, 6, 3, 6 )`
 
@@ -485,13 +495,13 @@ Handles polygon-related functions.
   - `Polygon1`: Table. A table containing all of the points of `polygon1` in the form of `( x1, y1, x2, y2, ... )`.
   - `Polygon2`: Table. A table containing all of the points of `polygon2` in the form of `( x1, y1, x2, y2, ... )`.
 - Returns:
-  - `true` if the polygons intersect.
+  - `Collisions`: Table. The spots where the polygon intersects the other polygon if the polygon intersects the other polygon. 
   - `false` if the polygons don't intersect. 
 - Example:
   - Checks if polygons with points ( 2, 6, ), ( 3, 8 ), ( 4, 6 ) and ( 4, 7 ), ( 3, 9 ), )( 5, 9 ) intersect. They don't.
-    - `PolygonIntersecs = MLib.Polygon.PolygonIntersects( { 2, 6, 3, 8, 4, 6 }, { 4, 7, 3, 9, 5, 9 } )`
-  - Checks if polygons with points ( 2, 6 ), ( 3, 8 ), ( 4, 6 ) and ( 3, 7 ), ( 2, 9 ), ( 4, 9 ) intersect. They do.
-    - `PolygonIntersects = MLib.Polygon.PolygonIntersects( { 2, 6, 3, 8, 4, 6 }, { 3, 7, 2, 9, 4, 9 } )`
+    - `PolygonIntersects = MLib.Polygon.PolygonIntersects( { 2, 6, 3, 8, 4, 6 }, { 4, 7, 3, 9, 5, 9 } )`
+  - Checks if polygons with points ( 2, 6 ), ( 3, 8 ), ( 4, 6 ) and ( 3, 7 ), ( 2, 9 ), ( 4, 9 ) intersect. They do, at, ( 2.75, 7.5 ), ( 3.25, 7.5 ).
+    - `Collisions = MLib.Polygon.PolygonIntersects( { 2, 6, 3, 8, 4, 6 }, { 3, 7, 2, 9, 4, 9 } )`
 
 #####MLib.Polygon.CircleIntersects
 - Checks whether or not a circle intersects a polygon. 
@@ -504,17 +514,17 @@ Handles polygon-related functions.
     - `CircleY`: Number. The y location of the circle center. 
     - `Radius`: Number. The radius of the circle.
     - `Points`: Table. A table containing all of the points of the polygon in the form of `( x1, y1, x2, y2, ... )`
-  - `MLib.Polygon.CircleIntersects( CircleX, CircleY, r, ... )`
+  - `MLib.Polygon.CircleIntersects( CircleX, CircleY, Radius, ... )`
     - `CircleX`: Number. The x location of the circle center. 
     - `CircleY`: Number. The y location of the circle center. 
     - `Radius`: Number. The radius of the circle.
     - `...`: Numbers. All of the points of the polygon in the form of `( x1, y1, x2, y2, ... )`
 - Returns:
-  - `true` if the circle and polygon intersects. 
+  - `Collisions`: Table. The spots where the circle intersects the polygon if the circle intersects the polygon. 
   - `false` if the circle and polygon don't intersect.
 - Example: 
-  - Checks if a circle with a radius of 2 located on ( 3, 5 ) intersects with a polygon with points on ( 2, 6 ), ( 4, 6 ), ( 3, 8 ). It does. 
-    - `CircleIntersects = MLib.Polygon.CircleIntersects( 3, 5, 2, 2, 6, 4, 6, 3, 8 )`
+  - Checks if a circle with a radius of 2 located on ( 3, 5 ) intersects with a polygon with points on ( 3, 1 ), ( 3, 6 ), ( 7, 4 ). It does, at ( 3, 3 ) and ( 5, 5 ).
+    - `Collisions = MLib.Polygon.CircleIntersects( 3, 5, 2, 3, 1, 3, 6, 7, 4 )`
   - Checks if a circle with a radius of 2 located on ( 3, 3 ) intersects with a polygon with points on ( 2, 6 ), ( 4, 6 ), ( 3, 8 ). It does not. 
     - `CircleIntersects = MLib.Polygon.CircleIntersects( 3, 3, 2, 2, 6, 4, 6, 3, 8 )`
 
@@ -533,7 +543,7 @@ Handles functions dealing with circles.
     - `Area = MLib.Circle.GetArea( 1 )`
 
 #####MLib.Circle.CheckPoint
-- Checks whether or not a point is within a circle.
+- Checks whether or not a point is on the outer-edge of a circle.
 - Synopsis:
   - `MLib.Circle.CheckPoint( CircleX, CircleY, Radius, x, y )`
 - Arguments:
@@ -582,7 +592,7 @@ Handles functions dealing with circles.
     - `Slope`: Number. The slope of the line.
     - `Intercept`: Number. The y-intercept of the line.
 - Returns: 
-  - `type`:
+  - `Type`:
     - String:
       - `'Secant'` if the line is a <a href="http://en.wikipedia.org/wiki/Secant_line">secant</a> to the circle.
       - `'Tangent'` if the line is tangental<a href="http://en.wikipedia.org/wiki/Tangent">tangent</a>
@@ -594,29 +604,34 @@ Handles functions dealing with circles.
   - `y2`: Number. The second y-coordinate of where the intersection occurs.
 - Example:
   - A line with points on ( 0, 9 ), ( 6, 9 ), and a circle center on ( 4, 9 ) and a radius of 1. 
-    - `type, x1, y1, x2, y2 = MLib.Circle.IsLineSecant( 4, 9, 1, 0, 9, 6, 9 )`
-      - Output: `'Secant', 3, 9, 5, 9.`
+    - `Type, x1, y1, x2, y2 = MLib.Circle.IsLineSecant( 4, 9, 1, 0, 9, 6, 9 ) }
+      - Output: `'Secant', 3, 9, 5, 9`
   - A line with a slope of 0 and a y-intercept of 9 and a a circle center on ( 4, 9 ) and a radius of 1.
-    - `type, x1, y1, x2, y2 = MLib.Circle.IsLineSecant( 4, 9, 1, 0, 9 )`
+    - `Type, x1, y1, x2, y2 = MLib.Circle.IsLineSecant( 4, 9, 1, 0, 9 )`
       - Output: `'Secant', 3, 9, 5, 9. `
+  - A line with points on ( 0, 8 ), ( 6, 8 ), and a circle center on ( 4, 9 ) and a radius of 1. 
+	- `Type, x1, y1, x2, y2 = MLib.Circle.IsLineSecant( 4, 9, 1, 0, 8, 6, 8 )
+      - Output: `'Tangent', 4, 8`
 
 #####MLib.Circle.IsSegmentSecant
 - Checks whether the line is a <a href="http://en.wikipedia.org/wiki/Secant_line">secant</a>, a <a href="http://en.wikipedia.org/wiki/Tangent">tangent</a> or neither.
 - Synopsis:
-  - `MLib.Circle.IsSegmentSecant( cx, cy, r, x1, y1, x2, y2 )`
+  - `MLib.Circle.IsSegmentSecant( CircleX, CircleY, Radius, x1, y1, x2, y2 )`
 - Arguments:
-  - `cx`: Number. The x-coordinate of the center of the circle.
-  - `cy`: Number. The y-coordinate of the center of the circle.
-  - `r`: Number. The radius of the circle.
+  - `CircleX`: Number. The x-coordinate of the center of the circle.
+  - `CircleY`: Number. The y-coordinate of the center of the circle.
+  - `Radius`: Number. The radius of the circle.
   - `x1`: Number. The first x-coordinate of the line.
   - `y1`: Number. The first y-coordinate of the line.
   - `x2`: Number. The second x-coordinate of the line.
   - `y2`: Number. The second y-coordinate of the line.
 - Returns: 
-  - `type`:
+  - `Type`:
     - String:
       - `'Secant'` if the line is a <a href="http://en.wikipedia.org/wiki/Secant_line">secant</a> to the circle.
-      - `'Tangent'` if the line is tangental<a href="http://en.wikipedia.org/wiki/Tangent">tangent</a>
+      - `'Tangent'` if the line is tangental <a href="http://en.wikipedia.org/wiki/Tangent">tangent</a>
+	  - `'Enclosed'` if the line is completely within the circle. 
+	  - `'Chord'` if the line is exactly on the circle's circumference. 
     - Boolean:
       - `false` if the line is neither a secant not a tangent.
   - `x1`: Number. The first x-coordinate of where the intersection occurs.
@@ -625,21 +640,24 @@ Handles functions dealing with circles.
   - `y2`: Number. The second y-coordinate of where the intersection occurs.
 - Example:
   - A line segment with points on ( 0, 9 ), ( 6, 9 ), and a circle center on ( 4, 9 ) and a radius of 1. 
-    - `type, x1, y1, x2, y2 = MLib.Circle.IsLineSecant( 4, 9, 1, 0, 9, 6, 9 )`
-      - Output: `'Secant', 3, 9, 5, 9.`
+    - `Type, x1, y1, x2, y2 = MLib.Circle.IsLineSecant( 4, 9, 1, 0, 9, 6, 9 )`
+      - Output: `'Secant', 3, 9, 5, 9`
 
 #####MLib.Circle.CircleIntersects
 - Returns the point that intersects the circles.
 - Synopsis:
-  - `MLib.Circle.CircleIntersects( cx1, cy1, r1, cx2, cy2, r2 )`
+  - `MLib.Circle.CircleIntersects( CircleX1, CircleY1, Radius1, CircleX2, CircleY2, Radius2 )`
 - Arguments: 
-  - `cx1`: Number. The x-coordinate of the first center circle.
-  - `cy1`: Number. The y-coordinate of the first center circle.
-  - `r1`: Number. The radius of the first circle.
-  - `cx2`: Number. The x-coordinate of the second center circle.
-  - `cy2`: Number. The y-coordinate of the second center circle.
-  - `r2`: Number. The radius of the first circle.
+  - `CircleX1`: Number. The x-coordinate of the first center circle.
+  - `CircleY1`: Number. The y-coordinate of the first center circle.
+  - `Radius1`: Number. The radius of the first circle.
+  - `CircleX2`: Number. The x-coordinate of the second center circle.
+  - `CircleY2`: Number. The y-coordinate of the second center circle.
+  - `Radius2`: Number. The radius of the first circle.
 - Returns:
+  - String:
+	- `'Equal'` if the circles have the same x and y and radius. 
+	- `'Colinear'` if the circles have the same x and y, but different radii. 
   - The points where the circles intersect.
   - `false` if they don't intersect.
 - Example:
@@ -678,7 +696,7 @@ Handles functions dealing with statisticsistics.
   - The average of the numbers.
 - Example:
   - Gets the average of a data set containing the numbers 1, 2, 3, 4, and 5, which is 3.
-    - `mean = MLib.Statistics.GetMean( 1, 2, 3, 4, 5 )`
+    - `Mean = MLib.Statistics.GetMean( 1, 2, 3, 4, 5 )`
 
 #####MLib.Statistics.GetMedian
 - Gets the <a href="http://en.wikipedia.org/wiki/Median">median</a> of the data set. 
@@ -691,7 +709,7 @@ Handles functions dealing with statisticsistics.
   - The median of the numbers.
 - Example:
   - Gets the median of a data set containing the numbers, 1, 2, 3, 4, and 5, which is 3.
-    - `median = .Statistics.GetMedian( 1, 2, 3, 4, 5 )`
+    - `Median = MLib.Statistics.GetMedian( 1, 2, 3, 4, 5 )`
 
 #####MLib.Statistics.GetMode
 - Gets the <a href="http://en.wikipedia.org/wiki/Mode_(statisticsistics)">mode</a> of the data set. 
@@ -701,12 +719,13 @@ Handles functions dealing with statisticsistics.
   - Table. Contains the numbers data.
   - Numbers. Can just be the numbers, or the `unpack`ed table containing the numbers.
 - Returns: 
-  - The mode of the numbers and how many times it appears.
-  - `false` if bimodial.
-  - `false` if no mode. 
+  - If there is one mode or more:
+	- `Numbers`: Table. A table in the form `{ Number1, Number2, etc. }`
+	- `Occurrences`: Number. The number of times the number(s) appeared. 
+  - `false` if there is not a mode. 
 - Example:
   - Gets the median of a data set containing the numbers, 1, 5, 6, 22, 2, 2, 1, 2, which is 2, which appears 3 times.
-    - `mode, times = MLib.Statistics.GetMode( 1, 5, 6, 22, 2, 2, 1, 2 )`
+    - `Modes, Times = MLib.Statistics.GetMode( 1, 5, 6, 22, 2, 2, 1, 2 )`
 
 #####MLib.Statistics.GetRange
 - Gets the <a href="http://en.wikipedia.org/wiki/Range_(statisticsistics)">range</a> of the data set. 
@@ -719,7 +738,7 @@ Handles functions dealing with statisticsistics.
   - The range of the numbers.
 - Example:
   - Gets the range of a data set containing the numbers, 1, 2, 3, and 4, which is 3.
-    - `range = MLib.Statistics.GetRange( 1, 2, 3, 4 )`
+    - `Range = MLib.Statistics.GetRange( 1, 2, 3, 4 )`
 
 ####MLib.Math
 Handles functions that have to do with math in general.
@@ -731,23 +750,23 @@ Handles functions that have to do with math in general.
   - `number`: Number. The number you are getting the nth root of.
   - `root`: Number. The number that is n for the nth root.
 - Returns:
-  - The number.
+  - The roots of the number (positive, negative).
 - Example:
   - Gets the square (2) root of 4, which is 2.
-    - `root = MLib.Math.GetRoot( 4, 2 ) `
+    - `Root = MLib.Math.GetRoot( 4, 2 ) `
 
 #####MLib.Math.IsPrime
 - Checks whether a number or set of numbers is <a href="http://en.wikipedia.org/wiki/Prime">prime</a> or not.
 - Synopsis: 
-  - `MLib.Math.IsPrime( number )`
+  - `MLib.Math.IsPrime( Number )`
 - Arguments:
-  - `number`: Number. The number that is being checked for prime-ness.
+  - `Number`: Number. The number that is being checked for prime-ness.
 - Returns:
   - `true` if the number is prime.
   - `false` if the number is not prime.
 - Example:
   - Checks if the number 3 is prime or not. 3 is prime.
-    - `prime = MLib.Math.IsPrime( 3 )`
+    - `Prime = MLib.Math.IsPrime( 3 )`
 
 #####MLib.Math.Round
 - Rounds a number up or down, depending on which it's closer to.
@@ -764,29 +783,29 @@ Handles functions that have to do with math in general.
 #####MLib.Math.GetSummation
 - Gives the <a href="http://en.wikipedia.org/wiki/Summation">summation</a>.
 - Synopsis:
-  - `MLib.Math.GetSummation( start, stop, func )`
+  - `MLib.Math.GetSummation( Start, Stop, Function )`
 - Arguments:
-  - `start`: Number. Where should the summation begin?
-  - `stop`: Number. Where shuld the summation end?
-  - `func`: Function. A function that gives the new value to add to the previous. Can have two arguments:
-    - `i`: The first argument. Represents the current number
-    - `t`: The second argument. Has all the previous values in it. 
-      - __IMPORTANT__: If you use `t`, your function must have an `if` statisticsement, regarding what to do if there is not a value for that number yet. 
+  - `Start`: Number. Where should the summation begin?
+  - `Stop`: Number. Where shuld the summation end?
+  - `Function`: Function. A Functiontion that gives the new value to add to the previous. Can have two arguments:
+    - `Index`: The first argument. Represents the current number
+    - `Previous`: The second argument. Has all the previous values in it. 
+      - __IMPORTANT__: If you use `Previous`, your function must have an `if` statement, regarding what to do if there is not a value for that number yet. 
 - Returns:
   - The sum of all of the values.
 - Example:
-  - Gives the sum of numbers that start at 1 and end at 10, multuplying each time by 2, which is 110. 
-    - `sum = MLib.Math.GetSummation( 1, 10, function( i ) return ( i * 2 ) end )`
+  - Gives the sum of numbers that start at 1 and end at 10, multiplying each time by 2, which is 110. 
+    - `Sum = MLib.Math.GetSummation( 1, 10, function( Index ) return ( Index * 2 ) end )`
   - Gives the sum of numbers that start at 1 and end at 5, adding the previous value each time, which is 35.
-    - `sum = MLib.Math.GetSummation( 1, 5, function( i, t ) if t[i-1] then return i + t[i-1] else return 1 end end )`
+    - `Sum = MLib.Math.GetSummation( 1, 5, function( Index, Previous ) if Previous[Index - 1] then return Index + Previous[Index - 1] else return 1 end end )`
 
 #####MLib.Math.GetPercentOfChange
 - Gives the <a href="http://en.wikipedia.org/wiki/Percentage_change#Percentage_change">percent of change</a> from two numbers.
 - Synopsis:
-  - `MLib.Math.GetPercentOfChange( old, new )`
+  - `MLib.Math.GetPercentOfChange( Old, New )`
 - Arguments:
-  - `old`: Number. The previous number.
-  - `new`: Number. The new number.
+  - `Old`: Number. The previous number.
+  - `New`: Number. The new number.
 - Returns:
   - The percentage difference from `old` to `new`.
 - Example:
@@ -796,14 +815,14 @@ Handles functions that have to do with math in general.
 #####MLib.Math.GetPercent
 - Gets the percentage of a number. 
 - Synopsis:
-  - `MLib.Math.GetPercent( percent, num )`
+  - `MLib.Math.GetPercent( Percent, Number )`
 - Arguments:
-  - `percent`: Number. The percentage you are getting of `num`.
-  - `num`: Number. The number that is getting changed. 
+  - `Percent`: Number. The percentage you are getting of `Number`.
+  - `Number`: Number. The number that is getting changed. 
 - Returns:
-  - `percentage`% of `num`.
+  - `Percentage`% of `Number`.
 - Example:
-  - 100% of 2 is 4.
+  - 100% of 2 is 2.
     - `MLib.Math.GetPercent( 1, 2 )`
 
 #####MLib.Math.GetRootsOfQuadratic
@@ -815,7 +834,8 @@ Handles functions that have to do with math in general.
   - `b`: Number. The number that has `x` next to it.
   - `c`: Number. The number that has no variable next to it.
 - Returns:
-  - The value of x.
+  - `false` if the given quadratic has no solution. 
+  - The value of x, otherwise.
 - Example:
   - Gets the x of the quadratic equation `1 * x ^ 2 + 3 * x - 4`, which is -4, 1.
     - `x1, x2 = MLib.Math.GetRootsOfQuadratic( 1, 3, -4 )`
@@ -823,15 +843,8 @@ Handles functions that have to do with math in general.
 #####MLib.Math.GetAngle
 - Gets the angle between two points.
 - Synopsis:
-  - `MLib.Math.GetAngle( x1, y1, x2, y2, dir )`
   - `MLib.Math.GetAngle( x1, y1, x2, y2, x3, y3 )`
 - Arguments:
-  - `MLib.Math.GetAngle( x1, y1, x2, y2, dir )`
-    - `x1`: Number. The x-coordinate of the primary point.
-    - `y1`: Number. The y-coordinate of the primary point.
-    - `x2`: Number. The x-coordinate of the secondary point.
-    - `y2`: Number. The y-coordinate of the secondary point.
-    - `dir`: String. Can be `up`, `down`, `left` or `right`. Used for the orientation of the picture. If not applicable, leave blank or make it `up`.
   - `MLib.Math.GetAngle( x1, y1, x2, y2, x3, y3 )`
     - `x1`: Number. The x-coordinate of the first point.
     - `y1`: Number. The y-coordinate of the first point.
@@ -840,9 +853,9 @@ Handles functions that have to do with math in general.
     - `x3`: Number. The x-coordinate of the third point.
     - `y3`: Number. The y-coordinate of the third point. 
 - Returns:
-  - The angle from point 1 to point 2 (and possibly point 3) in radians.
+  - The angle between point ( 1, 3 ) and ( 3, 1 ) with a vertex of ( 1, 1 ). This is 90 degrees or about 1.57079633 radians. 
 - Example:
-  - `angle = MLib.Math.GetAngle( 0, 0, 3, 3, 'Up' ), 2.35619449 )`
+  - `Angle = MLib.Math.GetAngle( 1, 3, 1, 1, 3, 1 )
 
 ###MLib.Shape
 Handles shape collision/intersection. 
@@ -918,13 +931,14 @@ Handles shape collision/intersection.
   - `Shape:Remove( Shapes )`
 - Arguments:
   - `MLib.Shape.Remove()`
+	- Remove all shapes. 
   - `MLib.Shape.Remove( Shapes )`
-    - `shapes`: Table. A table containing all of the shapes you want to remove. 
+    - `Shapes`: Table. A table containing all of the shapes you want to remove. 
   - `Shape:Remove()`
-	- `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
+	- `Shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
   - `Shape:Remove( Shapes )`
-	- `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
-	- `shapes`: Table. A table containing all of the shapes you want to remove. 
+	- `Shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
+	- `Shapes`: Table. A table containing all of the shapes you want to remove. 
 
 ##MLib.Shape Example
 Here is an example of how to use MLib.Shape.

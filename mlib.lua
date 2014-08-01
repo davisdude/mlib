@@ -52,6 +52,29 @@ local function SortWithReference( Table, Function )
     return Value, Key
 end
 
+local function CheckFuzzy( Number1, Number2 )
+	return ( Number1 - .00001 <= Number2 and Number2 <= Number1 + .00001 )
+end
+
+local function RemoveDuplicates( Table ) 
+	for Index1 = #Table, 1, -1 do
+		local First = Table[Index1]
+		for Index2 = #Table, 1, -1 do
+			local Second = Table[Index2]
+			if Index1 ~= Index2 then
+				if type( First[1] ) == 'number' and type( Second[1] ) == 'number' and type( First[2] ) == 'number' and type( Second[2] ) == 'number' then
+					if CheckFuzzy( First[1], Second[1] ) and CheckFuzzy( First[2], Second[2] ) then
+						table.remove( Table, Index1 )
+					end
+				elseif First[1] == Second[1] and First[2] == Second[2] then
+					table.remove( Table, Index1 )
+				end
+			end
+		end
+	end
+	return Table
+end
+
 -- Lines
 function MLib.Line.GetLength( x1, y1, x2, y2 )
 	return math.sqrt( ( x1 - x2 ) ^ 2 + ( y1 - y2 ) ^ 2 )
@@ -68,6 +91,7 @@ end
 
 function MLib.Line.GetPerpendicularSlope( ... )
 	local Userdata = CheckUserdata( ... )
+	local Slope
 	
 	if #Userdata ~= 1 then 
 		Slope = MLib.Line.GetSlope( unpack( Userdata ) ) 
@@ -82,7 +106,8 @@ end
 
 function MLib.Line.GetPerpendicularBisector( x1, y1, x2, y2 )
 	local Slope = MLib.Line.GetSlope( x1, y1, x2, y2 )
-	return MLib.Line.GetMidpoint( x1, y1, x2, y2 ), MLib.Line.GetPerpendicularSlope( Slope )
+	local MidpointX, MidpointY = MLib.Line.GetMidpoint( x1, y1, x2, y2 )
+	return MidpointX, MidpointY, MLib.Line.GetPerpendicularSlope( Slope )
 end
 
 function MLib.Line.GetIntercept( x, y, ... )
@@ -135,7 +160,7 @@ function MLib.Line.GetIntersection( ... )
 	return x, y
 end
 
-function MLib.Line.GetClosestPoint( px, py, ... )
+function MLib.Line.GetClosestPoint( PerpendicularX, PerpendicularY, ... )
 	local Userdata = CheckUserdata( ... )
 	local x1, y1, x2, y2, Slope, Intercept
 	local x, y
@@ -152,8 +177,8 @@ function MLib.Line.GetClosestPoint( px, py, ... )
 	elseif Slope == 0 then
 		x, y = PerpendicularX, y1
 	else
-		PerpendicularSlope = MLib.Line.GetPerpendicularSlope( Slope )
-		PerpendicularIntercept = MLib.Line.GetIntercept( PerpendicularX, PerpendicularY, PerpendicularSlope )
+		local PerpendicularSlope = MLib.Line.GetPerpendicularSlope( Slope )
+		local PerpendicularIntercept = MLib.Line.GetIntercept( PerpendicularX, PerpendicularY, PerpendicularSlope )
 		x, y = MLib.Line.GetIntersection( Slope, Intercept, PerpendicularSlope, PerpendicularIntercept )
 	end
 	
@@ -217,29 +242,30 @@ function MLib.Line.Segment.GetIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )
 		if Intercept1 == Intercept2 then 
 			local x = { x1, x2, x3, x4 }
 			local y = { y1, y2, y3, y4 }
+			local OriginalX = { x1, x2, x3, x4 }
 			local OriginalY = { y1, y2, y3, y4 }
 			
 			local Length1, Length2 = MLib.Line.GetLength( x[1], y[1], x[2], y[2] ), MLib.Line.GetLength( x[3], y[3], x[4], y[4] )
 			
 			local LargestX, LargestXReference = SortWithReference( x, function ( Value1, Value2 ) return Value1 > Value2 end ) 
-			local LargestY, LargestYReference = SortWithReference( y, function ( Value1, Value2 ) return Value1 > Value2 end ) 
-			local SmallestX, SmallestXReference = SortWithReference( x, function ( Value1, Value2 ) return Value1 < Value2 end ) 
-			local SmallestY, SmallestYReference = SortWithReference( y, function ( Value1, Value2 ) return Value1 < Value2 end ) 
-			
 			table.remove( x, LargestXReference )
-			table.remove( x, SmallestXReference )
+			local LargestY, LargestYReference = SortWithReference( y, function ( Value1, Value2 ) return Value1 > Value2 end ) 
 			table.remove( y, LargestYReference )
+			local SmallestX, SmallestXReference = SortWithReference( x, function ( Value1, Value2 ) return Value1 < Value2 end ) 
+			table.remove( x, SmallestXReference )
+			local SmallestY, SmallestYReference = SortWithReference( y, function ( Value1, Value2 ) return Value1 < Value2 end ) 
 			table.remove( y, SmallestYReference )
 			
 			local Distance = MLib.Line.GetLength( x[1], y[1], x[2], y[2] )
 			if Distance > Length1 or Distance > Length2 then return false end
-			
-			local Length1 = MLib.Line.GetLength( x[1], OriginalY[1], x[1], OriginalY[2] )
-			local Length2 = MLib.Line.GetLength( x[1], OriginalY[3], x[1], OriginalY[4] )
-			local Length3 = MLib.Line.GetLength( x[1], y[1], x[2], y[2] )
+
+			local Length3 = MLib.Line.GetLength( OriginalX[LargestXReference], OriginalY[LargestXReference], OriginalX[SmallestXReference], OriginalY[SmallestXReference] )
 			
 			if Length3 >= Length1 or Length3 >= Length2 then return false end
-			return x[1], y[1], x[2], y[2]
+			
+			local _, Index = SortWithReference( x, function ( Value1, Value2 ) return Value1 > Value2 end ) 
+			if Index == 1 then return x[1], y[1], x[2], y[2]
+			else return x[2], y[2], x[1], y[1] end
 		else
 			return false
 		end
@@ -324,14 +350,13 @@ function MLib.Line.Segment.GetIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )
 end
 
 -- Polygon
-function MLib.Polygon.GetTriangleHeight( base, ... )
+function MLib.Polygon.GetTriangleHeight( Base, ... )
 	local Userdata = CheckUserdata( ... )
-	local Area = 0
-	local Intercept = 0
+	local Area
 
 	if #Userdata == 1 then Area = Userdata[1] else Area = MLib.Polygon.GetArea( Userdata ) end
 	
-	return ( 2 * Area ) / base, Area
+	return ( 2 * Area ) / Base, Area
 end
 
 function MLib.Polygon.GetSignedArea( ... ) 
@@ -339,7 +364,7 @@ function MLib.Polygon.GetSignedArea( ... )
 	local Points = {}
 	
 	for Index = 1, #Userdata, 2 do
-		Points[#Points + 1] = { Userdata[a], Userdata[Index + 1] } 
+		Points[#Points + 1] = { Userdata[Index], Userdata[Index + 1] } 
 	end
 	
 	Points[#Points + 1] = {}
@@ -370,7 +395,7 @@ function MLib.Polygon.GetCentroid( ... )
 	Points[#Points + 1] = {}
 	Points[#Points][1], Points[#Points][2] = Points[1][1], Points[1][2]
 	
-	local Area = GetSignedArea( Userdata ) -- Needs to be signed here in case points are counter-clockwise. 
+	local Area = MLib.Polygon.GetSignedArea( Userdata ) -- Needs to be signed here in case points are counter-clockwise. 
 	
 	local CentroidX = ( 1 / ( 6 * Area ) ) * ( MLib.Math.GetSummation( 1, #Points, 
 		function( Index ) 
@@ -462,24 +487,21 @@ end
 function MLib.Polygon.LineIntersects( x1, y1, x2, y2, ... )
 	local Userdata = CheckUserdata( ... )
 	local Choices = {}
-
-	if MLib.Polygon.CheckPoint( x1, y1, Userdata ) then Choices[#Choices + 1] = { x1, y1 } end
-	if MLib.Polygon.CheckPoint( x2, y2, Userdata ) then Choices[#Choices + 1] = { x2, y2 } end
 	
 	for Index = 1, #Userdata, 2 do
 		-- if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, Userdata[Index], Userdata[Index + 1] ) then return true end
 		if Userdata[Index + 2] then
-			local x1, y1, x2, y2 = MLib.Line.Segment.GetIntersection( Userdata[Index], Userdata[Index + 1], Userdata[Index + 2], Userdata[Index + 3], x1, y1, x2, y2 )
-			if x2 then Choices[#Choices + 1] = { x1, y1, x2, y2 } 
-			elseif x1 then Choices[#Choices + 1] = { x1, y1 } end
+			local x, y = MLib.Line.Segment.GetIntersection( Userdata[Index], Userdata[Index + 1], Userdata[Index + 2], Userdata[Index + 3], x1, y1, x2, y2 )
+			if x then Choices[#Choices + 1] = { x, y } end
 		else
-			local x1, y1, x2, y2 = MLib.Line.Segment.GetIntersection( Userdata[Index], Userdata[Index + 1], Userdata[1], Userdata[2], x1, y1, x2, y2 )
-			if x2 then Choices[#Choices + 1] = { x1, y1, x2, y2 } 
-			elseif x1 then Choices[#Choices + 1] = { x1, y1 } end
+			local x, y = MLib.Line.Segment.GetIntersection( Userdata[Index], Userdata[Index + 1], Userdata[1], Userdata[2], x1, y1, x2, y2 )
+			if x then Choices[#Choices + 1] = { x, y } end
 		end
 	end
+
+	local Final = RemoveDuplicates( Choices )
 	
-	return #Choices > 0 and Choices or false
+	return #Final > 0 and Final or false
 end
 
 function MLib.Polygon.PolygonIntersects( Polygon1, Polygon2 )
@@ -521,13 +543,41 @@ function MLib.Polygon.PolygonIntersects( Polygon1, Polygon2 )
 		end
 	end	
 	
-	function RemoveDuplicates( Table ) -- Local because it is very custom-coded. 
+	local Final = RemoveDuplicates( Choices )
+	
+	return #Final > 0 and Final or false 
+end
+
+function MLib.Polygon.CircleIntersects( x, y, Radius, ... )
+	local Userdata = CheckUserdata( ... )
+	local Choices = {}
+	
+	for Index = 1, #Userdata, 2 do
+		if Userdata[Index + 2] then 
+			local Type, x1, y1, x2, y2 = MLib.Circle.IsSegmentSecant( x, y, Radius, Userdata[Index], Userdata[Index + 1], Userdata[Index + 2], Userdata[Index + 3] )
+			if x2 then 
+				Choices[#Choices + 1] = { Type, x1, y1, x2, y2 } 
+			elseif x1 then Choices[#Choices + 1] = { Type, x1, y1 } end
+		else
+			local Type, x1, y1, x2, y2 = MLib.Circle.IsSegmentSecant( x, y, Radius, Userdata[Index], Userdata[Index + 1], Userdata[1], Userdata[2] )
+			if x2 then 
+				Choices[#Choices + 1] = { Type, x1, y1, x2, y2 } 
+			elseif x1 then Choices[#Choices + 1] = { Type, x1, y1 } end
+		end
+	end
+	
+	local function RemoveDuplicates( Table ) 
 		for Index1 = #Table, 1, -1 do
 			local First = Table[Index1]
 			for Index2 = #Table, 1, -1 do
 				local Second = Table[Index2]
 				if Index1 ~= Index2 then
-					if First[1] == Second[1] and First[2] == Second[2] then
+					if type( First[1] ) ~= type( Second[1] ) then return false end
+					if type( First[2] ) == 'number' and type( Second[2] ) == 'number' and type( First[3] ) == 'number' and type( Second[3] ) == 'number' then
+						if CheckFuzzy( First[2], Second[2] ) and CheckFuzzy( First[3], Second[3] ) then
+							table.remove( Table, Index1 )
+						end
+					elseif First[1] == Second[1] and First[2] == Second[2] and First[3] == Second[3] then
 						table.remove( Table, Index1 )
 					end
 				end
@@ -538,32 +588,7 @@ function MLib.Polygon.PolygonIntersects( Polygon1, Polygon2 )
 	
 	local Final = RemoveDuplicates( Choices )
 	
-	return #Final > 0 and Final or false 
-end
-
-function MLib.Polygon.CircleIntersects( x, y, Radius, ... )
-	local Userdata = CheckUserdata( ... )
-	local Choices = {}
-	
-	if MLib.Polygon.CheckPoint( x, y, Userdata ) then Choices[#Choices + 1] = { x, y } end
-	
-	for Index = 1, #Userdata, 2 do
-		if Userdata[Index + 2] then 
-			local x1, y1, x2, y2 = MLib.Circle.IsSegmentSecant( x, y, Radius, Userdata[Index], Userdata[Index + 1], Userdata[Index + 2], Userdata[Index + 3] )
-			if x2 then 
-				Choices[#Choices + 1] = { x1, y1 } 
-				Choices[#Choices + 1] = { x2, y2 }
-			elseif x1 then Choices[#Choices + 1] = { x1, y1 } end
-		else
-			local x1, y1, x2, y2 = MLib.Circle.IsSegmentSecant( x, y, Radius, Userdata[Index], Userdata[Index + 1], Userdata[1], Userdata[2] )
-			if x2 then 
-				Choices[#Choices + 1] = { x1, y1 } 
-				Choices[#Choices + 1] = { x2, y2 }
-			elseif x1 then Choices[#Choices + 1] = { x1, y1 } end
-		end
-	end
-	
-	return #Choices > 0 and Choices or false
+	return #Final > 0 and Final or false
 end
 
 -- Circle
@@ -636,35 +661,30 @@ function MLib.Circle.IsSegmentSecant( CircleX, CircleY, Radius, x1, y1, x2, y2 )
 	
 	local Slope, Intercept = MLib.Line.GetSlope( x1, y1, x2, y2 ), MLib.Line.GetIntercept( x1, y1, x2, y2 )
 	
+	if MLib.Circle.CheckPoint( CircleX, CircleY, Radius, x1, y1 ) and MLib.Circle.CheckPoint( CircleX, CircleY, Radius, x2, y2 ) then -- Both points are on line-segment. 
+		return 'Chord', x1, y1, x2, y2
+	end
+	
 	if Slope then 
 		if MLib.Circle.IsPointInCircle( CircleX, CircleY, Radius, x1, y1 ) and MLib.Circle.IsPointInCircle( CircleX, CircleY, Radius, x2, y2 ) then -- Line-segment is fully in circle. 
-			return x1, y1, x2, y2
+			return 'Enclosed', x1, y1, x2, y2
 		elseif x3 and x4 then
-			if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 ) and MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x4, y4 ) then -- Both points are on line-segment. 
-				return x3, y3, x4, y4
-			elseif MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 ) then -- Only the first of the points is on the line-segment. 
-				return x3, y3
-			elseif MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x4, y4 ) then -- Only the second of the points is on the line-segment. 
-				return x4, y4
-			else -- Neither of the points are on the line-segment (means that the segment is not on the circle or "encasing" the circle)
+			if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 ) and not MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x4, y4 ) then -- Only the first of the points is on the line-segment. 
+				return 'Tangent', x3, y3
+			elseif MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x4, y4 ) and not MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 ) then -- Only the second of the points is on the line-segment. 
+				return 'Tangent', x4, y4
+			else -- Neither of the points are on the circle (means that the segment is not on the circle, but "encasing" the circle)
 				local Length = MLib.Line.GetLength( x1, y1, x2, y2 )
 				
-				local Distance1 = MLib.Line.GetLength( x1, y1, x3, y3 )
-				local Distance2 = MLib.Line.GetLength( x2, y2, x3, y3 )
-				local Distance3 = MLib.Line.GetLength( x1, y1, x4, y4 )
-				local Distance4 = MLib.Line.GetLength( x2, y3, x4, y4 )
-				
-				if Length > Distance1 or Length > Distance2 or Length > Distance3 or Length > Distance4 then
-					return false
-				elseif Length < Distance1 and Length < Distance2 and Length < Distance3 and Length < Distance4 then 
-					return false 
+				if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 ) and MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x4, y4 ) then
+					return 'Secant', x3, y3, x4, y4
 				else
-					return true
+					return false
 				end
 			end
 		elseif not x4 then -- Is a tangent. 
 			if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 ) then
-				return x3, y3
+				return 'Tangent', x3, y3
 			else -- Neither of the points are on the line-segment (means that the segment is not on the circle or "encasing" the circle).
 				local Length = MLib.Line.GetLength( x1, y1, x2, y2 )
 				local Distance1 = MLib.Line.GetLength( x1, y1, x3, y3 )
@@ -675,7 +695,7 @@ function MLib.Circle.IsSegmentSecant( CircleX, CircleY, Radius, x1, y1, x2, y2 )
 				elseif Length < Distance1 and Length < Distance2 then 
 					return false 
 				else
-					return true
+					return 'Tangent', x3, y3
 				end
 			end
 		end
@@ -696,17 +716,17 @@ function MLib.Circle.IsSegmentSecant( CircleX, CircleY, Radius, x1, y1, x2, y2 )
 		
 		if BottomY ~= TopY then 
 			if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, TopX, TopY ) and MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, BottomX, BottomY ) then
-				return TopX, TopY, BottomX, BottomY
+				return 'Chord', TopX, TopY, BottomX, BottomY
 			elseif MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, TopX, TopY ) then
-				return TopX, TopX
+				return 'Tangent', TopX, TopX
 			elseif MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, BottomX, BottomY ) then
-				return BottomX, BottomY
+				return 'Tangent', BottomX, BottomY
 			else
 				return false
 			end
 		else 
 			if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, TopX, TopY ) then
-				return TopX, TopY
+				return 'Tangent', TopX, TopY
 			else
 				return false
 			end
@@ -717,10 +737,12 @@ end
 function MLib.Circle.CircleIntersects( Circle1CenterX, Circle1CenterY, Radius1, Circle2CenterX, Circle2CenterY, Radius2 )
 	local Distance = MLib.Line.GetLength( Circle1CenterX, Circle1CenterY, Circle2CenterX, Circle2CenterY )
 	if Distance > Radius1 + Radius2 then return false end
-	if Distance == 0 and Radius1 == Radius2 then return true end
+	if Distance == 0 and Radius1 == Radius2 then return 'Equal' end
 	
 	local a = ( Radius1 ^ 2 - Radius2 ^ 2 + Distance ^ 2 ) / ( 2 * Distance )
 	local h = math.sqrt( Radius1 ^ 2 - a ^ 2 )
+	
+	if Circle1CenterX == Circle2CenterX and Circle1CenterY == Circle2CenterY then return 'Colinear' end
 	
 	local p2x = Circle1CenterX + a * ( Circle2CenterX - Circle1CenterX ) / Distance
 	local p2y = Circle1CenterY + a * ( Circle2CenterY - Circle1CenterY ) / Distance
@@ -768,38 +790,27 @@ function MLib.Statistics.GetMode( ... )
 	local Userdata = CheckUserdata( ... )
 
 	table.sort( Userdata )
-	local Number = { { Userdata[1] } }
-	for Index = 2, #Userdata do
-		if Userdata[Index] == Number[#Number][1] then 
-			table.insert( Number[#Number], Userdata[Index] ) 
-		else 
-			table.insert( Number, { Userdata[Index] } ) 
+	local Sorted = {}
+	for Index, Value in ipairs( Userdata ) do
+		Sorted[Value] = Sorted[Value] and Sorted[Value] + 1 or 1
+	end
+	
+	local Occurrences, Least = 0, {}
+	for Index, Value in pairs( Sorted ) do
+		if Value > Occurrences then
+			Least = { Index }
+			Occurrences = Value
+		elseif Value == Occurrences then
+			Least[#Least + 1] = Index
 		end
 	end
 	
-	local Large = { { #Number[1], Number[1][1] } }
-	for Index = 2, #Number do
-		if #Number[Index] > Large[1][1] then
-			for NextIndex = #Large, 1, -1 do
-				table.remove( Large, NextIndex )
-			end
-		table.insert( Large, { #Number[Index], Number[Index][1] } )
-		elseif #Number[Index] == Large[1][1] then
-			table.insert( Large, { #Number[Index], Number[Index][1] } )
-		end
-	end
-	
-	if #Large < 1 then 
-		return false 
-	elseif #Large > 1 then 
-		return false 
-	else 
-		return Large[1][2], Large[1][1] 
-	end
+	if #Least >= 1 then return Least, Occurrences
+	else return false end
 end
 
 function MLib.Statistics.GetRange( ... )
-	local Userdata = {}
+	local Userdata = CheckUserdata( ... )
 	
 	local Upper, Lower = math.max( unpack( Userdata ) ), math.min( unpack( Userdata ) )
 	
@@ -808,7 +819,8 @@ end
 
 -- Math (homeless functions)
 function MLib.Math.GetRoot( Number, Root )
-	return Number ^ ( 1 / Root )
+	local Num = Number ^ ( 1 / Root )
+	return Num, -Num
 end
 
 function MLib.Math.IsPrime( Number )	
@@ -858,7 +870,9 @@ function MLib.Math.GetSummation( Start, Stop, Function )
 end
 
 function MLib.Math.GetPercentOfChange( Old, New )
-	if Old == 0 then 
+	if Old == 0 and New == 0 then
+		return 0
+	elseif Old == 0 then 
 		return false
 	else 
 		return ( New - Old ) / math.abs( Old ) 
@@ -866,7 +880,7 @@ function MLib.Math.GetPercentOfChange( Old, New )
 end
 
 function MLib.Math.GetPercent( Percent, Number )
-	return Percent * math.abs( Number ) + Number 
+	return math.abs( Percent ) * Number
 end
 
 function MLib.Math.GetRootsOfQuadratic( a, b, c )
@@ -878,32 +892,12 @@ function MLib.Math.GetRootsOfQuadratic( a, b, c )
 	return ( -b - Discriminant ) / ( 2 * a ), ( -b + Discriminant ) / ( 2 * a )
 end
 
-function MLib.Math.GetAngle( ... )
-	local Userdata = CheckUserdata( ... )
-	local Angle = 0
-	
-	if #Userdata <= 5 then
-		local x1, y1, x2, y2, Direction = unpack( Userdata )
-		
-		if not Direction or Direction == 'Up' then Direction = math.rad( 90 ) 
-			elseif Direction == 'Right' then Direction = 0 
-			elseif Direction == 'Down' then Direction = math.rad( -90 )
-			elseif Direction == 'Left' then Direction = math.rad( -180 )
-		end
-		
-		local dx, dy = x2 - x1, y2 - y1
-		Angle = math.atan2( dy, dx ) + Direction
-	elseif #Userdata == 6 then
-		local x1, y1, x2, y2, x3, y3 = unpack( Userdata )
-		
-		local AB = MLib.Line.GetLength( x1, y1, x2, y2 )
-		local BC = MLib.Line.GetLength( x2, y2, x3, y3 )
-		local AC = MLib.Line.GetLength( x1, y1, x3, y3 )
-		
-		Angle = math.acos( ( BC * BC + AB * AB - AC * AC ) / ( 2 * BC * AB ) )
-	end
-	
-	return Angle
+function MLib.Math.GetAngle( x1, y1, x2, y2, x3, y3 )	
+    local A = MLib.Line.GetLength( x3, y3, x2, y2 )
+    local B = MLib.Line.GetLength( x1, y1, x2, y2 )
+    local C = MLib.Line.GetLength( x1, y1, x3, y3 )
+
+   return math.acos( ( A ^ 2 + B ^ 2 - C ^ 2 ) / ( 2 * A * B ) )
 end
 
 -- Shape
@@ -912,17 +906,17 @@ function MLib.Shape.NewShape( ... )
 	
 	if #Userdata == 3 then
 		Userdata.Type = 'Circle'
-		Userdata.x, Userdata.y, Userdata.radius = unpack( Userdata )
-		Userdata.Area = MLib.Circle.GetArea( Userdata.radius )
+		Userdata.x, Userdata.y, Userdata.Radius = unpack( Userdata )
+		Userdata.Area = MLib.Circle.GetArea( Userdata.Radius )
 	elseif #Userdata == 4 then
 		Userdata.Type = 'Line'
 		Userdata.x1, Userdata.y1, Userdata.x2, Userdata.y2 = unpack( Userdata )
-		Userdata.MLib.Line.GetSlope = MLib.Line.GetSlope( unpack( Userdata ) )
-		Userdata.MLib.Line.GetIntercept = MLib.Line.GetIntercept( unpack( Userdata ) )
+		Userdata.Slope = MLib.Line.GetSlope( unpack( Userdata ) )
+		Userdata.Intercept = MLib.Line.GetIntercept( unpack( Userdata ) )
 	else
+		Userdata.Points = Userdata
 		Userdata.Type = 'Polygon'
 		Userdata.Area = MLib.Polygon.GetArea( Userdata )
-		Userdata.Points = Userdata
 	end
 	
 	Userdata.Collided = false
@@ -938,74 +932,58 @@ end
 function MLib.Shape.CheckCollisions( Self, ... )
 	local Userdata = { ... }
 	
-	if Type( Self ) == 'table' then -- Using Index Self:table. 
-		if #Userdata == 0 then -- No arguments (colliding with everything). 
+	local function Check( Self, Shape )
+		local Collided = false
+		if not Shape.Removed and not Self.Removed then 
+			if Self.Type == 'Line' then 
+				if Shape.Type == 'Line' then
+					if MLib.Line.Segment.GetIntersection( Self.x1, Self.y1, Self.x2, Self.y2, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+				elseif Shape.Type == 'Polygon' then
+					if MLib.Polygon.LineIntersects( Self.x1, Self.y1, Self.x2, Self.y2, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+				elseif Shape.Type == 'Circle' then
+					if MLib.Circle.IsSegmentSecant( Shape.x, Shape.y, Shape.Radius, Self.x1, Self.y1, Self.x2, Self.y2 ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+				end
+			elseif Self.Type == 'Polygon' then
+				if Shape.Type == 'Line' then
+					if MLib.Polygon.LineIntersects( Shape.x1, Shape.y1, Shape.x2, Shape.y2, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+				elseif Shape.Type == 'Polygon' then
+					if MLib.Polygon.PolygonIntersects( Self.Points, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+				elseif Shape.Type == 'Circle' then
+					if MLib.Polygon.CircleIntersects( Shape.x, Shape.y, Shape.Radius, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+				end
+			elseif Self.Type == 'Circle' then
+				if Shape.Type == 'Line' then
+					if MLib.Circle.IsSegmentSecant( Self.x, Self.y, Self.Radius, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+				elseif Shape.Type == 'Polygon' then
+					if MLib.Polygon.CircleIntersects( Self.x, Self.y, Self.Radius, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+				elseif Shape.Type == 'Circle' then
+					if MLib.Circle.CircleIntersects( Self.x, Self.y, Self.Radius, Shape.x, Shape.y, Shape.Radius ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+				end
+			end
+		end
+		if not Collided then Self.Collided = false end
+	end
+
+	if type( Self ) == 'table' then -- Using Index Self:table. 
+		if #Userdata == 0 and Self.Type then -- No arguments (colliding with everything). 
 			for Index = 1, #MLib.Shape.User do
 				if Index ~= Self.Index then 
-					local Collided = false
 					local Shape = MLib.Shape.User[Index]
-					if not Shape.Removed and not Self.Removed then 
-						if Self.Type == 'Line' then 
-							if Shape.Type == 'Line' then
-								if MLib.Line.Segment.GetIntersection( Self.x1, Self.y1, Self.x2, Self.y2, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true end
-							elseif Shape.Type == 'Polygon' then
-								if MLib.Polygon.LineIntersects( Self.x1, Self.y1, Self.x2, Self.y2, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-							elseif Shape.Type == 'Circle' then
-								if MLib.Circle.IsSegmentSecant( Shape.x, Shape.y, Shape.radius, Self.x1, Self.y1, Self.x2, Self.y2 ) then Collided, Self.Collided, Shape.Collided = true, true end
-							end
-						elseif Self.Type == 'Polygon' then
-							if Shape.Type == 'Line' then
-								if MLib.Polygon.LineIntersects( Shape.x1, Shape.y1, Shape.x2, Shape.y2, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-							elseif Shape.Type == 'Polygon' then
-								if MLib.Polygon.PolygonIntersects( Self.Points, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-							elseif Shape.Type == 'Circle' then
-								if MLib.Polygon.CircleIntersects( Shape.x, Shape.y, Shape.radius, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-							end
-						elseif Self.Type == 'Circle' then
-							if Shape.Type == 'Line' then
-								if MLib.Circle.IsSegmentSecant( Self.x, Self.y, Self.radius, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true end
-							elseif Shape.Type == 'Polygon' then
-								if MLib.Polygon.CircleIntersects( Self.x, Self.y, Self.radius, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-							elseif Shape.Type == 'Circle' then
-								if MLib.Circle.CircleIntersects( Self.x, Self.y, Self.radius, Shape.x, Shape.y, Shape.radius ) then Collided, Self.Collided, Shape.Collided = true, true end
-							end
-						end
+					Check( Self, Shape )
+				end
+			end
+		elseif not Self.Type then -- Multi-item table. 
+			for Index1, Primary in ipairs( Self ) do
+				for Index2, Secondary in ipairs( Self ) do
+					if Index1 ~= Index2 then
+						Check( Primary, Secondary )
 					end
-					if not Collided then Self.Collided = false end
 				end
 			end
 		else -- Colliding with only certain things. 
 			for Index = 1, #Userdata do
-				local Collided = false
 				local Shape = Userdata[Index]
-				if not Shape.Removed and not Self.Removed then 
-					if Self.Type == 'Line' then 
-						if Shape.Type == 'Line' then
-							if MLib.Line.Segment.GetIntersection( Self.x1, Self.y1, Self.x2, Self.y2, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true end
-						elseif Shape.Type == 'Polygon' then
-							if MLib.Polygon.LineIntersects( Self.x1, Self.y1, Self.x2, Self.y2, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-						elseif Shape.Type == 'Circle' then
-							if MLib.Circle.IsSegmentSecant( Shape.x, Shape.y, Shape.radius, Self.x1, Self.y1, Self.x2, Self.y2 ) then Collided, Self.Collided, Shape.Collided = true, true end
-						end
-					elseif Self.Type == 'Polygon' then
-						if Shape.Type == 'Line' then
-							if MLib.Polygon.LineIntersects( Shape.x1, Shape.y1, Shape.x2, Shape.y2, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-						elseif Shape.Type == 'Polygon' then
-							if MLib.Polygon.PolygonIntersects( Self.Points, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-						elseif Shape.Type == 'Circle' then
-							if MLib.Polygon.CircleIntersects( Shape.x, Shape.y, Shape.radius, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-						end
-					elseif Self.Type == 'Circle' then
-						if Shape.Type == 'Line' then
-							if MLib.Circle.IsSegmentSecant( Self.x, Self.y, Self.radius, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true end
-						elseif Shape.Type == 'Polygon' then
-							if MLib.Polygon.CircleIntersects( Self.x, Self.y, Self.radius, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-						elseif Shape.Type == 'Circle' then
-							if MLib.Circle.CircleIntersects( Self.x, Self.y, Self.radius, Shape.x, Shape.y, Shape.radius ) then Collided, Self.Collided, Shape.Collided = true, true end
-						end
-					end
-				end
-				if not Collided then Self.Collided = false end
+				Check( Self, Shape )
 			end
 		end
 	else -- Not using Self:table. 
@@ -1017,36 +995,9 @@ function MLib.Shape.CheckCollisions( Self, ... )
 				for Index2 = 1, #MLib.Shape.User do
 					if Index ~= Index2 then 
 						local Shape = MLib.Shape.User[Index2]
-						if not Shape.Removed and not Self.Removed then 
-							if Self.Type == 'Line' then 
-								if Shape.Type == 'Line' then
-									if MLib.Line.Segment.GetIntersection( Self.x1, Self.y1, Self.x2, Self.y2, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true, true end
-								elseif Shape.Type == 'Polygon' then
-									if MLib.Polygon.LineIntersects( Self.x1, Self.y1, Self.x2, Self.y2, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
-								elseif Shape.Type == 'Circle' then
-									if MLib.Circle.IsSegmentSecant( Shape.x, Shape.y, Shape.radius, Self.x1, Self.y1, Self.x2, Self.y2 ) then Collided, Self.Collided, Shape.Collided = true, true, true end
-								end
-							elseif Self.Type == 'Polygon' then
-								if Shape.Type == 'Line' then
-									if MLib.Polygon.LineIntersects( Shape.x1, Shape.y1, Shape.x2, Shape.y2, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
-								elseif Shape.Type == 'Polygon' then
-									if MLib.Polygon.PolygonIntersects( Self.Points, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
-								elseif Shape.Type == 'Circle' then
-									if MLib.Polygon.CircleIntersects( Shape.x, Shape.y, Shape.radius, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
-								end
-							elseif Self.Type == 'Circle' then
-								if Shape.Type == 'Line' then
-									if MLib.Circle.IsSegmentSecant( Self.x, Self.y, Self.radius, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true, true end
-								elseif Shape.Type == 'Polygon' then
-									if MLib.Polygon.CircleIntersects( Self.x, Self.y, Self.radius, Shape.Points ) then Self.Collided, Collided, Self.Collided, Shape.Collided = true, true, true end
-								elseif Shape.Type == 'Circle' then
-									if MLib.Circle.CircleIntersects( Self.x, Self.y, Self.radius, Shape.x, Shape.y, Shape.radius ) then Collided, Self.Collided, Shape.Collided = true, true, true end
-								end
-							end
-						end
+						Check( Self, Shape )
 					end
 				end
-				if not Collided then Self.Collided = false end
 			end
 		else -- Checking only certain collisions
 			for Index = 1, #Userdata do
@@ -1055,36 +1006,9 @@ function MLib.Shape.CheckCollisions( Self, ... )
 				for Index2 = 1, #MLib.Shape.User do
 					if Self.Index ~= Userdata[Index2].Index then 
 						local Shape = MLib.Shape.User[Index2]
-						if not Shape.Removed and not Self.Removed then 
-							if Self.Type == 'Line' then 
-								if Shape.Type == 'Line' then
-									if MLib.Line.Segment.GetIntersection( Self.x1, Self.y1, Self.x2, Self.y2, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true end
-								elseif Shape.Type == 'Polygon' then
-									if MLib.Polygon.LineIntersects( Self.x1, Self.y1, Self.x2, Self.y2, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-								elseif Shape.Type == 'Circle' then
-									if MLib.Circle.IsSegmentSecant( Shape.x, Shape.y, Shape.radius, Self.x1, Self.y1, Self.x2, Self.y2 ) then Collided, Self.Collided, Shape.Collided = true, true end
-								end
-							elseif Self.Type == 'Polygon' then
-								if Shape.Type == 'Line' then
-									if MLib.Polygon.LineIntersects( Shape.x1, Shape.y1, Shape.x2, Shape.y2, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-								elseif Shape.Type == 'Polygon' then
-									if MLib.Polygon.PolygonIntersects( Self.Points, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-								elseif Shape.Type == 'Circle' then
-									if MLib.Polygon.CircleIntersects( Shape.x, Shape.y, Shape.radius, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-								end
-							elseif Self.Type == 'Circle' then
-								if Shape.Type == 'Line' then
-									if MLib.Circle.IsSegmentSecant( Self.x, Self.y, Self.radius, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true end
-								elseif Shape.Type == 'Polygon' then
-									if MLib.Polygon.CircleIntersects( Self.x, Self.y, Self.radius, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true end
-								elseif Shape.Type == 'Circle' then
-									if MLib.Circle.CircleIntersects( Self.x, Self.y, Self.radius, Shape.x, Shape.y, Shape.radius ) then Collided, Self.Collided, Shape.Collided = true, true end
-								end
-							end
-						end
+						Check( Self, Shape )
 					end
 				end
-				if not Collided then Self.Collided = false end
 			end
 		end
 	end
@@ -1093,21 +1017,19 @@ end
 function MLib.Shape.Remove( Self, ... )
 	local Userdata = { ... }
 	
-	if Type( Self ) == 'table' then
-		MLib.Shape.User[Self.Index] = { Removed = false }
+	if type( Self ) == 'table' and Self.Type then
+		Self.Removed = true
 		
 		if #Userdata > 0 then
 			for Index = 1, #Userdata do
-				MLib.Shape.User[Userdata[Index].Index] = { Removed = true }
+				MLib.Shape.User[Userdata[Index].Index].Removed = true
 			end
 		end
 	else
-		if #Userdata > 0 then
-			for Index = 1, #Userdata do
-				MLib.Shape.User[Userdata[Index].Index] = { Removed = true }
-			end
-		else
-			MLib.Shape.User = {}
+		local Table = #Userdata > 0 and Userdata or ( Self or MLib.Shape.User )
+		
+		for Index = 1, #Table do
+			MLib.Shape.User[Table[Index].Index].Removed = true
 		end
 	end
 end
