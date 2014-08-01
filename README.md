@@ -14,7 +14,7 @@ git clone git://github.com/davisdude/mlib.git
 ````
 
 ###Download
-The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/3.0.0">here</a>, and previous releases <a href="https://github.com/davisdude/mlib/releases">here</a>. 
+The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/1.0.0.3">here</a>, and previous releases <a href="https://github.com/davisdude/mlib/releases">here</a>. 
 
 ##Usage of MLib
 Download the file called <a href="https://github.com/davisdude/mlib/blob/master/mlib.lua">`mlib.lua`</a> and put it somewhere in the file for the process you want it in. Use the *require* function to import the module into the library.
@@ -23,7 +23,7 @@ Download the file called <a href="https://github.com/davisdude/mlib/blob/master/
 Here is an example of how to use MLib:
 ```lua
 -- Require libraries:
-MLib = require 'path/mlib' 
+MLib = require( 'path/mlib' )
 -- The first "MLib" can be whatever you want to call it.
 -- "path" is how you get to the file from the main directory of the application.
 -- See http://www.lua.org/pil/8.1.html for more information on the require function.  
@@ -964,31 +964,31 @@ function love.update( dt )
   MLib.Shape.CheckCollisions()
   -- This checks all collisions, between Rectangle, Circle and Line. 
   
-  print( Rectangle.collided, Line.collided, Circle.collided ) --> true, true, false
+  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> true, true, false
   
   MLib.Shape.CheckCollisions( { Rectangle, Circle } ) 
   -- This checks collisions between Rectangle and Circle only.
   
-  print( Rectangle.collided, Line.collided, Circle.collided ) --> false, false, false
+  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> false, false, false
   
   MLib.Shape.CheckCollisions( { Rectangle, Line } ) 
   -- This checks collisions between Rectangle and Line only.
   
-  print( Rectangle.collided, Line.collided, Circle.collided ) --> true, true, false
+  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> true, true, false
   
   Rectangle:CheckCollisions()
   -- This checks all collisions of Rectangle. 
   
-  print( Rectangle.collided, Line.collided, Circle.collided ) --> true, true, false
+  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> true, true, false
   
   Rectangle:CheckCollisions( Circle )
   -- This checks collisions between Circle and Rectangle only. 
   
-  print( Rectangle.collided, Line.collided, Circle.collided ) --> false, false, false
+  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> false, false, false
   
   Rectangle:CheckCollisions( Line )
   -- This checks collisions between Line and Rectangle only. 
   
-  print( Rectangle.collided, Line.collided, Circle.collided ) --> true, true, false
+  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> true, true, false
 end
 ````

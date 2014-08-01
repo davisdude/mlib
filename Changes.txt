@@ -1,5 +1,27 @@
 MLib changelog- accurate since 3.0.0 (now known as 0.3.0.0), short description from before then. 
 
+1.0.0.3
+====
+Added:
+----
+
+Removed:
+----
+
+Changed:
+----
+
+Fixed:
+----
+- README.md
+
+TODO:
+- Add:
+  - Frequency
+  - Binomial Probability
+  - Standard Deviation
+  - Conditional Probability
+
 1.0.0.2
 ====
 Added:
