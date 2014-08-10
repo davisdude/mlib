@@ -3,7 +3,7 @@ MLib
 
 __MLib__ is a math library that does math functions for you. It is designed to be __easy to use__ and __intuitive__. It has many <a href="http://github.com/davisdude/mlib#function-list">functions</a>. 
 
-__MLib__ is written in pure <a href="http://lua.org">Lua</a>, and can easily be dropped into any project! Examples are done with the *awesome* framework of <a href="love2d.org">LÖVE</a>, but should also work with other frameworks. 
+__MLib__ is written in pure <a href="http://lua.org">Lua</a>, and can easily be dropped into any project! Examples are done with the *awesome* framework of <a href="http://www.love2d.org">LÖVE</a>, but should also work with other frameworks. 
 
 ##Installation
 You can get the most recent version of MLib by:
