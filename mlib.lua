@@ -75,6 +75,25 @@ local function RemoveDuplicates( Table )
 	return Table
 end
 
+local function Copy( Table, Cache )
+    if type( Table ) ~= 'table' then
+        return Table
+    end
+
+    Cache = Cache or {}
+    if Cache[Table] then
+        return Cache[Table]
+    end
+
+    local New = {}
+    Cache[Table] = New
+    for Key, Value in pairs( Table ) do
+        New[Copy( Key, Cache)] = Copy( Value, Cache )
+    end
+
+    return New
+end
+
 -- Lines
 function MLib.Line.GetLength( x1, y1, x2, y2 )
 	return math.sqrt( ( x1 - x2 ) ^ 2 + ( y1 - y2 ) ^ 2 )
@@ -422,25 +441,26 @@ end
 
 function MLib.Polygon.CheckPoint( PointX, PointY, ... )
 	local Userdata = {}
+	local Lines = {}
 	local x = {}
 	local y = {}
-	local Slopes = {}
 	
 	if type( ... ) ~= 'table' then Userdata = { ... } else Userdata = ... end
 	
-	for Index = 1, #Userdata, 2 do
-		table.insert( x, Userdata[Index] )
-		table.insert( y, Userdata[Index + 1] )
+	local function Wrap( Number, Limit )
+		if Number > Limit then return Number - Limit end
+		return Number
 	end
 	
-	for Index = 1, #x do
-		local Slope
-		if Index ~= #x then
-			Slope = ( y[Index] - y[Index + 1] ) / ( x[Index] - x[Index + 1] )
-		else 
-			Slope = ( y[Index] - y[1] ) / ( x[Index] - x[1] )
-		end
-		Slopes[#Slopes + 1] = Slope
+	for Index = 1, #Userdata, 2 do
+		local Number = #Lines + 1
+		Lines[Number] = { x1 = Userdata[Index], y1 = Userdata[Index + 1], x2 = Userdata[ Wrap( Index + 2, #Userdata ) ], y2 = Userdata[ Wrap( Index + 3, #Userdata ) ], Visted = false }
+		Lines[Number].Slope = MLib.Line.GetSlope( Lines[Number].x1, Lines[Number].y1, Lines[Number].x2, Lines[Number].y2 )
+		Lines[Number].Intercept = MLib.Line.GetIntercept( Lines[Number].x1, Lines[Number].y1, Lines[Number].Slope )
+		Lines[Number].Visited = false
+		
+		x[Number] = Userdata[Index]
+		y[Number] = Userdata[Index + 1]
 	end
 	
 	local LowestX = math.min( unpack( x ) )
@@ -450,41 +470,80 @@ function MLib.Polygon.CheckPoint( PointX, PointY, ... )
 	
 	if PointX < LowestX or PointX > LargestX or PointY < LowestY or PointY > LargestY then return false end
 	
-	local Count = 0
-	
-	function Wrap( Number, Limit )
-		if Number > Limit then return Number - Limit end
-		return Number
-	end
-	
-	for Index = 1, #Slopes do
-		if Index ~= #Slopes then
-			local x1, x2 = x[Index], x[Index + 1]
-			local y1, y2 = y[Index], y[Index + 1]
-			if PointY == y1 or PointY == y2 then 
-				if y[ Wrap( Index + 2, #y ) ] ~= PointY and y[Wrap( Index + 3, #y )] ~= PointY then
-					Count = Count + 1
-				end
-			elseif MLib.Line.Segment.GetIntersection( x1, y1, x2, y2, PointX, PointY, LowestX, PointY ) then 
-				Count = Count + 1 
-			end
-		else
-			local x1, x2 = x[Index], x[1]
-			local y1, y2 = y[Index], y[1]
-			if PointY == y1 or PointY == y2 then 
-				if y[Wrap( Index + 2, #y )] ~= PointY and y[Wrap( Index + 3, #y )] ~= PointY then
-					Count = Count + 1
-				end
-			elseif MLib.Line.Segment.GetIntersection( x1, y1, x2, y2, PointX, PointY, LowestX, PointY ) then 
-				Count = Count + 1 
+	local function GetVertex( x1, y1, x2, y2 )
+		for Index = 1, #x do
+			local x3, y3, x4, y4 = x[Index], y[Index], x[ Wrap( Index + 1, #x ) ], y[ Wrap( Index + 1, #y ) ]
+			
+			if x1 == x3 and y1 == y3 and x2 ~= x4 and y2 ~= y4 then
+				return Index, x4, y4
+			elseif x1 == x4 and y1 == y4 and x2 ~= x3 and y2 ~= y3 then
+				return Index, x3, y3
 			end
 		end
 	end
-
-	return math.floor( Count / 2 ) ~= Count / 2 and true
+	
+	local Count = 0
+	
+	local Intersections = MLib.Polygon.LineSegmentIntersects( PointX, PointY, LargestX, PointY, Userdata )
+	if type( Intersections ) == 'table' then 
+		for _, Line in ipairs( Lines ) do 
+			local x1, y1, x2, y2 = Line.x1, Line.y1, Line.x2, Line.y2
+			local Slope, Intercept = Line.Slope, Line.Intercept
+			Line.Visited = true
+			
+			if y1 == PointY or y2 == PointY then -- Lies on a vertex. 
+				local I, x3, y3 = GetVertex( x1, y1, x2, y2 )
+				local Visited = I and Lines[I].Visited
+				
+				if Visited then
+					if y3 == y1 or y2 == y1 then
+						-- This could be VASTLY improved for speed. 
+						if MLib.Polygon.CheckPoint( PointX, PointY - 1, Userdata ) and MLib.Polygon.CheckPoint( PointX, PointY + 1, Userdata ) then
+							Count = Count + 1
+						end
+					elseif y3 > PointY then
+						Count = Count + 1
+					end
+				end
+			else
+				if MLib.Line.Segment.GetIntersection( x1, y1, x2, y2, PointX, PointY, LargestX, PointY ) then 
+					Count = Count + 1
+				end
+			end
+		end
+	else
+		return false
+	end
+	
+	return Count % 2 ~= 0 and Intersections
 end
 
 function MLib.Polygon.LineIntersects( x1, y1, x2, y2, ... )
+	local Userdata = CheckUserdata( ... )
+	local Choices = {}
+	
+	local Slope = MLib.Line.GetSlope( x1, y1, x2, y2 )
+	local Intercept = MLib.Line.GetIntercept( x1, y1, Slope )
+	
+	local x3, x4 = 1, 2
+	local y3, y4 = Slope * x3 + Intercept, Slope * x4 + Intercept
+	
+	for Index = 1, #Userdata, 2 do
+		if Userdata[Index + 2] then
+			local x, y = MLib.Line.GetIntersection( Userdata[Index], Userdata[Index + 1], Userdata[Index + 2], Userdata[Index + 3], x3, y3, x4, y4 )
+			if x then Choices[#Choices + 1] = { x, y } end
+		else
+			local x, y = MLib.Line.GetIntersection( Userdata[Index], Userdata[Index + 1], Userdata[1], Userdata[2], x3, y3, x4, y4 )
+			if x then Choices[#Choices + 1] = { x, y } end
+		end
+	end
+
+	local Final = RemoveDuplicates( Choices )
+	
+	return #Final > 0 and Final or false
+end
+
+function MLib.Polygon.LineSegmentIntersects( x1, y1, x2, y2, ... )
 	local Userdata = CheckUserdata( ... )
 	local Choices = {}
 	
@@ -504,19 +563,29 @@ function MLib.Polygon.LineIntersects( x1, y1, x2, y2, ... )
 	return #Final > 0 and Final or false
 end
 
+function MLib.Polygon.IsLineSegmentInside( x1, y1, x2, y2, ... )
+	local Userdata = CheckUserdata( ... )
+	
+	local Choices = MLib.Polygon.LineSegmentIntersects( x1, y1, x2, y2, Userdata ) 
+	if Choices then return true end
+	
+	if MLib.Polygon.CheckPoint( x1, y1, Userdata ) or MLib.Polygon.CheckPoint( x2, y2, Userdata ) then return true end
+	return false
+end
+
 function MLib.Polygon.PolygonIntersects( Polygon1, Polygon2 )
 	local Choices = {}
 	
 	for Index = 1, #Polygon1, 2 do
 		if Polygon1[Index + 2] then
-			local Intersections = MLib.Polygon.LineIntersects( Polygon1[Index], Polygon1[Index + 1], Polygon1[Index + 2], Polygon1[Index + 3], Polygon2 )
+			local Intersections = MLib.Polygon.LineSegmentIntersects( Polygon1[Index], Polygon1[Index + 1], Polygon1[Index + 2], Polygon1[Index + 3], Polygon2 )
 			if Intersections and #Intersections > 0 then
 				for Index2 = 1, #Intersections do
 					Choices[#Choices + 1] = { unpack( Intersections[Index2] ) }
 				end
 			end
 		else
-			local Intersections = MLib.Polygon.LineIntersects( Polygon1[Index], Polygon1[Index + 1], Polygon1[1], Polygon1[2], Polygon2 )
+			local Intersections = MLib.Polygon.LineSegmentIntersects( Polygon1[Index], Polygon1[Index + 1], Polygon1[1], Polygon1[2], Polygon2 )
 			if Intersections and #Intersections > 0 then
 				for Index2 = 1, #Intersections do
 					Choices[#Choices + 1] = { unpack( Intersections[Index2] ) }
@@ -527,14 +596,14 @@ function MLib.Polygon.PolygonIntersects( Polygon1, Polygon2 )
 	
 	for Index = 1, #Polygon2, 2 do
 		if Polygon2[Index + 2] then
-			local Intersections = MLib.Polygon.LineIntersects( Polygon2[Index], Polygon2[Index + 1], Polygon2[Index + 2], Polygon2[Index + 3], Polygon1 )
+			local Intersections = MLib.Polygon.LineSegmentIntersects( Polygon2[Index], Polygon2[Index + 1], Polygon2[Index + 2], Polygon2[Index + 3], Polygon1 )
 			if Intersections and #Intersections > 0 then
 				for Index2 = 1, #Intersections do
 					Choices[#Choices + 1] = { unpack( Intersections[Index2] ) }
 				end
 			end
 		else
-			local Intersections = MLib.Polygon.LineIntersects( Polygon2[Index], Polygon2[Index + 1], Polygon2[1], Polygon2[2], Polygon1 )
+			local Intersections = MLib.Polygon.LineSegmentIntersects( Polygon2[Index], Polygon2[Index + 1], Polygon2[1], Polygon2[2], Polygon1 )
 			if Intersections and #Intersections > 0 then
 				for Index2 = 1, #Intersections do
 					Choices[#Choices + 1] = { unpack( Intersections[Index2] ) }
@@ -589,6 +658,11 @@ function MLib.Polygon.CircleIntersects( x, y, Radius, ... )
 	local Final = RemoveDuplicates( Choices )
 	
 	return #Final > 0 and Final or false
+end
+
+function MLib.Polygon.IsCircleInside( x, y, Radius, ... )
+	local Userdata = CheckUserdata( ... )
+	return MLib.Polygon.CheckPoint( x, y, Userdata )
 end
 
 -- Circle
@@ -914,7 +988,7 @@ function MLib.Shape.NewShape( ... )
 		Userdata.Slope = MLib.Line.GetSlope( unpack( Userdata ) )
 		Userdata.Intercept = MLib.Line.GetIntercept( unpack( Userdata ) )
 	else
-		Userdata.Points = Userdata
+		Userdata.Points = Copy( Userdata )
 		Userdata.Type = 'Polygon'
 		Userdata.Area = MLib.Polygon.GetArea( Userdata )
 	end
@@ -939,46 +1013,49 @@ function MLib.Shape.CheckCollisions( Self, ... )
 				if Shape.Type == 'Line' then
 					if MLib.Line.Segment.GetIntersection( Self.x1, Self.y1, Self.x2, Self.y2, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true, true end
 				elseif Shape.Type == 'Polygon' then
-					if MLib.Polygon.LineIntersects( Self.x1, Self.y1, Self.x2, Self.y2, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+					if MLib.Polygon.LineSegmentIntersects( Self.x1, Self.y1, Self.x2, Self.y2, Shape.Points ) or MLib.Polygon.IsLineSegmentInside( Self.x1, Self.y1, Self.x2, Self.y2, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
 				elseif Shape.Type == 'Circle' then
 					if MLib.Circle.IsSegmentSecant( Shape.x, Shape.y, Shape.Radius, Self.x1, Self.y1, Self.x2, Self.y2 ) then Collided, Self.Collided, Shape.Collided = true, true, true end
 				end
 			elseif Self.Type == 'Polygon' then
 				if Shape.Type == 'Line' then
-					if MLib.Polygon.LineIntersects( Shape.x1, Shape.y1, Shape.x2, Shape.y2, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+					if MLib.Polygon.LineSegmentIntersects( Shape.x1, Shape.y1, Shape.x2, Shape.y2, Self.Points ) or MLib.Polygon.IsLineSegmentInside( Shape.x1, Shape.y1, Shape.x2, Shape.y2, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
 				elseif Shape.Type == 'Polygon' then
 					if MLib.Polygon.PolygonIntersects( Self.Points, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
 				elseif Shape.Type == 'Circle' then
-					if MLib.Polygon.CircleIntersects( Shape.x, Shape.y, Shape.Radius, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+					if MLib.Polygon.CircleIntersects( Shape.x, Shape.y, Shape.Radius, Self.Points ) or MLib.Polygon.IsCircleInside( Shape.x, Shape.y, Shape.Radius, Self.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
 				end
 			elseif Self.Type == 'Circle' then
 				if Shape.Type == 'Line' then
 					if MLib.Circle.IsSegmentSecant( Self.x, Self.y, Self.Radius, Shape.x1, Shape.y1, Shape.x2, Shape.y2 ) then Collided, Self.Collided, Shape.Collided = true, true, true end
 				elseif Shape.Type == 'Polygon' then
-					if MLib.Polygon.CircleIntersects( Self.x, Self.y, Self.Radius, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
+					if MLib.Polygon.CircleIntersects( Self.x, Self.y, Self.Radius, Shape.Points ) or MLib.Polygon.IsCircleInside( Self.x, Self.y, Self.Radius, Shape.Points ) then Collided, Self.Collided, Shape.Collided = true, true, true end
 				elseif Shape.Type == 'Circle' then
 					if MLib.Circle.CircleIntersects( Self.x, Self.y, Self.Radius, Shape.x, Shape.y, Shape.Radius ) then Collided, Self.Collided, Shape.Collided = true, true, true end
 				end
 			end
 		end
-		if not Collided then Self.Collided = false end
+		return Collided
 	end
 
 	if type( Self ) == 'table' then -- Using Index Self:table. 
 		if #Userdata == 0 and Self.Type then -- No arguments (colliding with everything). 
+			local Boolean = false
 			for Index = 1, #MLib.Shape.User do
 				if Index ~= Self.Index then 
 					local Shape = MLib.Shape.User[Index]
-					Check( Self, Shape )
 				end
 			end
+			if Boolean then Self.Collided = true else Self.Collided = false end
 		elseif not Self.Type then -- Multi-item table. 
-			for Index1, Primary in ipairs( Self ) do
-				for Index2, Secondary in ipairs( Self ) do
-					if Index1 ~= Index2 then
-						Check( Primary, Secondary )
+			for Index1, Primary in pairs( Self ) do
+				local Boolean = false
+				for Index2, Secondary in pairs( Self ) do
+					if Index1 ~= Index2 then 
+						Boolean = Boolean or Check( Primary, Secondary )
 					end
 				end
+				Primary.Collided = Boolean
 			end
 		else -- Colliding with only certain things. 
 			for Index = 1, #Userdata do

@@ -1,4 +1,31 @@
-MLib changelog- accurate since 3.0.0 (now known as 0.3.0.0), short description from before then. 
+MLib changelog- accurate since 3.0.0 (now known as 0.3.0.0), short description from before then.
+
+1.1.0.0
+====
+Added:
+----
+- MLib.Polygon.IsCircleInside
+- MLib.Polygon.LineSegmentIntersects
+- MLib.Polygon.IsLineSegmentInside
+- MLib.Statistics.GetFrequency
+- MLib.Math.Factorial
+- MLib.Math.SystemOfEquations
+
+Removed:
+----
+
+Changed:
+----
+- MLib.Polygon.LineIntersects is now MLib.Polygon.LineSegmentIntersects.
+- Put Word-wrap on Changes.txt
+
+Fixed:
+----
+- Problems with numberous MLib.Polygon and MLib.Circle problems. 
+
+TODO:
+- Fix
+	- MLib.Shape Table can't have metatables.  
 
 1.0.0.3
 ====

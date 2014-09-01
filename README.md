@@ -14,7 +14,7 @@ git clone git://github.com/davisdude/mlib.git
 ````
 
 ###Download
-The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/1.0.0.3">here</a>, and previous releases <a href="https://github.com/davisdude/mlib/releases">here</a>. 
+The __latest release__ can be found <a href="https://github.com/davisdude/mlib/releases/tag/1.1.0.0">here</a>, and previous releases <a href="https://github.com/davisdude/mlib/releases">here</a>. 
 
 ##Usage of MLib
 Download the file called <a href="https://github.com/davisdude/mlib/blob/master/mlib.lua">`mlib.lua`</a> and put it somewhere in the file for the process you want it in. Use the *require* function to import the module into the library.
@@ -93,6 +93,7 @@ print( string.format( 'Line 2: \n\tSlope: %s \n\tY-Intercept: %s', Slope2, Inter
 #####<a href="http://github.com/davisdude/mlib#mlibstatisticsgetmedian-1">MLib.Statistics.GetMedian</a>
 #####<a href="http://github.com/davisdude/mlib#mlibstatisticsgetmode-1">MLib.Statistics.GetMode</a>
 #####<a href="http://github.com/davisdude/mlib#mlibstatisticsgetrange-1">MLib.Statistics.GetRange</a>
+#####<a href="http://github.com/davisdude/mlib#mlibstatisticsgetfrequency-1">MLib.Statistics.GetFrequency</a>
 ####<a href="http://github.com/davisdude/mlib#mlibmath-1">MLib.Math</a>
 #####<a href="http://github.com/davisdude/mlib#mlibmathgetroot-1">MLib.Math.GetRoot</a>
 #####<a href="http://github.com/davisdude/mlib#mlibmathisprime-1">MLib.Math.IsPrime</a>
@@ -102,6 +103,8 @@ print( string.format( 'Line 2: \n\tSlope: %s \n\tY-Intercept: %s', Slope2, Inter
 #####<a href="http://github.com/davisdude/mlib#mlibmathgetpercent-1">MLib.Math.GetPercent</a>
 #####<a href="http://github.com/davisdude/mlib#mlibmathgetrootsofquadratic-1">MLib.Math.GetRootsOfQuadratic</a>
 #####<a href="http://github.com/davisdude/mlib#mlibmathgetangle-1">MLib.Math.GetAngle</a>
+#####<a href="http://github.com/davisdude/mlib#mlibmathfactorial-1">MLib.Math.Factorial</a>
+#####<a href="http://github.com/davisdude/mlib#mlibmathsystemofequations-1">MLib.Math.SystemOfEquations</a>
 ####<a href="http://github.com/davisdude/mlib#mlibshape-1">MLib.Shape</a>
 #####<a href="http://github.com/davisdude/mlib#mlibshapenewshape-1">MLib.Shape.NewShape</a>
 #####<a href="http://github.com/davisdude/mlib#mlibshapecheckcollisions-1">MLib.Shape.CheckCollisions</a>
@@ -401,63 +404,63 @@ Handles polygon-related functions.
 #####MLib.Polygon.GetSignedArea
 - Gives the signed area of any <a href="http://en.wikipedia.org/wiki/Simple_polygon">simple polygon</a>.
 - Synopsis:
-  - `MLib.Polygon.GetArea( Verticies )`
+  - `MLib.Polygon.GetArea( Vertices )`
 - Arguments:
-  - `Verticies`: 
-    - Table. Contains the x and y of the verticies.
+  - `Vertices`: 
+    - Table. Contains the x and y of the vertices.
     - Numbers. Can just be the numbers, or the `unpack`ed table containing the numbers.
 - Returns:
   - The area of the polygon.
 - Example: 
   - Gives the area of the polygon with points at ( 0, 0 ), ( 0, 4 ), ( 3, 0 ), which has an area of 6.
-    - `Verticies = { 0, 0, 0, 4, 3, 0 }`
-    - `Area = MLib.Polygon.GetSignedArea( Verticies )`
+    - `Vertices = { 0, 0, 0, 4, 3, 0 }`
+    - `Area = MLib.Polygon.GetSignedArea( Vertices )`
   - Gives the area of the polygon with points at ( 0, 0 ), ( 0, 4 ), ( 3, 0 ), ( 3, 4 ), which has an area of 12.
     - `Area = MLib.Polygon.GetSignedArea( 0, 0, 0, 4, 3, 0, 3, 4 )`
 	
 #####MLib.Polygon.GetArea
 - Gives the area of any <a href="http://en.wikipedia.org/wiki/Simple_polygon">simple polygon</a>.
 - Synopsis:
-  - `MLib.Polygon.GetArea( Verticies )`
+  - `MLib.Polygon.GetArea( Vertices )`
 - Arguments:
-  - `Verticies`: 
-    - Table. Contains the x and y of the verticies.
+  - `Vertices`: 
+    - Table. Contains the x and y of the vertices.
     - Numbers. Can just be the numbers, or the `unpack`ed table containing the numbers.
 - Returns:
   - The area of the polygon.
 - Example: 
   - Gives the area of the polygon with points at ( 0, 0 ), ( 0, 4 ), ( 3, 0 ), which has an area of 6.
-    - `Verticies = { 0, 0, 0, 4, 3, 0 }`
-    - `Area = MLib.Polygon.GetArea( Verticies )`
+    - `Vertices = { 0, 0, 0, 4, 3, 0 }`
+    - `Area = MLib.Polygon.GetArea( Vertices )`
   - Gives the area of the polygon with points at ( 0, 0 ), ( 0, 4 ), ( 3, 0 ), ( 3, 4 ), which has an area of 12.
     - `Area = MLib.Polygon.GetArea( 0, 0, 0, 4, 3, 0, 3, 4 )`
 
 #####MLib.Polygon.GetCentroid
 - Gives the <a href="http://en.wikipedia.org/wiki/Centroid">centroid</a> of any <a href="http://en.wikipedia.org/wiki/Simple_polygon">simple polygon</a>.
 - Synopsis:
-  - `MLib.Polygon.GetCentroid( Verticies )`
+  - `MLib.Polygon.GetCentroid( Vertices )`
 - Arguments:
-  - `Verticies`: 
-    - Table. Contains the x and y of the verticies.
+  - `Vertices`: 
+    - Table. Contains the x and y of the vertices.
     - Numbers. Can just be the numbers, or the `unpack`ed table containing the numbers.
 - Returns:
   - The centroid x and y of the polygon.
 - Example:
   - Gives the centroid of the polygon with points at ( 0, 0 ), ( 0, 6 ), ( 3, 0 ), which is at ( 1, 2 )
-    - `Verticies = { 0, 0, 0, 6, 3, 0 }`
-    - `CentroidX, CentroidY = MLib.Polygon.GetCentroid( Verticies )`
+    - `Vertices = { 0, 0, 0, 6, 3, 0 }`
+    - `CentroidX, CentroidY = MLib.Polygon.GetCentroid( Vertices )`
   - Gives centroid of a polygon with points at ( 0, 0 ), ( 0, 4 ), ( 4, 4 ), ( 4, 0 )
     - `CentroidX, CentroidY = MLib.Polygon.GetCentroid( 0, 0, 0, 4, 4, 4, 4, 0 )`
 
 #####MLib.Polygon.CheckPoint
 - Checks whether or not a point is inside a <a href="http://en.wikipedia.org/wiki/Simple_polygon">simple polygon</a>.
 - Synopsis:
-  - `MLib.Polygon.CheckPoint( x, y, Verticies )`
+  - `MLib.Polygon.CheckPoint( x, y, Vertices )`
 - Arguments:
   - `x`: Number. The x-coordinate that is being checked.
   - `y`: Number. The y-coordinate that is being checked.
-  - `Verticies`: 
-    - Table. Contains the x and y of the verticies.
+  - `Vertices`: 
+    - Table. Contains the x and y of the vertices.
     - Numbers. Can just be the numbers, or the `unpack`ed table containing the numbers.
 - Returns:
   - `true` if the point is inside the polygon.
@@ -687,7 +690,7 @@ Handles functions dealing with statisticsistics.
 #####MLib.Statistics.GetMean
 - Gives the <a href="http://en.wikipedia.org/wiki/Arithmetic_mean">arithmetic mean</a> of the data set.
 - Synopsis: 
-  - `MLib.Statistics.GetMean( data )`
+  - `MLib.Statistics.GetMean( Data )`
 - Arguments:
   - `data`: 
     - Table. Contains the numbers data.
@@ -701,7 +704,7 @@ Handles functions dealing with statisticsistics.
 #####MLib.Statistics.GetMedian
 - Gets the <a href="http://en.wikipedia.org/wiki/Median">median</a> of the data set. 
 - Synopsis:
-  - `MLib.Statistics.GetMedian( data )`
+  - `MLib.Statistics.GetMedian( Data )`
 - Arguments:
   - Table. Contains the numbers data.
   - Numbers. Can just be the numbers, or the `unpack`ed table containing the numbers.
@@ -714,7 +717,7 @@ Handles functions dealing with statisticsistics.
 #####MLib.Statistics.GetMode
 - Gets the <a href="http://en.wikipedia.org/wiki/Mode_(statisticsistics)">mode</a> of the data set. 
 - Synopsis: 
-  - `MLib.Statistics.GetMode( data )`
+  - `MLib.Statistics.GetMode( Data )`
 - Arguments:
   - Table. Contains the numbers data.
   - Numbers. Can just be the numbers, or the `unpack`ed table containing the numbers.
@@ -730,7 +733,7 @@ Handles functions dealing with statisticsistics.
 #####MLib.Statistics.GetRange
 - Gets the <a href="http://en.wikipedia.org/wiki/Range_(statisticsistics)">range</a> of the data set. 
 - Synopsis:
-  - `MLib.Statistics.GetRange( data )`
+  - `MLib.Statistics.GetRange( Data )`
 - Arguments:
   - Table. Contains the numbers data.
   - Numbers. Can just be the numbers, or the `unpack`ed table containing the numbers.
@@ -740,15 +743,28 @@ Handles functions dealing with statisticsistics.
   - Gets the range of a data set containing the numbers, 1, 2, 3, and 4, which is 3.
     - `Range = MLib.Statistics.GetRange( 1, 2, 3, 4 )`
 
+####MLib.Statistics.GetFrequency
+- Gets the <a href="http://en.wikipedia.org/wiki/Frequentist_probability#Definition">frequency</a> of the occurrences. 
+- Synopsis:
+  - MLib.Statistics.GetFrequency( TotalTrials, SuccessfulTrials )
+- Arguments:
+  - `TotalTrials`: Number. The number of trials attempted. 
+  - `SuccessfulTrials`: Number. The number of successful trials. 
+- Returns: 
+  - The frequency of the occurrence. 
+- Example:
+  - Gets the frequency of 1/10 successful attempts (.1). 
+    - `Frequency = MLib.Statistics.GetFrequency( 10, 1 )
+
 ####MLib.Math
 Handles functions that have to do with math in general.
 #####MLib.Math.GetRoot
 - Gets the nth root of a number.
 - Synopsis:
-  - `MLib.Math.GetRoot( number, root )`
+  - `MLib.Math.GetRoot( Number, Root )`
 - Arguments:
-  - `number`: Number. The number you are getting the nth root of.
-  - `root`: Number. The number that is n for the nth root.
+  - `Number`: Number. The number you are getting the nth root of.
+  - `Root`: Number. The number that is n for the nth root.
 - Returns:
   - The roots of the number (positive, negative).
 - Example:
@@ -771,9 +787,9 @@ Handles functions that have to do with math in general.
 #####MLib.Math.Round
 - Rounds a number up or down, depending on which it's closer to.
 - Synopsis:
-  - `MLib.Math.Round( number )`
+  - `MLib.Math.Round( Number )`
 - Arguments:
-  - `number`: Number. The number that you want to round.
+  - `Number`: Number. The number that you want to round.
 - Returns:
   - The number rounded up or down. 
 - Example:
@@ -856,6 +872,37 @@ Handles functions that have to do with math in general.
   - The angle between point ( 1, 3 ) and ( 3, 1 ) with a vertex of ( 1, 1 ). This is 90 degrees or about 1.57079633 radians. 
 - Example:
   - `Angle = MLib.Math.GetAngle( 1, 3, 1, 1, 3, 1 )
+  
+#####MLib.Statistics.Factorial
+- Gets the factorial of the number. 
+- Synopsis:
+  - MLib.Math.Factorial( Number )
+- Arguments:
+  - `Number`: Number. The number you wish to get the factorial of. 
+- Returns: 
+  - The factorial of the number.
+- Example:
+  - Gets the factorial of 3 (1 * 2 * 3 = 6). 
+    - `Factorial = MLib.Statistics.Factorial( 3 )`
+	
+#####MLib.Statistics.SystemOfEquations
+- Gets the factorial of the number. 
+- Synopsis:
+  - MLib.Math.SystemOfEquations( Number, Function )
+- Arguments:
+  - `Number`: Number. The number you wish to get the factorial of. 
+  - `Function`: Function. The function that determines how to accept input. 
+- Returns: 
+  - The proper value. 
+- Example:
+```lua
+Factorial = MLib.Math.SystemOfEquations( 5, 
+  function ( Number )
+    if Number < 5 then return Number * 3 + 1
+	elseif Number < 5 then return Number * 2 - 1
+	else return Number end
+  end
+) -- Returns 5.````
 
 ###MLib.Shape
 Handles shape collision/intersection. 
