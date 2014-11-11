@@ -1,5 +1,50 @@
 MLib changelog- accurate since 3.0.0 (now known as 0.3.0.0), short description from before then.
 
+1.1.0.2
+====
+Added:
+----
+- MLib.Polygon.IsPolygonInside
+
+Removed:
+----
+- Removed all MLib.Shape:
+	- Was very slow.
+	- Could not define custom callbacks. 
+	- Allow for flexibility. 
+
+Changed:
+----
+- Switched MLib.Line.GetIntersection back to the old way
+- MLib.Line.GetSegmentIntersection now returns 4 values if the lines are parallel. 
+
+TODO:
+- Make it so that MLib.Shape objects can use ':' syntax for other functions (i.e. MLib.Line.GetLength for Line objects, etc.)
+- Intuitive error messages. 
+
+
+1.1.0.1
+====
+Added:
+----
+
+Removed:
+----
+
+Changed:
+- MLib.Line.GetIntersection now returns true, instead of two points. 
+
+----
+
+Fixed:
+----
+- MLib.Line.GetIntersection now handles vertical lines: returns true if they collide, false otherwise. 
+- MLib.Polygon.LineIntersects now also handles verticals. 
+
+TODO:
+- Fix
+	- MLib.Shape Table can't have metatables.  
+
 1.1.0.0
 ====
 Added:

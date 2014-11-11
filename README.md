@@ -80,6 +80,7 @@ print( string.format( 'Line 2: \n\tSlope: %s \n\tY-Intercept: %s', Slope2, Inter
 #####<a href="http://github.com/davisdude/mlib#mlibpolygonlineintersects-1">MLib.Polygon.LineIntersects</a>
 #####<a href="http://github.com/davisdude/mlib#mlibpolygonpolygonintersects-1">MLib.Polygon.PolygonIntersects</a>
 #####<a href="http://github.com/davisdude/mlib#mlibpolygoncircleintersects-1">MLib.Polygon.CircleIntersects</a>
+#####<a href="http://github.com/davisdude/mlib#mlibpolygonispolygoninside-1">MLib.Polygon.IsPolygonInside</a>
 ####<a href="http://github.com/davisdude/mlib#mlibcircle-1">MLib.Circle</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclegetarea-1">MLib.Circle.GetArea</a>
 #####<a href="http://github.com/davisdude/mlib#mlibcirclecheckpoint-1">MLib.Circle.CheckPoint</a>
@@ -105,10 +106,6 @@ print( string.format( 'Line 2: \n\tSlope: %s \n\tY-Intercept: %s', Slope2, Inter
 #####<a href="http://github.com/davisdude/mlib#mlibmathgetangle-1">MLib.Math.GetAngle</a>
 #####<a href="http://github.com/davisdude/mlib#mlibmathfactorial-1">MLib.Math.Factorial</a>
 #####<a href="http://github.com/davisdude/mlib#mlibmathsystemofequations-1">MLib.Math.SystemOfEquations</a>
-####<a href="http://github.com/davisdude/mlib#mlibshape-1">MLib.Shape</a>
-#####<a href="http://github.com/davisdude/mlib#mlibshapenewshape-1">MLib.Shape.NewShape</a>
-#####<a href="http://github.com/davisdude/mlib#mlibshapecheckcollisions-1">MLib.Shape.CheckCollisions</a>
-#####<a href="http://github.com/davisdude/mlib#mlibshaperemove-1">MLib.Shape.Remove</a>
 
 #Functions
 ####MLib.Line
@@ -530,6 +527,22 @@ Handles polygon-related functions.
     - `Collisions = MLib.Polygon.CircleIntersects( 3, 5, 2, 3, 1, 3, 6, 7, 4 )`
   - Checks if a circle with a radius of 2 located on ( 3, 3 ) intersects with a polygon with points on ( 2, 6 ), ( 4, 6 ), ( 3, 8 ). It does not. 
     - `CircleIntersects = MLib.Polygon.CircleIntersects( 3, 3, 2, 2, 6, 4, 6, 3, 8 )`
+	
+#####MLib.Polygon.IsPolygonInside
+- Checks whether a polygon inside (or intersecting) another polygon. 
+- Synopsis:
+  - `MLib.Polygon.CircleIntersects( Polygon1, Polygon2 )`
+- Arguments:
+  - `MLib.Polygon.CircleIntersects( CircleX, CircleY, Radius, Points )`
+    - `Polygon1`: Table. The coordinates of the polygon that is being checked to be on the outside.
+    - `Polygon2`: Table. The coordinates of the polygon that is being checked to be on the inside. 
+- Returns:
+  - `Inside`: Boolean. `true` if `Polygon2` has at least one point inside `Polygon1`. `false` otherwise. 
+- Example: 
+  - Checks if a square at points ( 0, 0 ), ( 0, 4 ), ( 4, 4 ), ( 4, 0 ) encloses a square with coordinates ( 2, 2 ), ( 2, 3 ), ( 3, 3 ), ( 3, 2 ). It does. 
+    - `Inside = MLib.Polygon.IsPolygonInside( { 0, 0, 0, 4, 4, 4, 4, 0 }, { 2, 2, 2, 3, 3, 3, 3, 2 } )`
+  - Checks if a square at points ( 0, 0 ), ( 0, 4 ), ( 4, 4 ), ( 4, 0 ) encloses a square with coordinates ( 5, 5 ), ( 5, 7 ), ( 7, 7 ), ( 7, 5 ). It does not. 
+    - `Inside = MLib.Polygon.IsPolygonInside( { 0, 0, 0, 4, 4, 4, 4, 0 }, { 5, 5, 5, 7, 7, 7, 7, 5 } )`
 
 ####MLib.Circle
 Handles functions dealing with circles.
@@ -902,140 +915,4 @@ Factorial = MLib.Math.SystemOfEquations( 5,
 	elseif Number < 5 then return Number * 2 - 1
 	else return Number end
   end
-) -- Returns 5.````
-
-###MLib.Shape
-Handles shape collision/intersection. 
-#####MLib.Shape.NewShape
-- Registers a new shape/line.
-- Synopsis:
-  - `MLib.Shape.NewShape( x, y, r )`
-  - `MLib.Shape.NewShape( x1, y1, x2, y2 )`
-  - `MLib.Shape.NewShape( ... )`
-- Arguments: 
-  - `MLib.Shape.NewShape( x, y, r )`
-    - `x`: Number. The x-coordinant of the circle. 
-    - `y`: Number. The y-coordinant of the circle. 
-    - `r`: Number. The radius of the circle. 
-  - `MLib.Shape.NewShape( x1, y1, x2, y2 )`
-    - `x1`: Number. The first x-coordinant of the line segment. 
-    - `y1`: Number. The first y-coordinant of the line segment. 
-    - `x2`: Number. The second x-coordinant of the line segment. 
-    - `y2`: Number. The second y-coordinant of the line segment. 
-  - `MLib.Shape.NewShape( ... )`
-    - `...`: Table or Numbers. All of the points in the polygon. 
-- Returns:
-  - A table containing information regarding the shape registered. 
-    - All:
-      - `table.type`: String. The type of the shape (`'Circle'`, `'Line'`, or `'Polygon'`).
-      - `table.collided`: Boolean. `true` if the shape is collided with anything, `false` otherwise. 
-        - __Note__: You must call <a href="http://github.com/davisdude/mlib#mlibshapecheckcollisions-1">MLib.Shape.CheckCollisions</a> in <a href="http://www.love2d.org/wiki/love.update">love.update</a>.
-      - `table.index`: Number. The reference of the shape. 
-    - Circle:
-      - `x`: Number. The x-coordinant of the circle.
-      - `y`: Number. The y-coordinant of the circle. 
-      - `radius`: Number. The radius of the circle. 
-      - `area`: Number. The area of the circle. 
-    - Line segment:
-      - `x1`: Number. The first x-coordinant of the line segment. 
-      - `y1`: Number. The first y-coordinant of the line segment. 
-      - `x2`: Number. The second x-coordinant of the line segment. 
-      - `y2`: Number. The second y-coordinant of the line segment. 
-      - `slope`: Number. The slope of the line.
-      - `intercept`: Number or boolean. The y-intercept of the line. Boolean if the line is vertical.
-    - Polygon:
-      - `area`: Number. The area of the polygon. 
-      - `points`: Table. All of the points of the polygon. 
-- Example:
-  - See <a href="https://github.com/davisdude/mlib#mlibshape-example">the example</a>.
-
-#####MLib.Shape:CheckCollisions
-- Checks collisions between shapes. 
-- Synopsis:
-  - `MLib.Shape.CheckCollisions()`
-  - `MLib.Shape.CheckCollisions( Shapes )`
-  - `Shape:CheckCollisions()`
-  - `Shape:CheckCollisions( Shapes )`
-- Arguments: 
-  - `MLib.Shape.CheckCollisions()`
-  - `MLib.Shape.CheckCollisions( Shapes )`
-    - `shapes`: Table. A table containing all of the shapes you want to check for collisions (the shapes excluded will not be checked for collisions).
-      - __Note__: The shapes must be enclosed in a table, like follows: `{ shape1, shape2, ... }`.
-  - `Shape:CheckCollisions()`
-    - `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
-  - `Shape:CheckCollisions( Shapes )`
-    - `shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
-    - `shapes`: Tables. All the shapes being checked against `shape` (this checks if any of the `shapes` collide with `shape`).
-      - __Note__: Unlike other ones, the shapes in this one must be done seperately, like follows: `shape1, shape2, ...`.
-- See <a href="https://github.com/davisdude/mlib#mlibshape-example">the example</a>.
-
-#####MLib.Shape:Remove
-- Removes a table from testing. 
-- Synopsis:
-  - `MLib.Shape.Remove()`
-  - `MLib.Shape.Remove( Shapes )`
-  - `Shape:Remove()`
-  - `Shape:Remove( Shapes )`
-- Arguments:
-  - `MLib.Shape.Remove()`
-	- Remove all shapes. 
-  - `MLib.Shape.Remove( Shapes )`
-    - `Shapes`: Table. A table containing all of the shapes you want to remove. 
-  - `Shape:Remove()`
-	- `Shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
-  - `Shape:Remove( Shapes )`
-	- `Shape`: Table. The table returned from <a href="http://github.com/davisdude/mlib#mlibshapenew-1">MLib.Shape.NewShape</a>.
-	- `Shapes`: Table. A table containing all of the shapes you want to remove. 
-
-##MLib.Shape Example
-Here is an example of how to use MLib.Shape.
-```lua
--- Require libraries
-MLib = require 'path/mlib' 
--- The first "MLib" can be whatever you want it to be.
--- "path" is how you get to the file from the main directory of the application. 
-
-function love.load()
-	Circle = MLib.Shape.NewShape( 300, 300, 10 )
-	Rectangle = MLib.Shape.NewShape( 400, 300, 400, 200, 600, 200, 600, 300 )
-	Line = MLib.Shape.NewShape( 400, 200, 300, 400 )
-end
-
-function love.draw()
-	love.graphics.circle( 'fill', Circle.x, Circle.y, Circle.Radius )
-	love.graphics.polygon( 'fill', unpack( Rectangle.Points ) )
-	love.graphics.line( Line.x1, Line.y1, Line.x2, Line.y2 )
-end
-
-function love.update( dt )
-  MLib.Shape.CheckCollisions()
-  -- This checks all collisions, between Rectangle, Circle and Line. 
-  
-  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> true, true, false
-  
-  MLib.Shape.CheckCollisions( { Rectangle, Circle } ) 
-  -- This checks collisions between Rectangle and Circle only.
-  
-  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> false, false, false
-  
-  MLib.Shape.CheckCollisions( { Rectangle, Line } ) 
-  -- This checks collisions between Rectangle and Line only.
-  
-  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> true, true, false
-  
-  Rectangle:CheckCollisions()
-  -- This checks all collisions of Rectangle. 
-  
-  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> true, true, false
-  
-  Rectangle:CheckCollisions( Circle )
-  -- This checks collisions between Circle and Rectangle only. 
-  
-  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> false, false, false
-  
-  Rectangle:CheckCollisions( Line )
-  -- This checks collisions between Line and Rectangle only. 
-  
-  print( Rectangle.Collided, Line.Collided, Circle.Collided ) --> true, true, false
-end
-````
+) -- Returns 5.```

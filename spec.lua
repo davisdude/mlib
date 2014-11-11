@@ -294,8 +294,8 @@ context( 'MLib', function()
 			test( 'Returns true if the line intersects the polygon.', function()
 				local tab = _.Polygon.LineIntersects( 0, 4, 4, 4, 0, 0, 0, 4, 4, 4, 4, 0 )
 				assert_tables_fuzzy_equal( tab, { { 0, 4 }, { 4, 4 } } )
-				tab = _.Polygon.LineIntersects( 0, 4, 4, 0, 0, 0, 0, 4, 4, 4, 4, 0 )
-				assert_tables_fuzzy_equal( tab, { { 0, 4 }, { 4, 0 } } )
+				local tab2 = _.Polygon.LineIntersects( 0, 4, 4, 0, 0, 0, 0, 4, 4, 4, 4, 0 )
+				assert_tables_fuzzy_equal( tab2, { { 0, 4 }, { 4, 0 } } )
 			end )
 			
 			test( 'Returns false if the line does not intersect.', function()
@@ -341,6 +341,16 @@ context( 'MLib', function()
 			test( 'Returns false if the circle doesn\'t intersect.', function()
 				assert_false( _.Polygon.CircleIntersects( 9, 9, 2, 3, 1, 3, 6, 7, 4 ) )
 				assert_false( _.Polygon.CircleIntersects( 10, 5, 1, 4, 4, 6, 4, 6, 6, 4, 6 ) )
+			end )
+		end )
+		
+		context( 'IsPolygonInside', function()
+			test( 'Returns true if polygon2 is inside', function()
+				assert_true( _.Polygon.IsPolygonInside( { 0, 0, 0, 4, 4, 4, 4, 0 }, { 2, 2, 2, 3, 3, 3, 3, 2 } ) )
+			end )
+			
+			test( 'Returns false if polygon2 is outside', function()
+				assert_false( _.Polygon.IsPolygonInside( { 0, 0, 0, 4, 4, 4, 4, 0 }, { 5, 5, 5, 7, 7, 7, 7, 5 } ) )
 			end )
 		end )
 	end )
@@ -579,154 +589,6 @@ context( 'MLib', function()
 			test( 'Gives the angle between three points.', function()
 				assert_fuzzy_equal( _.Math.GetAngle( 1, 3, 1, 1, 3, 1 ), 1.57079633 )
 				assert_fuzzy_equal( _.Math.GetAngle( 4, 4, 1, 1, 4, 1 ), 0.785398163 )
-			end )
-		end )
-	end )
-	
-	context( 'Shape', function() 
-		context( 'NewShape', function()
-			test( 'Makes circles if given 3 arguments.', function()
-				assert_tables_fuzzy_equal( { _.Shape.NewShape( 1, 1, 1 ) }, { { 
-					1, 1, 1, 
-					Type = 'Circle', 
-					x = 1, 
-					y = 1, 
-					Radius = 1, 
-					Area = math.pi, 
-					Collided = false, 
-					Index = 1, 
-					Removed = false, 
-				} } )
-			end )
-			
-			test( 'Makes lines if given 4 arguments.', function()
-				assert_tables_fuzzy_equal( { _.Shape.NewShape( 1, 1, 0, 0 ) }, { { 
-					1, 1, 0, 0, 
-					Type = 'Line', 
-					x1 = 1, 
-					y1 = 1, 
-					x2 = 0, 
-					y2 = 0, 
-					Slope = 1, 
-					Intercept = 0, 
-					Collided = false, 
-					Index = 1, 
-					Removed = false, 
-				} } )
-			end )
-			
-			test( 'Makes polygons if given more than 4 arguments.', function()
-				assert_tables_fuzzy_equal( { _.Shape.NewShape( -1, -1, -1, 1, 1, 1, 1, -1 ) }, { { 
-					-1, -1, -1, 1, 1, 1, 1, -1, 
-					Points = { -1, -1, -1, 1, 1, 1, 1, -1 }, 
-					Type = 'Polygon', 
-					Area = 4, 
-					Collided = false, 
-					Index = 1, 
-					Removed = false, 
-				} } )
-			end )
-		end )
-		
-		context( 'CheckCollisions', function()
-			_.Shape.Remove()
-			local Circle = _.Shape.NewShape( 300, 300, 10 )
-			local Rectangle = _.Shape.NewShape( 400, 300, 400, 200, 600, 200, 600, 300 )
-			local Line = _.Shape.NewShape( 400, 200, 300, 400 )
-			
-			local function Reset()
-				_.Shape.Remove()
-				Circle = _.Shape.NewShape( 300, 300, 10 )
-				Rectangle = _.Shape.NewShape( 400, 300, 400, 200, 600, 200, 600, 300 )
-				Line = _.Shape.NewShape( 400, 200, 300, 400 )
-				
-				Circle.Collided = false
-				Rectangle.Collided = false
-				Line.Collided = false
-			end
-			
-			test( 'When called with no arguments it checks all collisions.', function()
-				Reset()
-				_.Shape.CheckCollisions()
-				assert_true( Rectangle.Collided )
-				assert_true( Line.Collided )
-				assert_false( Circle.Collided )
-			end )
-			
-			test( 'A table with arguments only checks mentioned items.', function()
-				Reset()
-				_.Shape.CheckCollisions( { Rectangle, Circle } )
-				assert_false( Rectangle.Collided )
-				assert_false( Line.Collided )
-				assert_false( Circle.Collided )
-				
-				Reset()
-				_.Shape.CheckCollisions{ Rectangle, Line }
-				assert_true( Rectangle.Collided )
-				assert_true( Line.Collided )
-				assert_false( Circle.Collided )
-			end )
-			
-			test( 'Can use ":" to check collisions on a certain item.', function()
-				Reset()
-				Circle:CheckCollisions()
-				assert_false( Rectangle.Collided )
-				assert_false( Line.Collided )
-				assert_false( Circle.Collided )
-			end )
-			
-			test( 'You can also use it to check only certain collisions.', function()
-				Reset()
-				Line:CheckCollisions( Rectangle )	
-				assert_true( Rectangle.Collided )
-				assert_true( Line.Collided )
-				assert_false( Circle.Collided )
-			end )
-		end ) 
-		
-		context( 'Remove', function()
-			_.Shape.Remove()
-			local Circle = _.Shape.NewShape( 300, 300, 10 )
-			local Rectangle = _.Shape.NewShape( 400, 300, 400, 200, 600, 200, 600, 300 )
-			local Line = _.Shape.NewShape( 400, 200, 300, 400 )
-			
-			local function Reset()
-				_.Shape.Remove()
-				Circle = _.Shape.NewShape( 300, 300, 10 )
-				Rectangle = _.Shape.NewShape( 400, 300, 400, 200, 600, 200, 600, 300 )
-				Line = _.Shape.NewShape( 400, 200, 300, 400 )
-			end
-			
-			test( 'No arguments removes all shapes.', function()
-				Reset()
-				_.Shape.Remove()
-				assert_true( Circle.Removed ) 
-				assert_true( Rectangle.Removed ) 
-				assert_true( Line.Removed ) 
-			end )
-			
-			test( 'Pass arguments to remove certain shapes.', function()
-				Reset()
-				_.Shape.Remove( { Circle, Rectangle } )
-				assert_true( Circle.Removed ) 
-				assert_true( Rectangle.Removed ) 
-				assert_false( Line.Removed ) 
-			end )
-			
-			test( 'Use ":" to remove a single item.', function()
-				Reset()
-				Circle:Remove()
-				assert_true( Circle.Removed ) 
-				assert_false( Rectangle.Removed ) 
-				assert_false( Line.Removed ) 
-			end ) 
-			
-			test( 'Use ":" and a table to remove multiple items.', function()
-				Reset()
-				Circle:Remove( Rectangle )
-				assert_true( Circle.Removed ) 
-				assert_true( Rectangle.Removed ) 
-				assert_false( Line.Removed ) 
 			end )
 		end )
 	end )
