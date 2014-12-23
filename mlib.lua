@@ -1,11 +1,1031 @@
-local MLib = {
-	_VERSION = 'MLib 1.1.0.2', 
+------------ Local Utility Functions ------------
+local unpack = table.unpack or unpack
+
+-- Used to handle variable-argument functions and whether they are passed as func{ table } or func( unpack( table ) )
+local function checkUserdata( ... )
+	local userdata = {}
+	if type( ... ) ~= 'table' then userdata = { ... } else userdata = ... end
+	return userdata
+end
+
+--[[
+	Returns a number and an index given a local function. If the local function returns true it updates the key.
+	
+	Example:
+	
+	Numbers = { 1, 2, 3, 4, 10 }
+	largestNumber, reference = GetIndex( Numbers, local function ( Value1, Value2 ) return Value1 > Value2 end ) 
+	print( largestNumber, reference ) --> 10, 5
+]]
+local function sortWithReference( tab, func )
+    if #tab == 0 then return nil, nil end
+    local key, value = 1, tab[1]
+    for i = 2, #tab do
+        if func( value, tab[i] ) then
+            key, value = i, tab[i]
+        end
+    end
+    return value, key
+end
+
+-- Deals with floats / very false false values. This can happen because of significant figures.
+local function checkFuzzy( number1, number2 )
+	return ( number1 - .00001 <= number2 and number2 <= number1 + .00001 )
+end
+
+-- Remove multiple occurrences from a table.
+local function removeDuplicatePairs( tab ) 
+	for index1 = #tab, 1, -1 do
+		local first = tab[index1]
+		for index2 = #tab, 1, -1 do
+			local second = tab[index2]
+			if index1 ~= index2 then
+				if type( first[1] ) == 'number' and type( second[1] ) == 'number' and type( first[2] ) == 'number' and type( second[2] ) == 'number' then
+					if checkFuzzy( first[1], second[1] ) and checkFuzzy( first[2], second[2] ) then
+						table.remove( tab, index1 )
+					end
+				elseif first[1] == second[1] and first[2] == second[2] then
+					table.remove( tab, index1 )
+				-- else
+					-- if type( first[1] ) == 'table' and type( second[1] ) == 'table' then
+						-- if ( first[1][1] == second[1][1] or first[1][1] == second[1][3] ) and ( first[1][2] == second[1][2] or first[1][2] == second[1][4] )
+						-- and ( first[1][3] == second[1][1] or first[1][3] == second[1][1] ) and ( first[1][4] == second[1][4] or first[1][4] == second[1][2] ) then
+							-- table.remove( tab, index1 )
+						-- end
+					-- end
+				end
+			end
+		end
+	end
+	return tab
+end
+
+-- Make a deep copy of the table.
+local function copy( tab, cache )
+    if type( tab ) ~= 'table' then
+        return tab
+    end
+
+    cache = cache or {}
+    if cache[tab] then
+        return cache[tab]
+    end
+
+    local new = {}
+    cache[tab] = new
+    for key, value in pairs( tab ) do
+        new[copy( key, cache )] = copy( value, cache )
+    end
+
+    return new
+end
+
+-------------------  Lines  --------------------
+-- Returns the length of a line.
+local function getLength( x1, y1, x2, y2 ) 
+	return math.sqrt( ( x1 - x2 ) * ( x1 - x2 ) + ( y1 - y2 ) * ( y1 - y2 ) )
+end
+
+-- Gives the midpoint of a line.
+local function getMidpoint( x1, y1, x2, y2 )
+	return ( x1 + x2 ) / 2, ( y1 + y2 ) / 2
+end
+
+-- Gives the slope of a line.
+local function getSlope( x1, y1, x2, y2 )
+	if x1 == x2 then return false end -- Technically it's infinity, but this is easier to program.
+	return ( y1 - y2 ) / ( x1 - x2 )
+end
+
+-- Gives the perpendicular slope of a line.
+-- x1, y1, x2, y2
+-- slope
+local function getPerpendicularSlope( ... )
+	local userdata = checkUserdata( ... )
+	local Slope
+	
+	if #userdata ~= 1 then 
+		slope = getSlope( unpack( userdata ) ) 
+	else
+		slope = unpack( userdata ) 
+	end
+	
+	if slope == 0 then return false  	-- Horizontal lines become vertical.
+	elseif not slope then return 0 end	-- Vertical lines become horizontal.
+	return -1 / slope 
+end
+
+-- Gives the perpendicular bisector of a line.
+local function getPerpendicularBisector( x1, y1, x2, y2 )
+	local slope = getSlope( x1, y1, x2, y2 )
+	local midpointX, midpointY = getMidpoint( x1, y1, x2, y2 )
+	return midpointX, midpointY, getPerpendicularSlope( slope )
+end
+
+-- Gives the y-intercept of a line.
+-- x1, y1, x2, y2
+-- x1, y1, slope
+local function getIntercept( x, y, ... )
+	local userdata = checkUserdata( ... )
+	local slope
+	
+	if #userdata == 1 then 
+		slope = userdata[1] 
+	else
+		slope = getSlope( x, y, unpack( userdata ) ) 
+	end
+	
+	if not slope then return false end
+	return y - slope * x
+end
+
+-- Gives the intersection of two lines.
+-- slope1, 	slope2, 		x1, 	y1, 		x2, y2
+-- slope1, 	intercept1, 	slope2, intercept2
+-- x1, 		y1, 			x2, 	y2, 		x3, y3, x4, y4
+local function getLineLineIntersection( ... )
+	local userdata = checkUserdata( ... )
+	local x1, y1, x2, y2, x3, y3, x4, y4
+	local slope1, intercept1
+	local slope2, intercept2
+	local x, y
+	
+	if #userdata == 4 then -- Given slope1, intercept1, slope2, intercept2. 
+		slope1, intercept1, slope2, intercept2 = unpack( userdata ) 
+		
+		-- Since these are lines, not segments, we can use arbitrary points, such as ( 1, y ), ( 2, y )
+		y1 = slope1 * 1 + intercept1
+		y2 = slope1 * 2 + intercept1
+		y3 = slope2 * 1 + intercept2
+		y4 = slope2 * 2 + intercept2
+		x1 = ( y1 - intercept1 ) / slope1
+		x2 = ( y2 - intercept1 ) / slope1
+		x3 = ( y3 - intercept1 ) / slope1
+		x4 = ( y4 - intercept1 ) / slope1
+	elseif #userdata == 6 then -- Given slope1, intercept1, and 2 points on the other line. 
+		slope1 = userdata[1]
+		intercept1 = userdata[2]
+		slope2 = getSlope( userdata[3], userdata[4], userdata[5], userdata[6] )
+		intercept2 =  getIntercept( userdata[3], userdata[4], userdata[5], userdata[6] )
+		
+		y1 = slope1 * 1 + intercept1
+		y2 = slope1 * 2 + intercept1
+		y3 = userdata[4]
+		y4 = userdata[6]
+		x1 = ( y1 - intercept1 ) / slope1
+		x2 = ( y2 - intercept1 ) / slope1
+		x3 = userdata[3]
+		x4 = userdata[5]
+	elseif #userdata == 8 then -- Given 2 points on line 1 and 2 points on line 2.
+		slope1 = getSlope( userdata[1], userdata[2], userdata[3], userdata[4] )
+		intercept1 = getIntercept( userdata[1], userdata[2], userdata[3], userdata[4] )
+		slope2 = getSlope( userdata[5], userdata[6], userdata[7], userdata[8] )
+		intercept2 = getIntercept( userdata[5], userdata[6], userdata[7], userdata[8] ) 
+		
+		x1, y1, x2, y2, x3, y3, x4, y4 = unpack( userdata )
+	end
+	
+	if not slope1 and not slope2 then -- Both are vertical lines
+		if x1 == x3 then -- Have to have the same x and y positions to intersect
+			return true
+		else
+			return false
+		end
+	elseif not slope1 then -- First is vertical
+		x = x1 -- They have to meet at this x, since it is this line's only x
+		y = slope2 * x + intercept2
+	elseif not slope2 then -- Second is vertical
+		x = x3 -- Vice-Versa
+		y = slope1 * x + intercept1
+	elseif slope1 == slope2 then -- Parallel (not vertical)
+		if intercept1 == intercept2 then -- Same intercept
+			return true
+		else
+			return false
+		end
+	else -- Regular lines
+		-- 		y = m1 * x + b1
+		-- 	  - y = m2 * x + b2
+		--		---------------
+		--      0 = x * ( m1 - m2 ) + ( b1 - b2 )
+		--     -( b1 - b2 ) = x * ( m1 - m2 )
+		--      x = ( -b1 + b2 ) / ( m1 - m2 )
+		
+		x = ( -intercept1 + intercept2 ) / ( slope1 - slope2 )
+		y = slope1 * x + intercept1
+	end
+	
+	return x, y
+end
+
+-- Gives the closest point to a line.
+-- perpendicularX, perpendicularY, x1, 		y1, 		x2, y2
+-- perpendicularX, perpendicularY, slope, 	intercept
+local function getClosestPoint( perpendicularX, perpendicularY, ... )
+	local userdata = checkUserdata( ... )
+	local x1, y1, x2, y2, slope, intercept
+	local x, y
+	
+	if #userdata == 4 then -- Given perpendicularX, perpendicularY, x1, y1, x2, y2
+		x1, y1, x2, y2 = unpack( userdata )
+		slope = getSlope( x1, y1, x2, y2 )
+		intercept = getIntercept( x1, y1, x2, y2 )
+	elseif #userdata == 2 then -- Given perpendicularX, perpendicularY, slope, intercept
+		slope, intercept = unpack( userdata )
+	end
+	
+	if not slope then -- Vertical line
+		x, y = x1, perpendicularY -- Closest point is always perpendicular, so you know where the point is.
+	elseif slope == 0 then -- Horizontal line
+		x, y = perpendicularX, y1
+	else
+		local perpendicularSlope = getPerpendicularSlope( slope )
+		local perpendicularIntercept = getIntercept( perpendicularX, perpendicularY, perpendicularSlope )
+		x, y = getLineLineIntersection( slope, intercept, perpendicularSlope, perpendicularIntercept )
+	end
+	
+	return x, y
+end
+
+-- Gives the intersection of a line and a line segment.
+-- x1, y1, x2, y2, x3, 		y3, x4, y4
+-- x1, y1, x2, y2, slope, 	intercept
+local function getLineSegmentIntersection( x1, y1, x2, y2, ... )
+	local userdata = checkUserdata( ... )
+	
+	local slope1, intercept1
+	local slope2, intercept2 = getSlope( x1, y1, x2, y2 ), getIntercept( x1, y1, x2, y2 )
+	local x, y
+	
+	if #userdata == 2 then -- Given slope, intercept
+		slope1, intercept1 = userdata[1], userdata[2]
+	else -- Given x3, y3, x4, y4
+		slope1 = getSlope( unpack( userdata ) )
+		intercept1 = getIntercept( unpack( userdata ) )
+	end
+	
+	if not slope1 and not slope2 then -- Vertical lines
+		if x1 == userdata[1] then
+			return x1, y1, x2, y2
+		else
+			return false
+		end
+	elseif not slope1 then -- slope1 is vertical
+		x, y = userdata[1], slope2 * userdata[1] + intercept2
+	elseif not slope2 then -- slope2 is vertical
+		x, y = x1, slope1 * x1 + intercept1
+	else
+		x, y = getLineLineIntersection( slope1, intercept1, slope2, intercept2 )
+	end
+	
+	local length1, length2, distance
+	if x == true then -- Lines are collinear. 
+		return x1, y1, x2, y2
+	elseif x then -- There is an intersection
+		length1, length2 = getLength( x1, y1, x, y ), getLength( x2, y2, x, y )
+		distance = getLength( x1, y1, x2, y2 )
+	else -- Lines are parallel but not collinear.
+		if intercept1 == intercept2 then
+			return x1, y1, x2, y2
+		else
+			return false
+		end
+	end
+	
+	if length1 <= distance and length2 <= distance then return x, y else return false end
+end
+
+-- Checks if a point is on a line.
+-- Does not support the format using slope because vertical lines would be impossible to check.
+local function checkLinePoint( x, y, x1, y1, x2, y2 )
+	local m = getSlope( x1, y1, x2, y2 )
+	local b = getIntercept( x1, y1, m )
+	
+	if not m then -- Vertical 
+		return x == x1
+	end
+	
+	return checkFuzzy( y, m * x + b )
+end
+
+----------------  Line Segment  ----------------
+-- Gives whether or not a point lies on a line segment.
+local function checkSegmentPoint( px, py, x1, y1, x2, y2 )
+	-- Explanation around 5:20
+	-- https://www.youtube.com/watch?v=A86COO8KC58
+	local x = checkLinePoint( px, py, x1, y1, x2, y2 )
+	if not x then return false end
+	
+	local lengthX = x2 - x1
+	local lengthY = y2 - y1
+	
+	if lengthX == 0 then -- Vertical line
+		if px == x1 then
+			local low, high
+			if y1 > y2 then low = y2; high = y1 
+			else low = y1; high = y2 end
+			
+			if py >= low and py <= high then return true 
+			else return false end
+		else
+			return false
+		end
+	elseif lengthY == 0 then -- Horizontal line
+		if py == y1 then
+			local low, high
+			if x1 > x2 then low = x2; high = x1 
+			else low = x1; high = x2 end
+			
+			if px >= low and px <= high then return true 
+			else return false end
+		else
+			return false
+		end
+	end
+	
+	local distanceToPointX = ( px - x1 )
+	local distanceToPointY = ( py - y1 )
+	local scaleX = distanceToPointX / lengthX
+	local scaleY = distanceToPointY / lengthY
+	
+	if ( scaleX >= 0 and scaleX <= 1 ) and ( scaleY >= 0 and scaleY <= 1 ) then -- Intersection
+		return true
+	end
+	return false
+end
+
+-- Gives the point of intersection between two line segments.
+local function getSegmentSegmentIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )
+	local slope1, intercept1 = getSlope( x1, y1, x2, y2 ), getIntercept( x1, y1, x2, y2 )
+	local slope2, intercept2 = getSlope( x3, y3, x4, y4 ), getIntercept( x3, y3, x4, y4 )
+	
+	-- Add points to the table.
+	local function addPoints( tab, x, y )
+		tab[#tab + 1] = x
+		tab[#tab + 1] = y
+	end
+	
+	local function removeDuplicatePairs( tab )
+		for i = #tab - 1, 1, -2 do
+			local x1, y1 = tab[i], tab[i + 1]
+			for ii = #tab - 1, 1, -2 do 
+				local x2, y2 = tab[ii], tab[ii + 1]
+				if i ~= ii then
+					if x1 == x2 and y1 == y2 then
+						table.remove( tab, i )
+						table.remove( tab, i )
+					end
+				end
+			end
+		end
+		return tab
+	end
+	
+	if slope1 == slope2 then -- Parallel lines
+		if intercept1 == intercept2 then -- The same lines, possibly in different points. 
+			local points = {}
+			if checkSegmentPoint( x1, y1, x3, y3, x4, y4 ) then addPoints( points, x1, y1 ) end
+			if checkSegmentPoint( x2, y2, x3, y3, x4, y4 ) then addPoints( points, x2, y2 ) end
+			if checkSegmentPoint( x3, y3, x1, y1, x2, y2 ) then addPoints( points, x3, y3 ) end
+			if checkSegmentPoint( x4, y4, x1, y1, x2, y2 ) then addPoints( points, x4, y4 ) end
+			
+			points = removeDuplicatePairs( points )
+			if #points == 0 then return false end
+			return unpack( points )
+		else
+			return false
+		end
+	end	
+
+	local x, y = getLineLineIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )
+	if x and checkSegmentPoint( x, y, x1, y1, x2, y2 ) and checkSegmentPoint( x, y, x3, y3, x4, y4 ) then
+		return x, y
+	end
+	
+	return false
+end
+
+--------------------- Math ---------------------
+-- Get the root of a number (i.e. the 2nd (square) root of 4 is 2)
+local function getRoot( number, root )
+	local num = number ^ ( 1 / root )
+	return num
+end
+
+-- Checks if a number is prime.
+local function isPrime( number )	
+	if number < 2 then return false end
+		
+	for i = 2, math.sqrt( number ) do
+		if number % i == 0 then
+			return false
+		end
+	end
+	
+	return true
+end
+
+-- Rounds a number to the xth place (round( 3.14159265359, 4 ) --> 3.1416)
+local function round( number, place )
+	local place, returnValue = place and 10 ^ place or 1
+	
+	local high = math.ceil( number * place )
+	local low = math.floor( number * place )
+	
+	local highDifferance = high - ( number * place ) 
+	local lowDifferance = ( number * place ) - low
+	
+	if high == number then
+		returnValue = number
+	else
+		if highDifferance <= lowDifferance then returnValue = high 
+		else returnValue = low end
+	end
+	
+	return returnValue / place
+end
+
+-- Gives the summation given a local function
+local function getSummation( start, stop, func )
+	if stop == 1 / 0 or stop == -1 / 0 then return false end
+	
+	local returnValue = {}
+	local value = 0
+	
+	for i = start, stop do
+		local new = func( i, returnValue )
+		
+		returnValue[i] = new
+		value = value + new
+	end
+	
+	return value
+end
+
+-- Gives the percent of change.
+local function getPercentOfChange( old, new )
+	if old == 0 and new == 0 then
+		return 0
+	elseif old == 0 then 
+		return false
+	else 
+		return ( new - old ) / math.abs( old ) 
+	end
+end
+
+-- Gives the percentage of a number.
+local function getPercentage( percent, number )
+	return percent * number
+end
+
+-- Returns the quadratic roots of an equation. 
+local function getQuadraticRoots( a, b, c )
+	local discriminant = b ^ 2 - ( 4 * a * c )
+	if discriminant < 0 then return false end
+	
+	discriminant = math.sqrt( discriminant )
+	local denominator = ( 2 * a )
+	
+	return ( -b - discriminant ) / denominator, ( -b + discriminant ) / denominator
+end
+
+-- Gives the angle between three points. 
+local function getAngle( x1, y1, x2, y2, x3, y3 )	
+    local a = getLength( x3, y3, x2, y2 )
+    local b = getLength( x1, y1, x2, y2 )
+    local c = getLength( x1, y1, x3, y3 )
+
+   return math.acos( ( a * a + b * b - c * c ) / ( 2 * a * b ) )
+end
+
+-------------------  Circle  -------------------
+-- Gives the area of the circle.
+local function getCircleArea( radius )
+	return math.pi * ( radius * radius )
+end
+
+-- Checks if a point is on the radius of a circle.
+local function checkCirclePoint( x, y, circleX, circleY, radius )
+	return getLength( circleX, circleY, x, y ) <= radius
+end
+
+-- Checks if a point is inside a circle. 
+local function isPointOnCircle( x, y, circleX, circleY, radius )
+	return checkFuzzy( getLength( circleX, circleY, x, y ), radius )
+end
+
+-- Gives the circumference of a circle.
+local function getCircumference( radius )
+	return 2 * math.pi * radius
+end
+
+-- Gives the intersection of a line and a circle. 
+local function getCircleLineIntersection( circleX, circleY, radius, x1, y1, x2, y2 )
+	slope = getSlope( x1, y1, x2, y2 ) 
+	intercept = getIntercept( x1, y1, slope ) 
+	
+	if slope then 
+		local a = ( 1 + slope ^ 2 )
+		local b = ( -2 * ( circleX ) + ( 2 * slope * intercept ) - ( 2 * circleY * slope ) )
+		local c = ( circleX ^ 2 + intercept ^ 2 - 2 * ( circleY ) * ( intercept ) + circleY ^ 2 - radius ^ 2 )
+		
+		x1, x2 = getQuadraticRoots( a, b, c )
+		
+		if not x1 then return false end
+		
+		y1 = slope * x1 + intercept
+		y2 = slope * x2 + intercept
+		
+		if x1 == x2 and y1 == y2 then 
+			return 'tangent', x1, y1
+		else 
+			return 'secant', x1, y1, x2, y2 
+		end
+	else -- Vertical Lines
+		-- Theory: *see Reference Pictures/Circle.png for information on how it works.
+		local lengthToPoint1 = circleX - x1
+		local remainingDistance = lengthToPoint1 - radius
+		local intercept = math.sqrt( -( lengthToPoint1 ^ 2 - radius ^ 2 ) )
+		
+		if -( lengthToPoint1 ^ 2 - radius ^ 2 ) < 0 then return false end
+		
+		local bottomX, bottomY = x1, circleY - intercept
+		local topX, topY = x1, circleY + intercept
+		
+		if topY ~= bottomY then 
+			return 'secant', topX, topY, bottomX, bottomY 
+		else 
+			return 'tangent', topX, topY 
+		end
+	end
+end
+
+-- Gives the type of intersection of a line segment. 
+local function getCircleSegmentIntersection( circleX, circleY, radius, x1, y1, x2, y2 )
+	local Type, x3, y3, x4, y4 = getCircleLineIntersection( circleX, circleY, radius, x1, y1, x2, y2 )
+	if not Type then return false end
+	
+	local slope, intercept = getSlope( x1, y1, x2, y2 ), getIntercept( x1, y1, x2, y2 )
+	
+	if isPointOnCircle( x1, y1, circleX, circleY, radius ) and isPointOnCircle( x2, y2, circleX, circleY, radius ) then -- Both points are on line-segment. 
+		return 'chord', x1, y1, x2, y2
+	end
+	
+	if slope then 
+		if checkCirclePoint( x1, y1, circleX, circleY, radius ) and checkCirclePoint( x2, y2, circleX, circleY, radius ) then -- Line-segment is fully in circle. 
+			return 'enclosed', x1, y1, x2, y2
+		elseif x3 and x4 then
+			if checkSegmentPoint( x3, y3, x1, y1, x2, y2 ) and not checkSegmentPoint( x4, y4, x1, y1, x2, y2 ) then -- Only the first of the points is on the line-segment. 
+				return 'tangent', x3, y3
+			elseif checkSegmentPoint( x4, y4, x1, y1, x2, y2 ) and not checkSegmentPoint( x3, y3, x1, y1, x2, y2 ) then -- Only the second of the points is on the line-segment. 
+				return 'tangent', x4, y4
+			else -- Neither of the points are on the circle (means that the segment is not on the circle, but "encasing" the circle)
+				if checkSegmentPoint( x3, y3, x1, y1, x2, y2 ) and checkSegmentPoint( x4, y4, x1, y1, x2, y2 ) then
+					return 'secant', x3, y3, x4, y4
+				else
+					return false
+				end
+			end
+		elseif not x4 then -- Is a tangent. 
+			if checkSegmentPoint( x3, y3, x1, y1, x2, y2 ) then
+				return 'tangent', x3, y3
+			else -- Neither of the points are on the line-segment (means that the segment is not on the circle or "encasing" the circle).
+				local length = getLength( x1, y1, x2, y2 )
+				local distance1 = getLength( x1, y1, x3, y3 )
+				local distance2 = getLength( x2, y2, x3, y3 )
+				
+				if length > distance1 or length > distance2 then 
+					return false
+				elseif length < distance1 and length < distance2 then 
+					return false 
+				else
+					return 'tangent', x3, y3
+				end
+			end
+		end
+	else
+		-- Theory: *see Reference Images/Circle.png for information on how it works.
+		local lengthToPoint1 = circleX - x1
+		local remainingDistance = lengthToPoint1 - radius
+		local intercept = math.sqrt( -( lengthToPoint1 ^ 2 - radius ^ 2 ) )
+		
+		if -( lengthToPoint1 ^ 2 - radius ^ 2 ) < 0 then return false end
+		
+		local topX, topY = x1, circleY - intercept
+		local bottomX, bottomY = x1, circleY + intercept
+		
+		local length = getLength( x1, y1, x2, y2 )
+		local distance1 = getLength( x1, y1, topX, topY )
+		local distance2 = getLength( x2, y2, topX, topY )
+		
+		if bottomY ~= topY then -- Not a tangent
+			if checkSegmentPoint( topX, topY, x1, y1, x2, y2 ) and checkSegmentPoint( bottomX, bottomY, x1, y1, x2, y2 ) then
+				return 'chord', topX, topY, bottomX, bottomY
+			elseif checkSegmentPoint( topX, topY, x1, y1, x2, y2 ) then
+				return 'tangent', topX, topX
+			elseif checkSegmentPoint( bottomX, bottomY, x1, y1, x2, y2 ) then
+				return 'tangent', bottomX, bottomY
+			else
+				return false
+			end
+		else -- Tangent
+			if checkSegmentPoint( topX, topY, x1, y1, x2, y2 ) then
+				return 'tangent', topX, topY
+			else
+				return false
+			end
+		end
+	end
+end
+
+-- Checks if one circle intersects another circle.
+local function getCircleCircleIntersection( circle1x, circle1y, radius1, circle2x, circle2y, radius2 )
+	local length = getLength( circle1x, circle1y, circle2x, circle2y )
+	if length > radius1 + radius2 then return false end -- If the distance is greater than the two radii, they can't intersect.
+	if checkFuzzy( length, 0 ) and radius1 == radius2 then return 'equal' end	
+	if circle1x == circle2x and circle1y == circle2y then return 'collinear' end
+	
+	local a = ( radius1 * radius1 - radius2 * radius2 + length * length ) / ( 2 * length )
+	local h = math.sqrt( radius1 * radius1 - a * a )
+	
+	local p2x = circle1x + a * ( circle2x - circle1x ) / length
+	local p2y = circle1y + a * ( circle2y - circle1y ) / length
+	local p3x = p2x + h * ( circle2y - circle1y ) / length
+	local p3y = p2y - h * ( circle2x - circle1x ) / length
+	local p4x = p2x - h * ( circle2y - circle1y ) / length
+	local p4y = p2y + h * ( circle2x - circle1x ) / length
+	
+	if checkFuzzy( length, radius1 + radius2 ) then return 'tangent', p3x, p3y end 
+	return 'intersection', p3x, p3y, p4x, p4y 
+end
+
+-------------------- Polygon  --------------------
+-- Gives the signed area.
+-- If the points are clockwise the number is negative, otherwise, it's positive.
+local function getSignedPolygonArea( ... ) 
+	local points = checkUserdata( ... )
+	
+	-- Shoelace formula (https://en.wikipedia.org/wiki/Shoelace_formula).
+	points[#points + 1] = points[1]
+	points[#points + 1] = points[2]
+	
+	return ( .5 * getSummation( 1, #points / 2, 
+		function( index ) 
+			index = index * 2 - 1 -- Convert it to work properly.
+			if points[index + 3] then 
+				return ( ( points[index] * points[index + 3] ) - ( points[index + 2] * points[index + 1] ) ) 
+			else 
+				return ( ( points[index] * points[2] ) - ( points[1] * points[index + 1] ) )
+			end 
+		end 
+	) )
+end
+
+-- Simply returns the area of the polygon.
+local function getPolygonArea( ... ) 
+	return math.abs( getSignedPolygonArea( ... ) )
+end
+
+-- Gives the height of a triangle, given the base.
+-- base, x1, 	y1, x2, y2, x3, y3, x4, y4
+-- base, area
+local function getTriangleHeight( base, ... )
+	local userdata = checkUserdata( ... )
+	local area
+
+	if #userdata == 1 then area = userdata[1] -- Given area.
+	else area = getPolygonArea( userdata ) end -- Given coordinates.
+	
+	-- area = ( base * height ) / 2
+	-- 2 * area = base * height
+	-- height = ( 2 * area ) / base
+	return ( 2 * area ) / base, area
+end
+
+-- Gives the centroid of the polygon.
+local function getCentroid( ... ) 
+	local points = checkUserdata( ... )
+	
+	points[#points + 1] = points[1]
+	points[#points + 1] = points[2]
+	
+	local area = getSignedPolygonArea( points ) -- Needs to be signed here in case points are counter-clockwise. 
+	
+	-- This formula: https://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon
+	local centroidX = ( 1 / ( 6 * area ) ) * ( getSummation( 1, #points / 2, 
+		function( index ) 
+			index = index * 2 - 1 -- Convert it to work properly.
+			if points[index + 3] then
+				return ( ( points[index] + points[index + 2] ) * ( ( points[index] * points[index + 3] ) - ( points[index + 2] * points[index + 1] ) ) )
+			else
+				return ( ( points[index] + points[1] ) * ( ( points[index] * points[2] ) - ( points[1] * points[index + 1] ) ) )
+			end
+		end
+	) )
+	
+	local centroidY = ( 1 / ( 6 * area ) ) * ( getSummation( 1, #points / 2, 
+		function( index ) 
+			index = index * 2 - 1 -- Convert it to work properly.
+			if points[index + 3] then
+				return ( ( points[index + 1] + points[index + 3] ) * ( ( points[index] * points[index + 3] ) - ( points[index + 2] * points[index + 1] ) ) )
+			else
+				return ( ( points[index + 1] + points[2] ) * ( ( points[index] * points[2] ) - ( points[1] * points[index + 1] ) ) )
+			end
+		end 
+	) )
+
+	return centroidX, centroidY
+end
+
+-- Checks if the point lies INSIDE the polygon not on the polygon.
+local function checkPolygonPoint( px, py, ... )
+	local points = checkUserdata( ... )
+	
+	local function getGreatestPoint( points )
+		local greatest = points[1]
+		for i = 2, #points / 2 do
+			i = i * 2 - 1
+			if points[i] > greatest then
+				greatest = points[i]
+			end
+		end
+		return greatest
+	end
+	
+	
+	local greatest = getGreatestPoint( points )
+	if greatest < px then return false end -- Speeds up process and prevents false positives (segment will always intersect).	
+	
+	local count = 0
+	for i = 1, #points, 2 do
+		local x1, y1, x2, y2
+		if points[i + 3] then
+			x1, y1, x2, y2 = points[i], points[i + 1], points[i + 2], points[i + 3]
+		else
+			x1, y1, x2, y2 = points[i], points[i + 1], points[1], points[2]
+		end
+		if getSegmentSegmentIntersection( px, py, greatest, py, x1, y1, x2, y2 ) then count = count + 1 end
+	end
+	
+	return count % 2 ~= 0
+end
+
+-- Returns whether or not a line intersects a polygon.
+-- x1, y1, x2, y2, polygonPoints
+local function getPolygonLineIntersection( x1, y1, x2, y2, ... )
+	local userdata = checkUserdata( ... )
+	local choices = {}
+	
+	local slope = getSlope( x1, y1, x2, y2 )
+	local intercept = getIntercept( x1, y1, slope )
+	
+	local x3, y3, x4, y4
+	if slope then
+		x3, x4 = 1, 2
+		y3, y4 = slope * x3 + intercept, slope * x4 + intercept
+	else
+		x3, x4 = x1, x1
+		y3, y4 = y1, y2
+	end
+	
+	for i = 1, #userdata, 2 do
+		if userdata[i + 2] then
+			local x1, y1, x2, y2 = getLineSegmentIntersection( userdata[i], userdata[i + 1], userdata[i + 2], userdata[i + 3], x3, y3, x4, y4 )
+			if x1 and not x2 then choices[#choices + 1] = { x1, y1 } 
+			elseif x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
+		else
+			local x1, y1, x2, y2 = getLineSegmentIntersection( userdata[i], userdata[i + 1], userdata[1], userdata[2], x3, y3, x4, y4 )
+			if x1 and not x2 then choices[#choices + 1] = { x1, y1 } 
+			elseif x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
+		end
+	end
+	
+	local final = removeDuplicatePairs( choices )
+	return #final > 0 and final or false
+end
+
+-- Returns if the line segment intersects the polygon.
+-- x1, y1, x2, y2, polygonPoints
+local function getPolygonSegmentIntersection( x1, y1, x2, y2, ... )
+	local userdata = checkUserdata( ... )
+	local choices = {}
+	
+	for i = 1, #userdata, 2 do
+		-- if checkSegmentPoint( x1, y1, x2, y2, userdata[i], userdata[i + 1] ) then return true end
+		if userdata[i + 2] then
+			local x1, y1, x2, y2 = getSegmentSegmentIntersection( userdata[i], userdata[i + 1], userdata[i + 2], userdata[i + 3], x1, y1, x2, y2 )
+			if x1 and not x2 then choices[#choices + 1] = { x1, y1 } 
+			elseif x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
+		else
+			local x1, y1, x2, y2 = getSegmentSegmentIntersection( userdata[i], userdata[i + 1], userdata[1], userdata[2], x1, y1, x2, y2 )
+			if x1 and not x2 then choices[#choices + 1] = { x1, y1 } 
+			elseif x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
+		end
+	end
+
+	local final = removeDuplicatePairs( choices )
+	return #final > 0 and final or false
+end
+
+-- Returns if the line segment is fully or partially inside. 
+-- x1, y1, x2, y2, polygonPoints
+local function isSegmentInsidePolygon( x1, y1, x2, y2, ... )
+	local userdata = checkUserdata( ... )
+	
+	local choices = getPolygonSegmentIntersection( x1, y1, x2, y2, userdata ) -- If it's partially enclosed that's all we need.
+	if choices then return true end
+	
+	if checkPolygonPoint( x1, y1, userdata ) or checkPolygonPoint( x2, y2, userdata ) then return true end
+	return false
+end
+
+-- Returns whether two polygons intersect.
+local function getPolygonPolygonIntersection( polygon1, polygon2 )
+	local choices = {}
+	
+	for index1 = 1, #polygon1, 2 do
+		if polygon1[index1 + 2] then
+			local intersections = getPolygonSegmentIntersection( polygon1[index1], polygon1[index1 + 1], polygon1[index1 + 2], polygon1[index1 + 3], polygon2 )
+			if intersections and #intersections > 0 then
+				for index2 = 1, #intersections do
+					choices[#choices + 1] = { unpack( intersections[index2] ) }
+				end
+			end
+		else
+			local intersections = getPolygonSegmentIntersection( polygon1[index1], polygon1[index1 + 1], polygon1[1], polygon1[2], polygon2 )
+			if intersections and #intersections > 0 then
+				for index2 = 1, #intersections do
+					choices[#choices + 1] = { unpack( intersections[index2] ) }
+				end
+			end
+		end
+	end
+	
+	for index1 = 1, #polygon2, 2 do
+		if polygon2[index1 + 2] then
+			local intersections = getPolygonSegmentIntersection( polygon2[index1], polygon2[index1 + 1], polygon2[index1 + 2], polygon2[index1 + 3], polygon1 )
+			if intersections and #intersections > 0 then
+				for index2 = 1, #intersections do
+					choices[#choices + 1] = { unpack( intersections[index2] ) }
+				end
+			end
+		else
+			local intersections = getPolygonSegmentIntersection( polygon2[index1], polygon2[index1 + 1], polygon2[1], polygon2[2], polygon1 )
+			if intersections and #intersections > 0 then
+				for index2 = 1, #intersections do
+					choices[#choices + 1] = { unpack( intersections[index2] ) }
+				end
+			end
+		end
+	end	
+
+	local final = removeDuplicatePairs( choices )
+	for i = #final, 1, -1 do
+		if type( final[i][1] ) == 'table' then -- Remove co-linear pairs.
+			table.remove( final, i )
+		end
+	end
+	
+	return #final > 0 and final
+end
+
+-- Returns whether the circle intersects the polygon.
+-- x, y, radius, polygonPoints
+local function getPolygonCircleIntersection( x, y, radius, ... )
+	local userdata = checkUserdata( ... )
+	local choices = {}
+	
+	local function removeDuplicates( tab ) 
+		for index1 = #tab, 1, -1 do
+			local first = tab[index1]
+			for index2 = #tab, 1, -1 do
+				local second = tab[index2]
+				if index1 ~= index2 then
+					if type( first[1] ) ~= type( second[1] ) then return false end
+					if type( first[2] ) == 'number' and type( second[2] ) == 'number' and type( first[3] ) == 'number' and type( second[3] ) == 'number' then
+						if checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
+							table.remove( tab, index1 )
+						end
+					elseif first[1] == second[1] and first[2] == second[2] and first[3] == second[3] then
+						table.remove( tab, index1 )
+					end
+				end
+			end
+		end
+		return tab
+	end
+	
+	for i = 1, #userdata, 2 do
+		if userdata[i + 2] then 
+			local Type, x1, y1, x2, y2 = getCircleSegmentIntersection( x, y, radius, userdata[i], userdata[i + 1], userdata[i + 2], userdata[i + 3] )
+			if x2 then 
+				choices[#choices + 1] = { Type, x1, y1, x2, y2 } 
+			elseif x1 then choices[#choices + 1] = { Type, x1, y1 } end
+		else
+			local Type, x1, y1, x2, y2 = getCircleSegmentIntersection( x, y, radius, userdata[i], userdata[i + 1], userdata[1], userdata[2] )
+			if x2 then 
+				choices[#choices + 1] = { Type, x1, y1, x2, y2 } 
+			elseif x1 then choices[#choices + 1] = { Type, x1, y1 } end
+		end
+	end
+	
+	local final = removeDuplicates( choices )
+	
+	return #final > 0 and final
+end
+
+-- Returns whether the circle is inside the polygon. 
+-- x, y, radius, polygonPoints
+local function isCircleInsidePolygon( x, y, radius, ... )
+	local userdata = checkUserdata( ... )
+	return checkPolygonPoint( x, y, userdata )
+end
+
+-- Returns whether the polygon is inside the polygon. 
+local function isPolygonInsidePolygon( polygon1, polygon2 )
+	local bool = false
+	for i = 1, #polygon2, 2 do
+		local result = false
+		if polygon2[i + 3] then
+			result = isSegmentInsidePolygon( polygon2[i], polygon2[i + 1], polygon2[i + 2], polygon2[i + 3], polygon1 )
+		else
+			result = isSegmentInsidePolygon( polygon2[i], polygon2[i + 1], polygon2[1], polygon2[2], polygon1 )
+		end
+		if result then bool = true; break end
+	end
+	return bool
+end
+
+------------------ Statistics ------------------
+-- Gets the average of a list of points
+-- points
+local function getMean( ... )
+	local userdata = checkUserdata( ... )
+	
+	mean = getSummation( 1, #userdata, 
+		function( i, t )
+			return userdata[i]
+		end 
+	) / #userdata
+	
+	return mean
+end
+
+local function getMedian( ... )
+	local userdata = checkUserdata( ... )
+	
+	table.sort( userdata )
+	
+	local median
+	if #userdata % 2 == 0 then -- If you have an even number of terms, you need to get the average of the middle 2.
+		median = getMean( userdata[#userdata / 2], userdata[#userdata / 2 + 1] )
+	else
+		median = userdata[#userdata / 2 + .5]
+	end
+	
+	return median
+end
+
+-- Gets the mode of a number.
+local function getMode( ... ) 
+	local userdata = checkUserdata( ... )
+
+	table.sort( userdata )
+	local sorted = {}
+	for i = 1, #userdata do
+		local value = userdata[i]
+		sorted[value] = sorted[value] and sorted[value] + 1 or 1
+	end
+	
+	local occurrences, least = 0, {} 
+	for i, value in pairs( sorted ) do
+		if value > occurrences then
+			least = { i }
+			occurrences = value
+		elseif value == occurrences then
+			least[#least + 1] = i
+		end
+	end
+	
+	if #least >= 1 then return least, occurrences
+	else return false end
+end
+
+-- Gets the range of the numbers.
+local function getRange( ... )
+	local userdata = checkUserdata( ... )
+	local high, low = math.max( unpack( userdata ) ), math.min( unpack( userdata ) )
+	return high - low
+end
+
+return {
+	_VERSION = 'MLib 0.9.0', 
 	_DESCRIPTION = 'A math and collisions library aimed at LÖVE.', 
 	_URL = 'https://github.com/davisdude/mlib', 
 	_LICENSE = [[
 		A math library made in Lua
 
-		Copyright (C) 2014 Davis Claiborne
+		copyright (C) 2014 Davis Claiborne
 
 		This program is free software; you can redistribute it and/or modify
 		it under the terms of the GNU General Public License as published by
@@ -23,995 +1043,113 @@ local MLib = {
 
 		Contact me at davisclaib@gmail.com
 	]], 
-	
-	Line = {
-		Segment = {}, 
+	line = {
+		getLength = 				getLength, 
+		getDistance = 				getLength, -- Alias
+		getMidpoint = 				getMidpoint, 
+		getSlope = 					getSlope, 
+		getPerpendicularSlope = 	getPerpendicularSlope, 
+		getPerpendicularBisector = 	getPerpendicularBisector, 
+		getIntercept = 				getIntercept, 
+		getIntersection = 			getLineLineIntersection, 
+		getClosestPoint = 			getClosestPoint, 
+		getSegmentIntersection = 	getLineSegmentIntersection, 
+		checkPoint = 				checkLinePoint, 
+		
+		segment = {
+			checkPoint = 			checkSegmentPoint, 
+			getIntersection = 		getSegmentSegmentIntersection, 
+		}, 
+	},
+	polygon = {
+		getTriangleHeight = 		getTriangleHeight, 
+		getSignedArea = 			getSignedPolygonArea, 
+		getArea = 					getPolygonArea, 
+		getCentroid = 				getCentroid, 
+		checkPoint = 				checkPolygonPoint, 
+		getLineIntersection = 		getPolygonLineIntersection, 
+		getSegmentIntersection = 	getPolygonSegmentIntersection, 
+		isSegmentInside = 			isSegmentInsidePolygon, 
+		getPolygonIntersection = 	getPolygonPolygonIntersection, 
+		getCircleIntersection = 	getPolygonCircleIntersection, 
+		isCircleInside = 			isCircleInsidePolygon, 
+		isPolygonInside = 			isPolygonInsidePolygon, 
 	}, 
-	Polygon = {}, 
-	Circle = {}, 
-	Statistics = {}, 
-	Math = {}, 
+	circle = {
+		getArea = 					getCircleArea, 
+		checkPoint = 				checkCirclePoint, 
+		getCircumference = 			getCircumference, 
+		getLineIntersection = 		getCircleLineIntersection, 
+		getSegmentIntersection = 	getCircleSegmentIntersection, 
+		getCircleIntersection = 	getCircleCircleIntersection, 
+		isPointOnCircle = 			isPointOnCircle, 
+	}, 
+	statistics = {
+		getMean = 					getMean, 
+		getMedian = 				getMedian, 
+		getMode = 					getMode, 
+		getRange = 					getRange, 
+	}, 
+	math = {
+		getRoot = 					getRoot, 
+		isPrime = 					isPrime, 
+		round = 					round, 
+		getSummation =				getSummation, 
+		getPercentOfChange = 		getPercentOfChange, 
+		getPercentage = 			getPercentage, 
+		getQuadraticRoots = 		getQuadraticRoots, 
+		getAngle = 					getAngle, 
+	}, 
 }
 
--- Local utility functions
-local function CheckUserdata( ... )
-	local Userdata = {}
-	if type( ... ) ~= 'table' then Userdata = { ... } else Userdata = ... end
-	return Userdata
-end
-
-local function SortWithReference( Table, Function )
-    if #Table == 0 then return nil, nil end
-    local Key, Value = 1, Table[1]
-    for i = 2, #Table do
-        if Function( Value, Table[i] ) then
-            Key, Value = i, Table[i]
-        end
-    end
-    return Value, Key
-end
-
-local function CheckFuzzy( Number1, Number2 )
-	return ( Number1 - .00001 <= Number2 and Number2 <= Number1 + .00001 )
-end
-
-local function RemoveDuplicates( Table ) 
-	for Index1 = #Table, 1, -1 do
-		local First = Table[Index1]
-		for Index2 = #Table, 1, -1 do
-			local Second = Table[Index2]
-			if Index1 ~= Index2 then
-				if type( First[1] ) == 'number' and type( Second[1] ) == 'number' and type( First[2] ) == 'number' and type( Second[2] ) == 'number' then
-					if CheckFuzzy( First[1], Second[1] ) and CheckFuzzy( First[2], Second[2] ) then
-						table.remove( Table, Index1 )
-					end
-				elseif First[1] == Second[1] and First[2] == Second[2] then
-					table.remove( Table, Index1 )
-				end
-			end
-		end
-	end
-	return Table
-end
-
-local function Copy( Table, Cache )
-    if type( Table ) ~= 'table' then
-        return Table
-    end
-
-    Cache = Cache or {}
-    if Cache[Table] then
-        return Cache[Table]
-    end
-
-    local New = {}
-    Cache[Table] = New
-    for Key, Value in pairs( Table ) do
-        New[Copy( Key, Cache)] = Copy( Value, Cache )
-    end
-
-    return New
-end
-
--- Lines
-function MLib.Line.GetLength( x1, y1, x2, y2 )
-	return math.sqrt( ( x1 - x2 ) ^ 2 + ( y1 - y2 ) ^ 2 )
-end
-
-function MLib.Line.GetMidpoint( x1, y1, x2, y2 )
-	return ( x1 + x2 ) / 2, ( y1 + y2 ) / 2
-end
-
-function MLib.Line.GetSlope( x1, y1, x2, y2 )
-	if x1 == x2 then return false end -- Technically it's infinity, but that's irrelevant. 
-	return ( y1 - y2 ) / ( x1 - x2 )
-end
-
-function MLib.Line.GetPerpendicularSlope( ... )
-	local Userdata = CheckUserdata( ... )
-	local Slope
-	
-	if #Userdata ~= 1 then 
-		Slope = MLib.Line.GetSlope( unpack( Userdata ) ) 
-	else
-		Slope = unpack( Userdata ) 
-	end
-	
-	if Slope == 0 then return false end 
-	if not Slope then return 0 end
-	return -1 / Slope 
-end
-
-function MLib.Line.GetPerpendicularBisector( x1, y1, x2, y2 )
-	local Slope = MLib.Line.GetSlope( x1, y1, x2, y2 )
-	local MidpointX, MidpointY = MLib.Line.GetMidpoint( x1, y1, x2, y2 )
-	return MidpointX, MidpointY, MLib.Line.GetPerpendicularSlope( Slope )
-end
-
-function MLib.Line.GetIntercept( x, y, ... )
-	local Userdata = CheckUserdata( ... )
-	local Slope = false
-	
-	if #Userdata == 1 then 
-		Slope = Userdata[1] 
-	else
-		Slope = MLib.Line.GetSlope( x, y, unpack( Userdata ) ) 
-	end
-	
-	if not Slope then return false end
-	return y - Slope * x
-end
-
-function MLib.Line.GetIntersection( ... )
-	local Userdata = CheckUserdata( ... )
-	local x1, y1, x2, y2, x3, y3, x4, y4
-	local Slope1, Intercept1
-	local Slope2, Intercept2
-	local x, y
-	
-	if #Userdata == 4 then -- Given Slope1, Intercept1, Slope2, Intercept2. 
-		Slope1, Intercept1, Slope2, Intercept2 = unpack( Userdata ) 
-		y1, y2, y3, y4 = Slope1 * 1 + Intercept1, Slope1 * 2 + Intercept1, Slope2 * 1 + Intercept2, Slope2 * 2 + Intercept2
-		x1, x2, x3, x4 = ( y1 - Intercept1 ) / Slope1, ( y2 - Intercept1 ) / Slope1, ( y3 - Intercept1 ) / Slope1, ( y4 - Intercept1 ) / Slope1
-	elseif #Userdata == 6 then -- Given Given Slope1, Intercept1, and 2 points on the line. 
-		Slope1, Intercept1, Slope2, Intercept2 = Userdata[1], Userdata[2], MLib.Line.GetSlope( Userdata[3], Userdata[4], Userdata[5], Userdata[6] ), MLib.Line.GetIntercept( Userdata[3], Userdata[4], Userdata[5], Userdata[6] ) 
-		y1, y2, y3, y4 = Slope1 * 1 + Intercept1, Slope1 * 2 + Intercept1, Userdata[4], Userdata[6]
-		x1, x2, x3, x4 = ( y1 - Intercept1 ) / Slope1, ( y2 - Intercept1 ) / Slope1, Userdata[3], Userdata[5]
-	elseif #Userdata == 8 then -- Given 2 points on line 1 and 2 points on line 2.
-		Slope1, Intercept1, Slope2, Intercept2 = MLib.Line.GetSlope( Userdata[1], Userdata[2], Userdata[3], Userdata[4] ), MLib.Line.GetIntercept( Userdata[1], Userdata[2], Userdata[3], Userdata[4] ), MLib.Line.GetSlope( Userdata[5], Userdata[6], Userdata[7], Userdata[8] ), MLib.Line.GetIntercept( Userdata[5], Userdata[6], Userdata[7], Userdata[8] ) 
-		x1, y1, x2, y2, x3, y3, x4, y4 = unpack( Userdata )
-	end
-	
-	if not Slope1 and not Slope2 then
-		if x1 == x3 then
-			x, y = x1, y1
-		end
-	elseif not Slope1 then 
-		x = x1
-		y = Slope2 * x + Intercept2
-	elseif not Slope2 then
-		x = x3
-		y = Slope1 * x + Intercept1
-	elseif Slope1 == Slope2 then 
-		return false
-	else
-		x = ( -Intercept1 + Intercept2 ) / ( Slope1 - Slope2 )
-		y = Slope1 * x + Intercept1
-	end
-	
-	return x, y
-end
-
-function MLib.Line.GetClosestPoint( PerpendicularX, PerpendicularY, ... )
-	local Userdata = CheckUserdata( ... )
-	local x1, y1, x2, y2, Slope, Intercept
-	local x, y
-	
-	if #Userdata == 4 then
-		x1, y1, x2, y2 = unpack( Userdata )
-		Slope, Intercept = MLib.Line.GetSlope( x1, y1, x2, y2 ), MLib.Line.GetIntercept( x1, y1, x2, y2 )
-	elseif #Userdata == 2 then
-		Slope, Intercept = unpack( Userdata )
-	end
-	
-	if not Slope then
-		x, y = x1, PerpendicularY
-	elseif Slope == 0 then
-		x, y = PerpendicularX, y1
-	else
-		local PerpendicularSlope = MLib.Line.GetPerpendicularSlope( Slope )
-		local PerpendicularIntercept = MLib.Line.GetIntercept( PerpendicularX, PerpendicularY, PerpendicularSlope )
-		x, y = MLib.Line.GetIntersection( Slope, Intercept, PerpendicularSlope, PerpendicularIntercept )
-	end
-	
-	return x, y
-end
-
-function MLib.Line.GetSegmentIntersection( x1, y1, x2, y2, ... )
-	local Userdata = CheckUserdata( ... )
-	
-	local Slope1, Intercept1
-	local Slope2, Intercept2 = MLib.Line.GetSlope( x1, y1, x2, y2 ), MLib.Line.GetIntercept( x1, y1, x2, y2 )
-	local x, y
-	
-	if #Userdata == 2 then 
-		Slope1, Intercept1 = Userdata[1], Userdata[2]
-	else
-		Slope1, Intercept1 = MLib.Line.GetSlope( unpack( Userdata ) ), MLib.Line.GetIntercept( unpack( Userdata ) )
-	end
-	
-	if not Slope1 and not Slope2 then -- Vertical lines
-		if x1 == Userdata[1] then
-			return x1, y1, x2, y2
-		else
-			return false
-		end
-	elseif not Slope1 then
-		x, y = Userdata[1], Slope2 * Userdata[1] + Intercept2
-	elseif not Slope2 then
-		x, y = x1, Slope1 * x1 + Intercept1
-	else
-		x, y = MLib.Line.GetIntersection( Slope1, Intercept1, Slope2, Intercept2 )
-	end
-	
-	local Length1, Length2, Distance
-	if x then
-		Length1, Length2 = MLib.Line.GetLength( x1, y1, x, y ), MLib.Line.GetLength( x2, y2, x, y )
-		Distance = MLib.Line.GetLength( x1, y1, x2, y2 )
-	else -- Lines are parallel
-		if Intercept1 == Intercept2 then
-			return x1, y1, x2, y2
-		else
-			return false
-		end
-	end
-	
-	if Length1 <= Distance and Length2 <= Distance then return x, y else return false end
-end
-
--- Line Segment
-function MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 )
-	local Slope, Intercept = MLib.Line.GetSlope( x1, y1, x2, y2 ), MLib.Line.GetIntercept( x1, y1, x2, y2 )
-	
-	if not Slope then
-		if x1 ~= x3 then return false end
-		local Length = MLib.Line.GetLength( x1, y1, x2, y2 )
-		local Distance1 = MLib.Line.GetLength( x1, y1, x3, y3 )
-		local Distance2 = MLib.Line.GetLength( x2, y2, x3, y3 )
-		if Distance1 > Length or Distance2 > Length then return false end
-		return true
-	elseif y3 == Slope * x3 + Intercept then
-		local Length = MLib.Line.GetLength( x1, y1, x2, y2 )
-		local Distance1 = MLib.Line.GetLength( x1, y1, x3, y3 )
-		local Distance2 = MLib.Line.GetLength( x2, y2, x3, y3 )
-		if Distance1 > Length or Distance2 > Length then return false end
-		return true
-	else
-		return false
-	end
-end
-
-function MLib.Line.Segment.GetIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )
-	local Slope1, Intercept1 = MLib.Line.GetSlope( x1, y1, x2, y2 ), MLib.Line.GetIntercept( x1, y1, x2, y2 )
-	local Slope2, Intercept2 = MLib.Line.GetSlope( x3, y3, x4, y4 ), MLib.Line.GetIntercept( x3, y3, x4, y4 )
-	
-	if Slope1 == Slope2 and Slope1 then 
-		if Intercept1 == Intercept2 then 
-			local x = { x1, x2, x3, x4 }
-			local y = { y1, y2, y3, y4 }
-			local OriginalX = { x1, x2, x3, x4 }
-			local OriginalY = { y1, y2, y3, y4 }
-			
-			local Length1, Length2 = MLib.Line.GetLength( x[1], y[1], x[2], y[2] ), MLib.Line.GetLength( x[3], y[3], x[4], y[4] )
-			
-			local LargestX, LargestXReference = SortWithReference( x, function ( Value1, Value2 ) return Value1 > Value2 end ) 
-			table.remove( x, LargestXReference )
-			local LargestY, LargestYReference = SortWithReference( y, function ( Value1, Value2 ) return Value1 > Value2 end ) 
-			table.remove( y, LargestYReference )
-			local SmallestX, SmallestXReference = SortWithReference( x, function ( Value1, Value2 ) return Value1 < Value2 end ) 
-			table.remove( x, SmallestXReference )
-			local SmallestY, SmallestYReference = SortWithReference( y, function ( Value1, Value2 ) return Value1 < Value2 end ) 
-			table.remove( y, SmallestYReference )
-			
-			local Distance = MLib.Line.GetLength( x[1], y[1], x[2], y[2] )
-			if Distance > Length1 or Distance > Length2 then return false end
-
-			local Length3 = MLib.Line.GetLength( OriginalX[LargestXReference], OriginalY[LargestXReference], OriginalX[SmallestXReference], OriginalY[SmallestXReference] )
-			
-			if Length3 >= Length1 or Length3 >= Length2 then return false end
-			
-			local _, Index = SortWithReference( x, function ( Value1, Value2 ) return Value1 > Value2 end ) 
-			if Index == 1 then return x[1], y[1], x[2], y[2]
-			else return x[2], y[2], x[1], y[1] end
-		else
-			return false
-		end
-	end
-	
-	local x, y
-	
-	if not Slope1 and not Slope2 then
-		if x1 ~= x3 then return false end
-		
-		local x = { x1, x2, x3, x4 }
-		local y = { y1, y2, y3, y4 }
-
-		local OriginalY = { y1, y2, y3, y4 }
-		
-		local Length1, Length2 = MLib.Line.GetLength( x[1], y[1], x[2], y[2] ), MLib.Line.GetLength( x[3], y[3], x[4], y[4] )
-		
-		local LargestX, LargestXReference = SortWithReference( x, function ( Value1, Value2 ) return Value1 > Value2 end ) 
-		local LargestY, LargestYReference = SortWithReference( y, function ( Value1, Value2 ) return Value1 > Value2 end ) 
-		local SmallestX, SmallestXReference = SortWithReference( x, function ( Value1, Value2 ) return Value1 < Value2 end ) 
-		local SmallestY, SmallestYReference = SortWithReference( y, function ( Value1, Value2 ) return Value1 < Value2 end ) 
-		
-		table.remove( x, LargestXReference )
-		table.remove( x, SmallestXReference )
-		table.remove( y, LargestYReference )
-		table.remove( y, SmallestYReference )
-		
-		local Distance = MLib.Line.GetLength( x[1], y[1], x[2], y[2] )
-		if Distance > Length1 or Distance > Length2 then return false end
-		
-		local Length1 = MLib.Line.GetLength( x[1], OriginalY[1], x[1], OriginalY[2] )
-		local Length2 = MLib.Line.GetLength( x[1], OriginalY[3], x[1], OriginalY[4] )
-		local Length3 = MLib.Line.GetLength( x[1], y[1], x[2], y[2] )
-		
-		if Length3 >= Length1 or Length3 >= Length2 then return false end
-		return x[1], y[1], x[2], y[2]
-	elseif not Slope1 then
-		x = x2
-		y = Slope2 * x + Intercept2
-		
-		local Length1 = MLib.Line.GetLength( x1, y1, x2, y2 )
-		local Length2 = MLib.Line.GetLength( x3, y3, x4, y4 )
-		local Distance1 = MLib.Line.GetLength( x1, y1, x, y )
-		local Distance2 = MLib.Line.GetLength( x2, y2, x, y )
-		local Distance3 = MLib.Line.GetLength( x3, y3, x, y )
-		local Distance4 = MLib.Line.GetLength( x4, y4, x, y )
-		
-		if ( Distance1 > Length1 ) or ( Distance2 > Length1 ) or ( Distance3 > Length2 ) or ( Distance4 > Length2 ) then 
-			return false 
-		end
-	elseif not Slope2 then
-		x = x4
-		y = Slope1 * x + Intercept1
-		
-		local Length1 = MLib.Line.GetLength( x1, y1, x2, y2 )
-		local Length2 = MLib.Line.GetLength( x3, y3, x4, y4 )
-		local Distance1 = MLib.Line.GetLength( x1, y1, x, y )
-		local Distance2 = MLib.Line.GetLength( x2, y2, x, y )
-		local Distance3 = MLib.Line.GetLength( x3, y3, x, y )
-		local Distance4 = MLib.Line.GetLength( x4, y4, x, y )
-		
-		if ( Distance1 > Length1 ) or ( Distance2 > Length1 ) or ( Distance3 > Length2 ) or ( Distance4 > Length2 ) then return false end
-	else
-		x, y = MLib.Line.GetIntersection( Slope1, Intercept1, Slope2, Intercept2 )
-		if not x then return false end
-		
-		local Length1, Length2 = MLib.Line.GetLength( x1, y1, x2, y2 ), MLib.Line.GetLength( x3, y3, x4, y4 )
-		local Distance1 = MLib.Line.GetLength( x1, y1, x, y )
-		if Distance1 > Length1 then return false end
-		
-		local Distance2 = MLib.Line.GetLength( x2, y2, x, y )
-		if Distance2 > Length1 then return false end
-		
-		local Distance3 = MLib.Line.GetLength( x3, y3, x, y )
-		if Distance3 > Length2 then return false end
-		
-		local Distance4 = MLib.Line.GetLength( x4, y4, x, y )
-		if Distance4 > Length2 then return false end
-	end
-	
-	return x, y
-end
-
--- Polygon
-function MLib.Polygon.GetTriangleHeight( Base, ... )
-	local Userdata = CheckUserdata( ... )
-	local Area
-
-	if #Userdata == 1 then Area = Userdata[1] else Area = MLib.Polygon.GetArea( Userdata ) end
-	
-	return ( 2 * Area ) / Base, Area
-end
-
-function MLib.Polygon.GetSignedArea( ... ) 
-	local Userdata = CheckUserdata( ... )
-	local Points = {}
-	
-	for Index = 1, #Userdata, 2 do
-		Points[#Points + 1] = { Userdata[Index], Userdata[Index + 1] } 
-	end
-	
-	Points[#Points + 1] = {}
-	Points[#Points][1], Points[#Points][2] = Points[1][1], Points[1][2]
-	return ( .5 * MLib.Math.GetSummation( 1, #Points, 
-		function( Index ) 
-			if Points[Index + 1] then 
-				return ( ( Points[Index][1] * Points[Index + 1][2] ) - ( Points[Index + 1][1] * Points[Index][2] ) ) 
-			else 
-				return ( ( Points[Index][1] * Points[1][2] ) - ( Points[1][1] * Points[Index][2] ) )
-			end 
-		end 
-	) )
-end
-
-function MLib.Polygon.GetArea( ... ) 
-	return math.abs( MLib.Polygon.GetSignedArea( ... ) )
-end
-
-function MLib.Polygon.GetCentroid( ... ) 
-	local Userdata = CheckUserdata( ... )
-	
-	local Points = {}
-	for Index = 1, #Userdata, 2 do
-		table.insert( Points, { Userdata[Index], Userdata[Index + 1] } )
-	end
-	
-	Points[#Points + 1] = {}
-	Points[#Points][1], Points[#Points][2] = Points[1][1], Points[1][2]
-	
-	local Area = MLib.Polygon.GetSignedArea( Userdata ) -- Needs to be signed here in case points are counter-clockwise. 
-	
-	local CentroidX = ( 1 / ( 6 * Area ) ) * ( MLib.Math.GetSummation( 1, #Points, 
-		function( Index ) 
-			if Points[Index + 1] then
-				return ( ( Points[Index][1] + Points[Index + 1][1] ) * ( ( Points[Index][1] * Points[Index + 1][2] ) - ( Points[Index + 1][1] * Points[Index][2] ) ) )
-			else
-				return ( ( Points[Index][1] + Points[1][1] ) * ( ( Points[Index][1] * Points[1][2] ) - ( Points[1][1] * Points[Index][2] ) ) )
-			end
-		end
-	) )
-	
-	local CentroidY = ( 1 / ( 6 * Area ) ) * ( MLib.Math.GetSummation( 1, #Points, 
-		function( Index ) 
-			if Points[Index + 1] then
-				return ( ( Points[Index][2] + Points[Index + 1][2] ) * ( ( Points[Index][1] * Points[Index + 1][2] ) - ( Points[Index + 1][1] * Points[Index][2] ) ) )
-			else
-				return ( ( Points[Index][2] + Points[1][2] ) * ( ( Points[Index][1] * Points[1][2] ) - ( Points[1][1] * Points[Index][2] ) ) )
-			end
-		end 
-	) )
-
-	return CentroidX, CentroidY
-end
-
-function MLib.Polygon.CheckPoint( PointX, PointY, ... )
-	local Userdata = {}
-	local Lines = {}
-	local x = {}
-	local y = {}
-	
-	if type( ... ) ~= 'table' then Userdata = { ... } else Userdata = ... end
-	
-	local function Wrap( Number, Limit )
-		if Number > Limit then return Number - Limit end
-		return Number
-	end
-	
-	for Index = 1, #Userdata, 2 do
-		local Number = #Lines + 1
-		Lines[Number] = { x1 = Userdata[Index], y1 = Userdata[Index + 1], x2 = Userdata[ Wrap( Index + 2, #Userdata ) ], y2 = Userdata[ Wrap( Index + 3, #Userdata ) ], Visted = false }
-		Lines[Number].Slope = MLib.Line.GetSlope( Lines[Number].x1, Lines[Number].y1, Lines[Number].x2, Lines[Number].y2 )
-		Lines[Number].Intercept = MLib.Line.GetIntercept( Lines[Number].x1, Lines[Number].y1, Lines[Number].Slope )
-		Lines[Number].Visited = false
-		
-		x[Number] = Userdata[Index]
-		y[Number] = Userdata[Index + 1]
-	end
-	
-	local LowestX = math.min( unpack( x ) )
-	local LargestX = math.max( unpack( x ) )
-	local LowestY = math.min( unpack( y ) )
-	local LargestY = math.max( unpack( y ) )
-	
-	if PointX < LowestX or PointX > LargestX or PointY < LowestY or PointY > LargestY then return false end
-	
-	local function GetVertex( x1, y1, x2, y2 )
-		for Index = 1, #x do
-			local x3, y3, x4, y4 = x[Index], y[Index], x[ Wrap( Index + 1, #x ) ], y[ Wrap( Index + 1, #y ) ]
-			
-			if x1 == x3 and y1 == y3 and x2 ~= x4 and y2 ~= y4 then
-				return Index, x4, y4
-			elseif x1 == x4 and y1 == y4 and x2 ~= x3 and y2 ~= y3 then
-				return Index, x3, y3
-			end
-		end
-	end
-	
-	local Count = 0
-	
-	local Intersections = MLib.Polygon.LineSegmentIntersects( PointX, PointY, LargestX, PointY, Userdata )
-	if type( Intersections ) == 'table' then 
-		for _, Line in ipairs( Lines ) do 
-			local x1, y1, x2, y2 = Line.x1, Line.y1, Line.x2, Line.y2
-			local Slope, Intercept = Line.Slope, Line.Intercept
-			Line.Visited = true
-			
-			if y1 == PointY or y2 == PointY then -- Lies on a vertex. 
-				local I, x3, y3 = GetVertex( x1, y1, x2, y2 )
-				local Visited = I and Lines[I].Visited
-				
-				if Visited then
-					if y3 == y1 or y2 == y1 then
-						-- This could be VASTLY improved for speed. 
-						if MLib.Polygon.CheckPoint( PointX, PointY - 1, Userdata ) or MLib.Polygon.CheckPoint( PointX, PointY + 1, Userdata ) then
-							Count = Count + 1
-						end
-					elseif y3 > PointY then
-						Count = Count + 1
-					end
-				end
-			else
-				if MLib.Line.Segment.GetIntersection( x1, y1, x2, y2, PointX, PointY, LargestX, PointY ) then 
-					Count = Count + 1
-				end
-			end
-		end
-	else
-		return false
-	end
-	
-	return Count % 2 ~= 0 and true
-end
-
-function MLib.Polygon.LineIntersects( x1, y1, x2, y2, ... )
-	local Userdata = CheckUserdata( ... )
-	local Choices = {}
-	
-	local Slope = MLib.Line.GetSlope( x1, y1, x2, y2 )
-	local Intercept = MLib.Line.GetIntercept( x1, y1, Slope )
-	
-	local x3, y3, x4, y4
-	if Slope then
-		x3, x4 = 1, 2
-		y3, y4 = Slope * x3 + Intercept, Slope * x4 + Intercept
-	else
-		x3, x4 = x1, x1
-		y3, y4 = y1, y2
-	end
-	
-	for Index = 1, #Userdata, 2 do
-		if Userdata[Index + 2] then
-			local x, y = MLib.Line.GetSegmentIntersection( Userdata[Index], Userdata[Index + 1], Userdata[Index + 2], Userdata[Index + 3], x3, y3, x4, y4 )
-			if x then Choices[#Choices + 1] = { x, y } end
-		else
-			local x, y = MLib.Line.GetSegmentIntersection( Userdata[Index], Userdata[Index + 1], Userdata[1], Userdata[2], x3, y3, x4, y4 )
-			if x then Choices[#Choices + 1] = { x, y } end
-		end
-	end
-	-- Make sure Final is not nil?
-	-- Also: make sure vertical lines are handled via Line.GetIntersection. 
-	
-	local Final = RemoveDuplicates( Choices )
-	
-	return #Final > 0 and Final or false
-end
-
-function MLib.Polygon.LineSegmentIntersects( x1, y1, x2, y2, ... )
-	local Userdata = CheckUserdata( ... )
-	local Choices = {}
-	
-	for Index = 1, #Userdata, 2 do
-		-- if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, Userdata[Index], Userdata[Index + 1] ) then return true end
-		if Userdata[Index + 2] then
-			local x, y = MLib.Line.Segment.GetIntersection( Userdata[Index], Userdata[Index + 1], Userdata[Index + 2], Userdata[Index + 3], x1, y1, x2, y2 )
-			if x then Choices[#Choices + 1] = { x, y } end
-		else
-			local x, y = MLib.Line.Segment.GetIntersection( Userdata[Index], Userdata[Index + 1], Userdata[1], Userdata[2], x1, y1, x2, y2 )
-			if x then Choices[#Choices + 1] = { x, y } end
-		end
-	end
-
-	local Final = RemoveDuplicates( Choices )
-	
-	return #Final > 0 and Final or false
-end
-
-function MLib.Polygon.IsLineSegmentInside( x1, y1, x2, y2, ... )
-	local Userdata = CheckUserdata( ... )
-	
-	local Choices = MLib.Polygon.LineSegmentIntersects( x1, y1, x2, y2, Userdata ) 
-	if Choices then return true end
-	
-	if MLib.Polygon.CheckPoint( x1, y1, Userdata ) or MLib.Polygon.CheckPoint( x2, y2, Userdata ) then return true end
-	return false
-end
-
-function MLib.Polygon.PolygonIntersects( Polygon1, Polygon2 )
-	local Choices = {}
-	
-	for Index = 1, #Polygon1, 2 do
-		if Polygon1[Index + 2] then
-			local Intersections = MLib.Polygon.LineSegmentIntersects( Polygon1[Index], Polygon1[Index + 1], Polygon1[Index + 2], Polygon1[Index + 3], Polygon2 )
-			if Intersections and #Intersections > 0 then
-				for Index2 = 1, #Intersections do
-					Choices[#Choices + 1] = { unpack( Intersections[Index2] ) }
-				end
-			end
-		else
-			local Intersections = MLib.Polygon.LineSegmentIntersects( Polygon1[Index], Polygon1[Index + 1], Polygon1[1], Polygon1[2], Polygon2 )
-			if Intersections and #Intersections > 0 then
-				for Index2 = 1, #Intersections do
-					Choices[#Choices + 1] = { unpack( Intersections[Index2] ) }
-				end
-			end
-		end
-	end
-	
-	for Index = 1, #Polygon2, 2 do
-		if Polygon2[Index + 2] then
-			local Intersections = MLib.Polygon.LineSegmentIntersects( Polygon2[Index], Polygon2[Index + 1], Polygon2[Index + 2], Polygon2[Index + 3], Polygon1 )
-			if Intersections and #Intersections > 0 then
-				for Index2 = 1, #Intersections do
-					Choices[#Choices + 1] = { unpack( Intersections[Index2] ) }
-				end
-			end
-		else
-			local Intersections = MLib.Polygon.LineSegmentIntersects( Polygon2[Index], Polygon2[Index + 1], Polygon2[1], Polygon2[2], Polygon1 )
-			if Intersections and #Intersections > 0 then
-				for Index2 = 1, #Intersections do
-					Choices[#Choices + 1] = { unpack( Intersections[Index2] ) }
-				end
-			end
-		end
-	end	
-	
-	local Final = RemoveDuplicates( Choices )
-	
-	return #Final > 0 and Final or false 
-end
-
-function MLib.Polygon.CircleIntersects( x, y, Radius, ... )
-	local Userdata = CheckUserdata( ... )
-	local Choices = {}
-	
-	for Index = 1, #Userdata, 2 do
-		if Userdata[Index + 2] then 
-			local Type, x1, y1, x2, y2 = MLib.Circle.IsSegmentSecant( x, y, Radius, Userdata[Index], Userdata[Index + 1], Userdata[Index + 2], Userdata[Index + 3] )
-			if x2 then 
-				Choices[#Choices + 1] = { Type, x1, y1, x2, y2 } 
-			elseif x1 then Choices[#Choices + 1] = { Type, x1, y1 } end
-		else
-			local Type, x1, y1, x2, y2 = MLib.Circle.IsSegmentSecant( x, y, Radius, Userdata[Index], Userdata[Index + 1], Userdata[1], Userdata[2] )
-			if x2 then 
-				Choices[#Choices + 1] = { Type, x1, y1, x2, y2 } 
-			elseif x1 then Choices[#Choices + 1] = { Type, x1, y1 } end
-		end
-	end
-	
-	local function RemoveDuplicates( Table ) 
-		for Index1 = #Table, 1, -1 do
-			local First = Table[Index1]
-			for Index2 = #Table, 1, -1 do
-				local Second = Table[Index2]
-				if Index1 ~= Index2 then
-					if type( First[1] ) ~= type( Second[1] ) then return false end
-					if type( First[2] ) == 'number' and type( Second[2] ) == 'number' and type( First[3] ) == 'number' and type( Second[3] ) == 'number' then
-						if CheckFuzzy( First[2], Second[2] ) and CheckFuzzy( First[3], Second[3] ) then
-							table.remove( Table, Index1 )
-						end
-					elseif First[1] == Second[1] and First[2] == Second[2] and First[3] == Second[3] then
-						table.remove( Table, Index1 )
-					end
-				end
-			end
-		end
-		return Table
-	end
-	
-	local Final = RemoveDuplicates( Choices )
-	
-	return #Final > 0 and Final or false
-end
-
-function MLib.Polygon.IsCircleInside( x, y, Radius, ... )
-	local Userdata = CheckUserdata( ... )
-	return MLib.Polygon.CheckPoint( x, y, Userdata )
-end
-
-function MLib.Polygon.IsPolygonInside( Polygon1, Polygon2 )
-	local Boolean = false
-	for Index = 1, #Polygon2, 2 do
-		local Result = false
-		if Polygon2[Index + 3] then
-			Result = MLib.Polygon.IsLineSegmentInside( Polygon2[Index], Polygon2[Index + 1], Polygon2[Index + 2], Polygon2[Index + 3], Polygon1 )
-		else
-			Result = MLib.Polygon.IsLineSegmentInside( Polygon2[Index], Polygon2[Index + 1], Polygon2[1], Polygon2[2], Polygon1 )
-		end
-		if Result then Boolean = true; break end
-	end
-	return Boolean
-end
-
--- Circle
-function MLib.Circle.GetArea( Radius )
-	return math.pi * ( Radius ^ 2 )
-end
-
-function MLib.Circle.CheckPoint( CircleX, CircleY, Radius, x, y )
-	return ( x - CircleX ) ^ 2 + ( y - CircleY ) ^ 2 == Radius ^ 2 
-end
-
-function MLib.Circle.GetCircumference( Radius )
-	return 2 * math.pi * Radius
-end
-
-function MLib.Circle.IsLineSecant( CircleX, CircleY, Radius, ... )
-	local Userdata = CheckUserdata( ... )
-	
-	local Slope, Intercept = 0, 0
-	
-	if #Userdata == 2 then 
-		Slope, Intercept = Userdata[1], Userdata[2] 
-	else 
-		Slope = MLib.Line.GetSlope( Userdata[1], Userdata[2], Userdata[3], Userdata[4] ) 
-		Intercept = MLib.Line.GetIntercept( Userdata[1], Userdata[2], Slope ) 
-	end
-	
-	local x1, y1, x2, y2
-	if #Userdata == 4 then x1, y1, x2, y2 = unpack( Userdata ) end
-	
-	if Slope then 
-		local a = ( 1 + Slope ^ 2 )
-		local b = ( -2 * ( CircleX ) + ( 2 * Slope * Intercept ) - ( 2 * CircleY * Slope ) )
-		local c = ( CircleX ^ 2 + Intercept ^ 2 - 2 * ( CircleY ) * ( Intercept ) + CircleY ^ 2 - Radius ^ 2 )
-		
-		x1, x2 = MLib.Math.GetRootsOfQuadratic( a, b, c )
-		
-		if not x1 then return false end
-		
-		y1 = Slope * x1 + Intercept
-		y2 = Slope * x2 + Intercept
-		
-		if x1 == x2 and y1 == y2 then 
-			return 'Tangent', x1, y1
-		else 
-			return 'Secant', x1, y1, x2, y2 
-		end
-	else
-		-- Theory: *see Reference Pictures/Circle.png for information on how it works.
-		local LengthToPoint1 = CircleX - x1
-		local RemainingDistance = LengthToPoint1 - Radius
-		local Intercept = math.sqrt( -( LengthToPoint1 ^ 2 - Radius ^ 2 ) )
-		
-		if -( LengthToPoint1 ^ 2 - Radius ^ 2 ) < 0 then return false end
-		
-		local BottomX, BottomY = x1, CircleY - Intercept
-		local TopX, TopY = x1, CircleY + Intercept
-		
-		if TopY ~= BottomY then 
-			return 'Secant', TopX, TopY, BottomX, BottomY 
-		else 
-			return 'Tangent', TopX, TopY 
-		end
-	end
-end
-
-function MLib.Circle.IsSegmentSecant( CircleX, CircleY, Radius, x1, y1, x2, y2 )
-	local Type, x3, y3, x4, y4 = MLib.Circle.IsLineSecant( CircleX, CircleY, Radius, x1, y1, x2, y2 )
-	if not Type then return false end
-	
-	local Slope, Intercept = MLib.Line.GetSlope( x1, y1, x2, y2 ), MLib.Line.GetIntercept( x1, y1, x2, y2 )
-	
-	if MLib.Circle.CheckPoint( CircleX, CircleY, Radius, x1, y1 ) and MLib.Circle.CheckPoint( CircleX, CircleY, Radius, x2, y2 ) then -- Both points are on line-segment. 
-		return 'Chord', x1, y1, x2, y2
-	end
-	
-	if Slope then 
-		if MLib.Circle.IsPointInCircle( CircleX, CircleY, Radius, x1, y1 ) and MLib.Circle.IsPointInCircle( CircleX, CircleY, Radius, x2, y2 ) then -- Line-segment is fully in circle. 
-			return 'Enclosed', x1, y1, x2, y2
-		elseif x3 and x4 then
-			if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 ) and not MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x4, y4 ) then -- Only the first of the points is on the line-segment. 
-				return 'Tangent', x3, y3
-			elseif MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x4, y4 ) and not MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 ) then -- Only the second of the points is on the line-segment. 
-				return 'Tangent', x4, y4
-			else -- Neither of the points are on the circle (means that the segment is not on the circle, but "encasing" the circle)
-				local Length = MLib.Line.GetLength( x1, y1, x2, y2 )
-				
-				if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 ) and MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x4, y4 ) then
-					return 'Secant', x3, y3, x4, y4
-				else
-					return false
-				end
-			end
-		elseif not x4 then -- Is a tangent. 
-			if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, x3, y3 ) then
-				return 'Tangent', x3, y3
-			else -- Neither of the points are on the line-segment (means that the segment is not on the circle or "encasing" the circle).
-				local Length = MLib.Line.GetLength( x1, y1, x2, y2 )
-				local Distance1 = MLib.Line.GetLength( x1, y1, x3, y3 )
-				local Distance2 = MLib.Line.GetLength( x2, y2, x3, y3 )
-				
-				if Length > Distance1 or Length > Distance2 then 
-					return false
-				elseif Length < Distance1 and Length < Distance2 then 
-					return false 
-				else
-					return 'Tangent', x3, y3
-				end
-			end
-		end
-	else
-		-- Theory: *see Reference Images/Circle.png for information on how it works.
-		local LengthToPoint1 = CircleX - x1
-		local RemainingDistance = LengthToPoint1 - Radius
-		local Intercept = math.sqrt( -( LengthToPoint1 ^ 2 - Radius ^ 2 ) )
-		
-		if -( LengthToPoint1 ^ 2 - Radius ^ 2 ) < 0 then return false end
-		
-		local TopX, TopY = x1, CircleY - Intercept
-		local BottomX, BottomY = x1, CircleY + Intercept
-		
-		local Length = MLib.Line.GetLength( x1, y1, x2, y2 )
-		local Distance1 = MLib.Line.GetLength( x1, y1, TopX, TopY )
-		local Distance2 = MLib.Line.GetLength( x2, y2, TopX, TopY )
-		
-		if BottomY ~= TopY then 
-			if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, TopX, TopY ) and MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, BottomX, BottomY ) then
-				return 'Chord', TopX, TopY, BottomX, BottomY
-			elseif MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, TopX, TopY ) then
-				return 'Tangent', TopX, TopX
-			elseif MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, BottomX, BottomY ) then
-				return 'Tangent', BottomX, BottomY
-			else
-				return false
-			end
-		else 
-			if MLib.Line.Segment.CheckPoint( x1, y1, x2, y2, TopX, TopY ) then
-				return 'Tangent', TopX, TopY
-			else
-				return false
-			end
-		end
-	end
-end
-
-function MLib.Circle.CircleIntersects( Circle1CenterX, Circle1CenterY, Radius1, Circle2CenterX, Circle2CenterY, Radius2 )
-	local Distance = MLib.Line.GetLength( Circle1CenterX, Circle1CenterY, Circle2CenterX, Circle2CenterY )
-	if Distance > Radius1 + Radius2 then return false end
-	if Distance == 0 and Radius1 == Radius2 then return 'Equal' end
-	
-	local a = ( Radius1 ^ 2 - Radius2 ^ 2 + Distance ^ 2 ) / ( 2 * Distance )
-	local h = math.sqrt( Radius1 ^ 2 - a ^ 2 )
-	
-	if Circle1CenterX == Circle2CenterX and Circle1CenterY == Circle2CenterY then return 'Colinear' end
-	
-	local p2x = Circle1CenterX + a * ( Circle2CenterX - Circle1CenterX ) / Distance
-	local p2y = Circle1CenterY + a * ( Circle2CenterY - Circle1CenterY ) / Distance
-	local p3x = p2x + h * ( Circle2CenterY - Circle1CenterY ) / Distance
-	local p3y = p2y - h * ( Circle2CenterX - Circle1CenterX ) / Distance
-	local p4x = p2x - h * ( Circle2CenterY - Circle1CenterY ) / Distance
-	local p4y = p2y + h * ( Circle2CenterX - Circle1CenterX ) / Distance
-	
-	if Distance == Radius1 + Radius2 then return p3x, p3y end
-	return p3x, p3y, p4x, p4y 
-end
-
-function MLib.Circle.IsPointInCircle( CircleX, CircleY, Radius, x, y )
-	return MLib.Line.GetLength( CircleX, CircleY, x, y ) <= Radius
-end
-
--- Statistics
-function MLib.Statistics.GetMean( ... )
-	local Userdata = CheckUserdata( ... )
-	
-	local Mean = 0
-	for Index = 1, #Userdata do
-		Mean = Mean + Userdata[Index]
-	end
-	Mean = Mean / #Userdata
-	
-	return Mean
-end
-
-function MLib.Statistics.GetMedian( ... )
-	local Userdata = CheckUserdata( ... )
-	
-	table.sort( Userdata )
-	
-	if #Userdata % 2 == 0 then
-		Userdata = ( Userdata[math.floor( #Userdata / 2 )] + Userdata[math.floor( #Userdata / 2 + 1 )] ) / 2
-	else
-		Userdata =  Userdata[#Userdata / 2 + .5]
-	end
-	
-	return Userdata
-end
-
-function MLib.Statistics.GetMode( ... ) 
-	local Userdata = CheckUserdata( ... )
-
-	table.sort( Userdata )
-	local Sorted = {}
-	for Index, Value in ipairs( Userdata ) do
-		Sorted[Value] = Sorted[Value] and Sorted[Value] + 1 or 1
-	end
-	
-	local Occurrences, Least = 0, {}
-	for Index, Value in pairs( Sorted ) do
-		if Value > Occurrences then
-			Least = { Index }
-			Occurrences = Value
-		elseif Value == Occurrences then
-			Least[#Least + 1] = Index
-		end
-	end
-	
-	if #Least >= 1 then return Least, Occurrences
-	else return false end
-end
-
-function MLib.Statistics.GetRange( ... )
-	local Userdata = CheckUserdata( ... )
-	
-	local Upper, Lower = math.max( unpack( Userdata ) ), math.min( unpack( Userdata ) )
-	
-	return Upper - Lower
-end
-
--- Math (homeless functions)
-function MLib.Math.GetRoot( Number, Root )
-	local Num = Number ^ ( 1 / Root )
-	return Num, -Num
-end
-
-function MLib.Math.IsPrime( Number )	
-	if Number < 2 then return false end
-		
-	for Index = 2, math.sqrt( Number ) do
-		if Number % Index == 0 then
-			return false
-		end
-	end
-	
-	return true
-end
-
-function MLib.Math.Round( Number, DecimalPlace )
-	local DecimalPlace, ReturnedValue = DecimalPlace and 10 ^ DecimalPlace or 1
-	
-	local UpperNumber = math.ceil( Number * DecimalPlace )
-	local LowerNumber = math.floor( Number * DecimalPlace )
-	
-	local UpperDifferance = UpperNumber - ( Number * DecimalPlace ) 
-	local LowerDifference = ( Number * DecimalPlace ) - LowerNumber
-	
-	if UpperNumber == Number then
-		ReturnedValue = Number
-	else
-		if UpperDifferance <= LowerDifference then ReturnedValue = UpperNumber elseif LowerDifference < UpperDifferance then ReturnedValue = LowerNumber end
-	end
-	
-	return ReturnedValue / DecimalPlace
-end
-
-function MLib.Math.GetSummation( Start, Stop, Function )
-	if Stop == 1 / 0 or Stop == -1 / 0 then return false end
-	
-	local ReturnedValue = {}
-	local Value = 0
-	
-	for Index = Start, Stop do
-		local New = Function( Index, ReturnedValue )
-		
-		ReturnedValue[Index] = New
-		Value = Value + New
-	end
-	
-	return Value
-end
-
-function MLib.Math.GetPercentOfChange( Old, New )
-	if Old == 0 and New == 0 then
-		return 0
-	elseif Old == 0 then 
-		return false
-	else 
-		return ( New - Old ) / math.abs( Old ) 
-	end
-end
-
-function MLib.Math.GetPercent( Percent, Number )
-	return math.abs( Percent ) * Number
-end
-
-function MLib.Math.GetRootsOfQuadratic( a, b, c )
-	local Discriminant = b ^ 2 - ( 4 * a * c )
-	if Discriminant < 0 then return false end
-	
-	Discriminant = math.sqrt( Discriminant )
-	
-	return ( -b - Discriminant ) / ( 2 * a ), ( -b + Discriminant ) / ( 2 * a )
-end
-
-function MLib.Math.GetAngle( x1, y1, x2, y2, x3, y3 )	
-    local A = MLib.Line.GetLength( x3, y3, x2, y2 )
-    local B = MLib.Line.GetLength( x1, y1, x2, y2 )
-    local C = MLib.Line.GetLength( x1, y1, x3, y3 )
-
-   return math.acos( ( A ^ 2 + B ^ 2 - C ^ 2 ) / ( 2 * A * B ) )
-end
-
-return MLib
+-- Name: 																		Accounted For:
+-- -------------------------------------------------------------------------	--------------
+-- getLength( x1, y1, x2, y2 ) 													+
+-- getDistance( x1, y1, x2, y2 )												+
+-- getMidpoint( x1, y1, x2, y2 )												+
+-- getSlope( x1, y1, x2, y2 )													+
+-- getPerpendicularSlope( ... )													+
+-- getPerpendicularBisector( x1, y1, x2, y2 )									+
+-- getIntercept( x, y, ... )													+
+-- getLineLineIntersection( ... )												+
+-- getClosestPoint( perpendicularX, perpendicularY, ... )						+
+-- getLineSegmentIntersection( x1, y1, x2, y2, ... )							+
+-- checkLinePoint( x, y, x1, y1, x2, y2 )										+
+--																				+
+-- checkSegmentPoint( px, py, x1, y1, x2, y2 )									+
+-- getSegmentSegmentIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )				+
+--																				+
+-- getTriangleHeight( base, ... )												+
+-- getSignedPolygonArea( ... ) 													+
+-- getPolygonArea( ... ) 														+
+-- getCentroid( ... ) 															+
+-- checkPolygonPoint( px, py, ... )												+
+-- getPolygonLineIntersection( x1, y1, x2, y2, ... )							+
+-- getPolygonSegmentIntersection( x1, y1, x2, y2, ... )							+
+-- isSegmentInsidePolygon( x1, y1, x2, y2, ... )								+
+-- getPolygonPolygonIntersection( polygon1, polygon2 )							+
+-- getPolygonCircleIntersection( x, y, radius, ... )							+
+-- isCircleInsidePolygon( x, y, radius, ... )									+
+-- isPolygonInsidePolygon( polygon1, polygon2 )									+
+--																				+
+-- getCircleArea( radius )														+
+-- checkPoint( x, y, circleX, circleY, radius )									+
+-- getCircumference( radius )													+
+-- getCircleLineIntersection( circleX, circleY, radius, ... )					+
+-- getCircleSegmentIntersection( cx, cy, r, x1, y1, x2, y2 )					+
+-- getCircleCircleIntersection( c1x, c1y, r1, c2x, c2y, r2 )					+
+-- isPointOnCircle( x, y, circleX, circleY, radius )							+
+--																				+
+-- getMean( ... )																+
+-- getMedian( ... )																+
+-- getMode( ... ) 																+
+-- getRange( ... )																+
+-- 																				+
+-- getRoot( number, root )														+
+-- isPrime( number )															+
+-- round( number, place )														+
+-- getSummation( start, stop, func )											+
+-- getPercentOfChange( old, new )												+
+-- getPercentage( percent, number )												+
+-- getQuadraticRoots( a, b, c )													+
+-- getAngle( x1, y1, x2, y2, x3, y3 )											+

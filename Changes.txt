@@ -1,4 +1,53 @@
-MLib changelog- accurate since 3.0.0 (now known as 0.3.0.0), short description from before then.
+0.9.0
+====
+Added:
+----
+- mlib.line.getDistance as an alias for mlib.line.getLength.
+- mlib.line.checkPoint
+- Internal documentation.
+
+Removed:
+----
+- mlib.circle.isPointInCircle is replaced with mlib.circle.checkPoint
+- mlib.circle.checkPoint is replaced with mlib.circle.isPointOnCircle
+- Variation of mlib.circle.getLineIntersection( cx, cy, radius, slope, intercept ) is no longer supported, as it can cause errors with vertical lines.
+
+Changed:
+----
+- CHANGE: 	mlib.line.getIntersection now returns true for colinear lines.
+- CHANGE: 	mlib.line.getIntersection now returns true if the line are collinear.
+- CHANGE: 	mlib.line.getIntersection now returns true if vertical lines are collinear.
+- CHANGE: 	mlib.line.getSegmentIntersection now returns true if the line and segment are collinear.
+- CHANGE: 	Changed the order of mlib.line.segment.checkPoint arguments.
+- NAME: 	mlib.polygon.lineIntersects is now mlib.polygon.getLineIntersection
+- NAME: 	mlib.polygon.lineSegmentIntersects is now mlib.polygon.getSegmentIntersection
+- NAME: 	mlib.polygon.isLineSegmentInside is now mlib.polygon.isSegmentInside
+- NAME: 	mlib.polygon.polygonIntersects is now mlib.polygon.getPolygonIntersection
+- CHANGED: 	mlib.circle.checkPoint now takes arguments ( px, py, cx, cy, radius ).
+- CHANGED: 	mlib.circle.isPointOnCircle now takes arguments ( px, py, cx, cy, radius ).
+- NAME: 	mlib.polygon.circleIntersects is now mlib.polygon.getCircleIntersection
+- NAME: 	mlib.circle.isLineSecant is now mlib.circle.getLineIntersection
+- NAME: 	mlib.circle.isSegmentSecant is now mlib.circle.getSegmentIntersection
+- NAME: 	mlib.circle.circlesIntersects is now mlib.circle.getCircleIntersection
+- CHANGE: 	Added types 'tangent' and 'intersection' to mlib.circle.getCircleIntersection.
+- NAME:		mlib.math.getRootsOfQuadratic is now mlib.math.getQuadraticRoots
+- CHANGE:	mlib.math.getRoot now only returns the positive, since it there is not always negatives.
+- NAME: 	mlib.math.getPercent is now mlib.math.getPercentage
+
+- Cleaned up code (added comments, spaced lines, etc.)
+- Made syntax that uses camelCase instead of CamelCase.
+	- Match style of more programmers.
+	- Easier to type.
+- Moved to semantic numbering.
+- Made any returns strings lower-case.
+- Updated specs for missing functions. 
+
+To-Do
+----
+- Update readme.
+- Add mlib.statistics.getStandardDeviation
+- Add mlib.statistics.getMeasuresOfCentralTendency
+- Add mlib.statistics.getMeasuresOfDispersion
 
 1.1.0.2
 ====
