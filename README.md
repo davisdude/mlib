@@ -1,7 +1,7 @@
 MLib
 ====
 
-__MLib__ is a math and collisions library written in Lua. It's aim is to be __robust__ and __easy to use__. While I've tried to optimize MLib as much as possible, it is still *very* slow, and it is therefore very slow. I am currently working on implementing a more lightweight library, and will link it once it's available. 
+__MLib__ is a math and collisions library written in Lua. It's aim is to be __robust__ and __easy to use__. While I've tried to optimize MLib as much as possible, it is still *very* slow, and it is therefore not ideal for most situations. I am currently working on implementing a more lightweight library, and will link it once it's available. 
 
 ##Downloading
 You can download the latest __stable__ version of MLib by downloading the latest [release](https://github.com/davisdude/mlib/releases/).
