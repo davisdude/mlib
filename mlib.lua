@@ -1,3 +1,20 @@
+--[[
+	A math library made in Lua
+	copyright (C) 2014 Davis Claiborne
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License along
+	with this program; if not, write to the Free Software Foundation, Inc.,
+	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+	Contact me at davisclaib@gmail.com
+]]
+
 ------------ Local Utility Functions ------------
 local unpack = table.unpack or unpack
 
@@ -1101,55 +1118,3 @@ return {
 		getAngle = 					getAngle, 
 	}, 
 }
-
--- Name: 																		Accounted For:
--- -------------------------------------------------------------------------	--------------
--- getLength( x1, y1, x2, y2 ) 													+
--- getDistance( x1, y1, x2, y2 )												+
--- getMidpoint( x1, y1, x2, y2 )												+
--- getSlope( x1, y1, x2, y2 )													+
--- getPerpendicularSlope( ... )													+
--- getPerpendicularBisector( x1, y1, x2, y2 )									+
--- getIntercept( x, y, ... )													+
--- getLineLineIntersection( ... )												+
--- getClosestPoint( perpendicularX, perpendicularY, ... )						+
--- getLineSegmentIntersection( x1, y1, x2, y2, ... )							+
--- checkLinePoint( x, y, x1, y1, x2, y2 )										+
---																				+
--- checkSegmentPoint( px, py, x1, y1, x2, y2 )									+
--- getSegmentSegmentIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )				+
---																				+
--- getTriangleHeight( base, ... )												+
--- getSignedPolygonArea( ... ) 													+
--- getPolygonArea( ... ) 														+
--- getCentroid( ... ) 															+
--- checkPolygonPoint( px, py, ... )												+
--- getPolygonLineIntersection( x1, y1, x2, y2, ... )							+
--- getPolygonSegmentIntersection( x1, y1, x2, y2, ... )							+
--- isSegmentInsidePolygon( x1, y1, x2, y2, ... )								+
--- getPolygonPolygonIntersection( polygon1, polygon2 )							+
--- getPolygonCircleIntersection( x, y, radius, ... )							+
--- isCircleInsidePolygon( x, y, radius, ... )									+
--- isPolygonInsidePolygon( polygon1, polygon2 )									+
---																				+
--- getCircleArea( radius )														+
--- checkPoint( x, y, circleX, circleY, radius )									+
--- getCircumference( radius )													+
--- getCircleLineIntersection( circleX, circleY, radius, ... )					+
--- getCircleSegmentIntersection( cx, cy, r, x1, y1, x2, y2 )					+
--- getCircleCircleIntersection( c1x, c1y, r1, c2x, c2y, r2 )					+
--- isPointOnCircle( x, y, circleX, circleY, radius )							+
---																				+
--- getMean( ... )																+
--- getMedian( ... )																+
--- getMode( ... ) 																+
--- getRange( ... )																+
--- 																				+
--- getRoot( number, root )														+
--- isPrime( number )															+
--- round( number, place )														+
--- getSummation( start, stop, func )											+
--- getPercentOfChange( old, new )												+
--- getPercentage( percent, number )												+
--- getQuadraticRoots( a, b, c )													+
--- getAngle( x1, y1, x2, y2, x3, y3 )											+
