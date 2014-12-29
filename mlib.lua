@@ -13,8 +13,8 @@ end
 	
 	Example:
 	
-	Numbers = { 1, 2, 3, 4, 10 }
-	largestNumber, reference = GetIndex( Numbers, local function ( Value1, Value2 ) return Value1 > Value2 end ) 
+	numbers = { 1, 2, 3, 4, 10 }
+	largestNumber, reference = sortWithReference( numbers, function ( Value1, Value2 ) return Value1 > Value2 end ) 
 	print( largestNumber, reference ) --> 10, 5
 ]]
 local function sortWithReference( tab, func )
