@@ -1,3 +1,25 @@
+0.9.1
+====
+Added:
+----
+- Added mlib.statistics.getCentralTendency
+- Added mlib.statistics.getDispersion
+- Added mlib.statistics.getStandardDeviation
+- Added mlib.statistics.getVariation
+- Added mlib.statistics.getVariationRatio
+
+Removed:
+----
+
+Changed:
+----
+- FIX:		mlib.polygon.checkPoint now handles vertices better. 
+
+
+To-Do
+----
+- Add more functions. 
+
 0.9.0
 ====
 Added:
