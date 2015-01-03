@@ -19,10 +19,10 @@
 local unpack = table.unpack or unpack
 
 -- Used to handle variable-argument functions and whether they are passed as func{ table } or func( unpack( table ) )
-local function checkUserdata( ... )
-	local userdata = {}
-	if type( ... ) ~= 'table' then userdata = { ... } else userdata = ... end
-	return userdata
+local function checkInput( ... )
+	local input = {}
+	if type( ... ) ~= 'table' then input = { ... } else input = ... end
+	return input
 end
 
 --[[
@@ -31,7 +31,7 @@ end
 	Example:
 	
 	numbers = { 1, 2, 3, 4, 10 }
-	largestNumber, reference = sortWithReference( numbers, function ( Value1, Value2 ) return Value1 > Value2 end ) 
+	largestNumber, reference = sortWithReference( numbers, function ( value1, value2 ) return value1 > value2 end ) 
 	print( largestNumber, reference ) --> 10, 5
 ]]
 local function sortWithReference( tab, func )
@@ -45,7 +45,7 @@ local function sortWithReference( tab, func )
     return value, key
 end
 
--- Deals with floats / very false false values. This can happen because of significant figures.
+-- Deals with floats / verify false false values. This can happen because of significant figures.
 local function checkFuzzy( number1, number2 )
 	return ( number1 - .00001 <= number2 and number2 <= number1 + .00001 )
 end
@@ -110,7 +110,7 @@ end
 
 -- Gives the slope of a line.
 local function getSlope( x1, y1, x2, y2 )
-	if x1 == x2 then return false end -- Technically it's infinity, but this is easier to program.
+	if checkFuzzy( x1, x2 ) then return false end -- Technically it's undefined, but this is easier to program.
 	return ( y1 - y2 ) / ( x1 - x2 )
 end
 
@@ -118,17 +118,17 @@ end
 -- x1, y1, x2, y2
 -- slope
 local function getPerpendicularSlope( ... )
-	local userdata = checkUserdata( ... )
-	local Slope
+	local input = checkInput( ... )
+	local slope
 	
-	if #userdata ~= 1 then 
-		slope = getSlope( unpack( userdata ) ) 
+	if #input ~= 1 then 
+		slope = getSlope( unpack( input ) ) 
 	else
-		slope = unpack( userdata ) 
+		slope = unpack( input ) 
 	end
 	
-	if slope == 0 then return false  	-- Horizontal lines become vertical.
-	elseif not slope then return 0 end	-- Vertical lines become horizontal.
+	if not slope then return 0 -- Vertical lines become horizontal.
+	elseif checkFuzzy( slope, 0 ) then return false end -- Horizontal lines become vertical.
 	return -1 / slope 
 end
 
@@ -143,13 +143,13 @@ end
 -- x1, y1, x2, y2
 -- x1, y1, slope
 local function getIntercept( x, y, ... )
-	local userdata = checkUserdata( ... )
+	local input = checkInput( ... )
 	local slope
 	
-	if #userdata == 1 then 
-		slope = userdata[1] 
+	if #input == 1 then 
+		slope = input[1] 
 	else
-		slope = getSlope( x, y, unpack( userdata ) ) 
+		slope = getSlope( x, y, unpack( input ) ) 
 	end
 	
 	if not slope then return false end
@@ -161,14 +161,14 @@ end
 -- slope1, 	intercept1, 	slope2, intercept2
 -- x1, 		y1, 			x2, 	y2, 		x3, y3, x4, y4
 local function getLineLineIntersection( ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	local x1, y1, x2, y2, x3, y3, x4, y4
 	local slope1, intercept1
 	local slope2, intercept2
 	local x, y
 	
-	if #userdata == 4 then -- Given slope1, intercept1, slope2, intercept2. 
-		slope1, intercept1, slope2, intercept2 = unpack( userdata ) 
+	if #input == 4 then -- Given slope1, intercept1, slope2, intercept2. 
+		slope1, intercept1, slope2, intercept2 = unpack( input ) 
 		
 		-- Since these are lines, not segments, we can use arbitrary points, such as ( 1, y ), ( 2, y )
 		y1 = slope1 * 1 + intercept1
@@ -179,27 +179,27 @@ local function getLineLineIntersection( ... )
 		x2 = ( y2 - intercept1 ) / slope1
 		x3 = ( y3 - intercept1 ) / slope1
 		x4 = ( y4 - intercept1 ) / slope1
-	elseif #userdata == 6 then -- Given slope1, intercept1, and 2 points on the other line. 
-		slope1 = userdata[1]
-		intercept1 = userdata[2]
-		slope2 = getSlope( userdata[3], userdata[4], userdata[5], userdata[6] )
-		intercept2 =  getIntercept( userdata[3], userdata[4], userdata[5], userdata[6] )
+	elseif #input == 6 then -- Given slope1, intercept1, and 2 points on the other line. 
+		slope1 = input[1]
+		intercept1 = input[2]
+		slope2 = getSlope( input[3], input[4], input[5], input[6] )
+		intercept2 =  getIntercept( input[3], input[4], input[5], input[6] )
 		
 		y1 = slope1 * 1 + intercept1
 		y2 = slope1 * 2 + intercept1
-		y3 = userdata[4]
-		y4 = userdata[6]
+		y3 = input[4]
+		y4 = input[6]
 		x1 = ( y1 - intercept1 ) / slope1
 		x2 = ( y2 - intercept1 ) / slope1
-		x3 = userdata[3]
-		x4 = userdata[5]
-	elseif #userdata == 8 then -- Given 2 points on line 1 and 2 points on line 2.
-		slope1 = getSlope( userdata[1], userdata[2], userdata[3], userdata[4] )
-		intercept1 = getIntercept( userdata[1], userdata[2], userdata[3], userdata[4] )
-		slope2 = getSlope( userdata[5], userdata[6], userdata[7], userdata[8] )
-		intercept2 = getIntercept( userdata[5], userdata[6], userdata[7], userdata[8] ) 
+		x3 = input[3]
+		x4 = input[5]
+	elseif #input == 8 then -- Given 2 points on line 1 and 2 points on line 2.
+		slope1 = getSlope( input[1], input[2], input[3], input[4] )
+		intercept1 = getIntercept( input[1], input[2], input[3], input[4] )
+		slope2 = getSlope( input[5], input[6], input[7], input[8] )
+		intercept2 = getIntercept( input[5], input[6], input[7], input[8] ) 
 		
-		x1, y1, x2, y2, x3, y3, x4, y4 = unpack( userdata )
+		x1, y1, x2, y2, x3, y3, x4, y4 = unpack( input )
 	end
 	
 	if not slope1 and not slope2 then -- Both are vertical lines
@@ -214,8 +214,8 @@ local function getLineLineIntersection( ... )
 	elseif not slope2 then -- Second is vertical
 		x = x3 -- Vice-Versa
 		y = slope1 * x + intercept1
-	elseif slope1 == slope2 then -- Parallel (not vertical)
-		if intercept1 == intercept2 then -- Same intercept
+	elseif checkFuzzy( slope1, slope2 ) then -- Parallel (not vertical)
+		if checkFuzzy( intercept1, intercept2 ) then -- Same intercept
 			return true
 		else
 			return false
@@ -239,16 +239,16 @@ end
 -- perpendicularX, perpendicularY, x1, 		y1, 		x2, y2
 -- perpendicularX, perpendicularY, slope, 	intercept
 local function getClosestPoint( perpendicularX, perpendicularY, ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	local x1, y1, x2, y2, slope, intercept
 	local x, y
 	
-	if #userdata == 4 then -- Given perpendicularX, perpendicularY, x1, y1, x2, y2
-		x1, y1, x2, y2 = unpack( userdata )
+	if #input == 4 then -- Given perpendicularX, perpendicularY, x1, y1, x2, y2
+		x1, y1, x2, y2 = unpack( input )
 		slope = getSlope( x1, y1, x2, y2 )
 		intercept = getIntercept( x1, y1, x2, y2 )
-	elseif #userdata == 2 then -- Given perpendicularX, perpendicularY, slope, intercept
-		slope, intercept = unpack( userdata )
+	elseif #input == 2 then -- Given perpendicularX, perpendicularY, slope, intercept
+		slope, intercept = unpack( input )
 	end
 	
 	if not slope then -- Vertical line
@@ -268,27 +268,27 @@ end
 -- x1, y1, x2, y2, x3, 		y3, x4, y4
 -- x1, y1, x2, y2, slope, 	intercept
 local function getLineSegmentIntersection( x1, y1, x2, y2, ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	
 	local slope1, intercept1
 	local slope2, intercept2 = getSlope( x1, y1, x2, y2 ), getIntercept( x1, y1, x2, y2 )
 	local x, y
 	
-	if #userdata == 2 then -- Given slope, intercept
-		slope1, intercept1 = userdata[1], userdata[2]
+	if #input == 2 then -- Given slope, intercept
+		slope1, intercept1 = input[1], input[2]
 	else -- Given x3, y3, x4, y4
-		slope1 = getSlope( unpack( userdata ) )
-		intercept1 = getIntercept( unpack( userdata ) )
+		slope1 = getSlope( unpack( input ) )
+		intercept1 = getIntercept( unpack( input ) )
 	end
 	
 	if not slope1 and not slope2 then -- Vertical lines
-		if x1 == userdata[1] then
+		if checkFuzzy( x1, input[1] ) then
 			return x1, y1, x2, y2
 		else
 			return false
 		end
 	elseif not slope1 then -- slope1 is vertical
-		x, y = userdata[1], slope2 * userdata[1] + intercept2
+		x, y = input[1], slope2 * input[1] + intercept2
 	elseif not slope2 then -- slope2 is vertical
 		x, y = x1, slope1 * x1 + intercept1
 	else
@@ -302,7 +302,7 @@ local function getLineSegmentIntersection( x1, y1, x2, y2, ... )
 		length1, length2 = getLength( x1, y1, x, y ), getLength( x2, y2, x, y )
 		distance = getLength( x1, y1, x2, y2 )
 	else -- Lines are parallel but not collinear.
-		if intercept1 == intercept2 then
+		if checkFuzzy( intercept1, intercept2 ) then
 			return x1, y1, x2, y2
 		else
 			return false
@@ -319,7 +319,7 @@ local function checkLinePoint( x, y, x1, y1, x2, y2 )
 	local b = getIntercept( x1, y1, m )
 	
 	if not m then -- Vertical 
-		return x == x1
+		return checkFuzzy( x, x1 )
 	end
 	
 	return checkFuzzy( y, m * x + b )
@@ -336,8 +336,8 @@ local function checkSegmentPoint( px, py, x1, y1, x2, y2 )
 	local lengthX = x2 - x1
 	local lengthY = y2 - y1
 	
-	if lengthX == 0 then -- Vertical line
-		if px == x1 then
+	if checkFuaay( lengthX, 0 ) then -- Vertical line
+		if checkFuzzy( px, x1 ) then
 			local low, high
 			if y1 > y2 then low = y2; high = y1 
 			else low = y1; high = y2 end
@@ -347,8 +347,8 @@ local function checkSegmentPoint( px, py, x1, y1, x2, y2 )
 		else
 			return false
 		end
-	elseif lengthY == 0 then -- Horizontal line
-		if py == y1 then
+	elseif checkFuzzy( lengthY, 0 ) then -- Horizontal line
+		if chcekFuzzy( py, y1 ) then
 			local low, high
 			if x1 > x2 then low = x2; high = x1 
 			else low = x1; high = x2 end
@@ -388,7 +388,7 @@ local function getSegmentSegmentIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )
 			for ii = #tab - 1, 1, -2 do 
 				local x2, y2 = tab[ii], tab[ii + 1]
 				if i ~= ii then
-					if x1 == x2 and y1 == y2 then
+					if checkFuzzy( x1, x2 ) and checkFuzzy( y1, y2 ) then
 						table.remove( tab, i )
 						table.remove( tab, i )
 					end
@@ -452,7 +452,7 @@ local function round( number, place )
 	local highDifferance = high - ( number * place ) 
 	local lowDifferance = ( number * place ) - low
 	
-	if high == number then
+	if checkFuzzy( high, number ) then
 		returnValue = number
 	else
 		if highDifferance <= lowDifferance then returnValue = high 
@@ -463,9 +463,7 @@ local function round( number, place )
 end
 
 -- Gives the summation given a local function
-local function getSummation( start, stop, func )
-	if stop == 1 / 0 or stop == -1 / 0 then return false end
-	
+local function getSummation( start, stop, func ) -- No need for error checking, since it is done automatically by the for-loop.	
 	local returnValue = {}
 	local value = 0
 	
@@ -553,7 +551,7 @@ local function getCircleLineIntersection( circleX, circleY, radius, x1, y1, x2, 
 		y1 = slope * x1 + intercept
 		y2 = slope * x2 + intercept
 		
-		if x1 == x2 and y1 == y2 then 
+		if checkFuzzy( x1, x2 ) and checkFuzzy( y1, y2 ) then 
 			return 'tangent', x1, y1
 		else 
 			return 'secant', x1, y1, x2, y2 
@@ -659,8 +657,8 @@ end
 local function getCircleCircleIntersection( circle1x, circle1y, radius1, circle2x, circle2y, radius2 )
 	local length = getLength( circle1x, circle1y, circle2x, circle2y )
 	if length > radius1 + radius2 then return false end -- If the distance is greater than the two radii, they can't intersect.
-	if checkFuzzy( length, 0 ) and radius1 == radius2 then return 'equal' end	
-	if circle1x == circle2x and circle1y == circle2y then return 'collinear' end
+	if checkFuzzy( length, 0 ) and checkFuzzy( radius1, radius2 ) then return 'equal' end	
+	if checkFuzzy( circle1x, circle2x ) and checkFuzzy( circle1y, circle2y ) then return 'collinear' end
 	
 	local a = ( radius1 * radius1 - radius2 * radius2 + length * length ) / ( 2 * length )
 	local h = math.sqrt( radius1 * radius1 - a * a )
@@ -707,11 +705,11 @@ end
 -- base, x1, 	y1, x2, y2, x3, y3, x4, y4
 -- base, area
 local function getTriangleHeight( base, ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	local area
 
-	if #userdata == 1 then area = userdata[1] -- Given area.
-	else area = getPolygonArea( userdata ) end -- Given coordinates.
+	if #input == 1 then area = input[1] -- Given area.
+	else area = getPolygonArea( input ) end -- Given coordinates.
 	
 	-- area = ( base * height ) / 2
 	-- 2 * area = base * height
@@ -757,7 +755,7 @@ end
 -- Returns whether or not a line intersects a polygon.
 -- x1, y1, x2, y2, polygonPoints
 local function getPolygonLineIntersection( x1, y1, x2, y2, ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	local choices = {}
 	
 	local slope = getSlope( x1, y1, x2, y2 )
@@ -772,13 +770,13 @@ local function getPolygonLineIntersection( x1, y1, x2, y2, ... )
 		y3, y4 = y1, y2
 	end
 	
-	for i = 1, #userdata, 2 do
-		if userdata[i + 2] then
-			local x1, y1, x2, y2 = getLineSegmentIntersection( userdata[i], userdata[i + 1], userdata[i + 2], userdata[i + 3], x3, y3, x4, y4 )
+	for i = 1, #input, 2 do
+		if input[i + 2] then
+			local x1, y1, x2, y2 = getLineSegmentIntersection( input[i], input[i + 1], input[i + 2], input[i + 3], x3, y3, x4, y4 )
 			if x1 and not x2 then choices[#choices + 1] = { x1, y1 } 
 			elseif x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
 		else
-			local x1, y1, x2, y2 = getLineSegmentIntersection( userdata[i], userdata[i + 1], userdata[1], userdata[2], x3, y3, x4, y4 )
+			local x1, y1, x2, y2 = getLineSegmentIntersection( input[i], input[i + 1], input[1], input[2], x3, y3, x4, y4 )
 			if x1 and not x2 then choices[#choices + 1] = { x1, y1 } 
 			elseif x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
 		end
@@ -791,17 +789,17 @@ end
 -- Returns if the line segment intersects the polygon.
 -- x1, y1, x2, y2, polygonPoints
 local function getPolygonSegmentIntersection( x1, y1, x2, y2, ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	local choices = {}
 	
-	for i = 1, #userdata, 2 do
-		-- if checkSegmentPoint( x1, y1, x2, y2, userdata[i], userdata[i + 1] ) then return true end
-		if userdata[i + 2] then
-			local x1, y1, x2, y2 = getSegmentSegmentIntersection( userdata[i], userdata[i + 1], userdata[i + 2], userdata[i + 3], x1, y1, x2, y2 )
+	for i = 1, #input, 2 do
+		-- if checkSegmentPoint( x1, y1, x2, y2, input[i], input[i + 1] ) then return true end
+		if input[i + 2] then
+			local x1, y1, x2, y2 = getSegmentSegmentIntersection( input[i], input[i + 1], input[i + 2], input[i + 3], x1, y1, x2, y2 )
 			if x1 and not x2 then choices[#choices + 1] = { x1, y1 } 
 			elseif x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
 		else
-			local x1, y1, x2, y2 = getSegmentSegmentIntersection( userdata[i], userdata[i + 1], userdata[1], userdata[2], x1, y1, x2, y2 )
+			local x1, y1, x2, y2 = getSegmentSegmentIntersection( input[i], input[i + 1], input[1], input[2], x1, y1, x2, y2 )
 			if x1 and not x2 then choices[#choices + 1] = { x1, y1 } 
 			elseif x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
 		end
@@ -836,10 +834,10 @@ local function checkPolygonPoint( px, py, ... )
 	
 	local count = 0
 	for i = 1, #points, 2 do
-		if points[i + 1] == py then
+		if checkFuzzy( points[i + 1], py ) then
 			points[i + 1] = py + .001 -- Handles vertices that lie on the point. 
 		end
-		if points[i + 3] and points[i + 3] == py then
+		if points[i + 3] and checkFuzzy( points[i + 3], py ) then
 			points[i + 3] = py + .001 -- Do not need to worry about alternate case, since points[2] has already been done. 
 		end
 		local x1, y1 = points[i], points[i + 1]
@@ -856,12 +854,12 @@ end
 -- Returns if the line segment is fully or partially inside. 
 -- x1, y1, x2, y2, polygonPoints
 local function isSegmentInsidePolygon( x1, y1, x2, y2, ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	
-	local choices = getPolygonSegmentIntersection( x1, y1, x2, y2, userdata ) -- If it's partially enclosed that's all we need.
+	local choices = getPolygonSegmentIntersection( x1, y1, x2, y2, input ) -- If it's partially enclosed that's all we need.
 	if choices then return true end
 	
-	if checkPolygonPoint( x1, y1, userdata ) or checkPolygonPoint( x2, y2, userdata ) then return true end
+	if checkPolygonPoint( x1, y1, input ) or checkPolygonPoint( x2, y2, input ) then return true end
 	return false
 end
 
@@ -905,7 +903,7 @@ local function getPolygonPolygonIntersection( polygon1, polygon2 )
 		end
 	end	
 
-	local choices = removeDuplicatePairs( choices )
+	choices = removeDuplicatePairs( choices )
 	for i = #choices, 1, -1 do
 		if type( choices[i][1] ) == 'table' then -- Remove co-linear pairs.
 			table.remove( choices, i )
@@ -918,7 +916,7 @@ end
 -- Returns whether the circle intersects the polygon.
 -- x, y, radius, polygonPoints
 local function getPolygonCircleIntersection( x, y, radius, ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	local choices = {}
 	
 	local function removeDuplicates( tab ) 
@@ -932,7 +930,7 @@ local function getPolygonCircleIntersection( x, y, radius, ... )
 						if checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
 							table.remove( tab, index1 )
 						end
-					elseif first[1] == second[1] and first[2] == second[2] and first[3] == second[3] then
+					elseif checkFuzzy( first[1], second[1] ) and checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
 						table.remove( tab, index1 )
 					end
 				end
@@ -941,14 +939,14 @@ local function getPolygonCircleIntersection( x, y, radius, ... )
 		return tab
 	end
 	
-	for i = 1, #userdata, 2 do
-		if userdata[i + 2] then 
-			local Type, x1, y1, x2, y2 = getCircleSegmentIntersection( x, y, radius, userdata[i], userdata[i + 1], userdata[i + 2], userdata[i + 3] )
+	for i = 1, #input, 2 do
+		if input[i + 2] then 
+			local Type, x1, y1, x2, y2 = getCircleSegmentIntersection( x, y, radius, input[i], input[i + 1], input[i + 2], input[i + 3] )
 			if x2 then 
 				choices[#choices + 1] = { Type, x1, y1, x2, y2 } 
 			elseif x1 then choices[#choices + 1] = { Type, x1, y1 } end
 		else
-			local Type, x1, y1, x2, y2 = getCircleSegmentIntersection( x, y, radius, userdata[i], userdata[i + 1], userdata[1], userdata[2] )
+			local Type, x1, y1, x2, y2 = getCircleSegmentIntersection( x, y, radius, input[i], input[i + 1], input[1], input[2] )
 			if x2 then 
 				choices[#choices + 1] = { Type, x1, y1, x2, y2 } 
 			elseif x1 then choices[#choices + 1] = { Type, x1, y1 } end
@@ -963,8 +961,8 @@ end
 -- Returns whether the circle is inside the polygon. 
 -- x, y, radius, polygonPoints
 local function isCircleInsidePolygon( x, y, radius, ... )
-	local userdata = checkUserdata( ... )
-	return checkPolygonPoint( x, y, userdata )
+	local input = checkUserdata( ... )
+	return checkPolygonPoint( x, y, input )
 end
 
 -- Returns whether the polygon is inside the polygon. 
@@ -986,27 +984,27 @@ end
 -- Gets the average of a list of points
 -- points
 local function getMean( ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	
-	mean = getSummation( 1, #userdata, 
+	mean = getSummation( 1, #input, 
 		function( i, t )
-			return userdata[i]
+			return input[i]
 		end 
-	) / #userdata
+	) / #input
 	
 	return mean
 end
 
 local function getMedian( ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	
-	table.sort( userdata )
+	table.sort( input )
 	
 	local median
-	if #userdata % 2 == 0 then -- If you have an even number of terms, you need to get the average of the middle 2.
-		median = getMean( userdata[#userdata / 2], userdata[#userdata / 2 + 1] )
+	if #input % 2 == 0 then -- If you have an even number of terms, you need to get the average of the middle 2.
+		median = getMean( input[#input / 2], input[#input / 2 + 1] )
 	else
-		median = userdata[#userdata / 2 + .5]
+		median = input[#input / 2 + .5]
 	end
 	
 	return median
@@ -1014,12 +1012,12 @@ end
 
 -- Gets the mode of a number.
 local function getMode( ... ) 
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 
-	table.sort( userdata )
+	table.sort( input )
 	local sorted = {}
-	for i = 1, #userdata do
-		local value = userdata[i]
+	for i = 1, #input do
+		local value = input[i]
 		sorted[value] = sorted[value] and sorted[value] + 1 or 1
 	end
 	
@@ -1039,20 +1037,20 @@ end
 
 -- Gets the range of the numbers.
 local function getRange( ... )
-	local userdata = checkUserdata( ... )
-	local high, low = math.max( unpack( userdata ) ), math.min( unpack( userdata ) )
+	local input = checkUserdata( ... )
+	local high, low = math.max( unpack( input ) ), math.min( unpack( input ) )
 	return high - low
 end
 
 -- Gets the variance of a set of numbers.
 local function getVariance( ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	local mean = getMean( ... )
 	local sum = 0 
-	for i = 1, #userdata do
-		sum = sum + ( mean - userdata[i] ) * ( mean - userdata[i] )
+	for i = 1, #input do
+		sum = sum + ( mean - input[i] ) * ( mean - input[i] )
 	end
-	return sum / #userdata
+	return sum / #input
 end
 
 -- Gets the standard deviation of a set of numbers.
@@ -1068,10 +1066,10 @@ end
 
 -- Gets the variation ratio of a data set. 
 local function getVariationRatio( ... )
-	local userdata = checkUserdata( ... )
+	local input = checkUserdata( ... )
 	local numbers, times = getMode( ... )
 	times = times * #numbers -- Account for bimodal data
-	return 1 - ( times / #userdata )
+	return 1 - ( times / #input )
 end
 
 -- Gets the measures of dispersion of a data set. 
@@ -1080,7 +1078,7 @@ local function getDispersion( ... )
 end
 
 return {
-	_VERSION = 'MLib 0.9.1', 
+	_VERSION = 'MLib 0.9.2', 
 	_DESCRIPTION = 'A math and collisions library aimed at LÖVE.', 
 	_URL = 'https://github.com/davisdude/mlib', 
 	_LICENSE = [[
