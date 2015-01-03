@@ -161,7 +161,7 @@ end
 -- slope1, 	intercept1, 	slope2, intercept2
 -- x1, 		y1, 			x2, 	y2, 		x3, y3, x4, y4
 local function getLineLineIntersection( ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	local x1, y1, x2, y2, x3, y3, x4, y4
 	local slope1, intercept1
 	local slope2, intercept2
@@ -239,7 +239,7 @@ end
 -- perpendicularX, perpendicularY, x1, 		y1, 		x2, y2
 -- perpendicularX, perpendicularY, slope, 	intercept
 local function getClosestPoint( perpendicularX, perpendicularY, ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	local x1, y1, x2, y2, slope, intercept
 	local x, y
 	
@@ -268,7 +268,7 @@ end
 -- x1, y1, x2, y2, x3, 		y3, x4, y4
 -- x1, y1, x2, y2, slope, 	intercept
 local function getLineSegmentIntersection( x1, y1, x2, y2, ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	
 	local slope1, intercept1
 	local slope2, intercept2 = getSlope( x1, y1, x2, y2 ), getIntercept( x1, y1, x2, y2 )
@@ -336,7 +336,7 @@ local function checkSegmentPoint( px, py, x1, y1, x2, y2 )
 	local lengthX = x2 - x1
 	local lengthY = y2 - y1
 	
-	if checkFuaay( lengthX, 0 ) then -- Vertical line
+	if checkFuzzy( lengthX, 0 ) then -- Vertical line
 		if checkFuzzy( px, x1 ) then
 			local low, high
 			if y1 > y2 then low = y2; high = y1 
@@ -348,7 +348,7 @@ local function checkSegmentPoint( px, py, x1, y1, x2, y2 )
 			return false
 		end
 	elseif checkFuzzy( lengthY, 0 ) then -- Horizontal line
-		if chcekFuzzy( py, y1 ) then
+		if checkFuzzy( py, y1 ) then
 			local low, high
 			if x1 > x2 then low = x2; high = x1 
 			else low = x1; high = x2 end
@@ -678,7 +678,7 @@ end
 -- Gives the signed area.
 -- If the points are clockwise the number is negative, otherwise, it's positive.
 local function getSignedPolygonArea( ... ) 
-	local points = checkUserdata( ... )
+	local points = checkInput( ... )
 	
 	-- Shoelace formula (https://en.wikipedia.org/wiki/Shoelace_formula).
 	points[#points + 1] = points[1]
@@ -705,7 +705,7 @@ end
 -- base, x1, 	y1, x2, y2, x3, y3, x4, y4
 -- base, area
 local function getTriangleHeight( base, ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	local area
 
 	if #input == 1 then area = input[1] -- Given area.
@@ -719,7 +719,7 @@ end
 
 -- Gives the centroid of the polygon.
 local function getCentroid( ... ) 
-	local points = checkUserdata( ... )
+	local points = checkInput( ... )
 	
 	points[#points + 1] = points[1]
 	points[#points + 1] = points[2]
@@ -755,7 +755,7 @@ end
 -- Returns whether or not a line intersects a polygon.
 -- x1, y1, x2, y2, polygonPoints
 local function getPolygonLineIntersection( x1, y1, x2, y2, ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	local choices = {}
 	
 	local slope = getSlope( x1, y1, x2, y2 )
@@ -789,7 +789,7 @@ end
 -- Returns if the line segment intersects the polygon.
 -- x1, y1, x2, y2, polygonPoints
 local function getPolygonSegmentIntersection( x1, y1, x2, y2, ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	local choices = {}
 	
 	for i = 1, #input, 2 do
@@ -811,7 +811,7 @@ end
 
 -- Checks if the point lies INSIDE the polygon not on the polygon.
 local function checkPolygonPoint( px, py, ... )
-	local points = { unpack( checkUserdata( ... ) ) } -- Make a new table, as to not edit values of previous. 
+	local points = { unpack( checkInput( ... ) ) } -- Make a new table, as to not edit values of previous. 
 	
 	local function getGreatestPoint( points )
 		local greatest = points[1]
@@ -854,7 +854,7 @@ end
 -- Returns if the line segment is fully or partially inside. 
 -- x1, y1, x2, y2, polygonPoints
 local function isSegmentInsidePolygon( x1, y1, x2, y2, ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	
 	local choices = getPolygonSegmentIntersection( x1, y1, x2, y2, input ) -- If it's partially enclosed that's all we need.
 	if choices then return true end
@@ -916,7 +916,7 @@ end
 -- Returns whether the circle intersects the polygon.
 -- x, y, radius, polygonPoints
 local function getPolygonCircleIntersection( x, y, radius, ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	local choices = {}
 	
 	local function removeDuplicates( tab ) 
@@ -961,7 +961,7 @@ end
 -- Returns whether the circle is inside the polygon. 
 -- x, y, radius, polygonPoints
 local function isCircleInsidePolygon( x, y, radius, ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	return checkPolygonPoint( x, y, input )
 end
 
@@ -984,7 +984,7 @@ end
 -- Gets the average of a list of points
 -- points
 local function getMean( ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	
 	mean = getSummation( 1, #input, 
 		function( i, t )
@@ -996,7 +996,7 @@ local function getMean( ... )
 end
 
 local function getMedian( ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	
 	table.sort( input )
 	
@@ -1012,7 +1012,7 @@ end
 
 -- Gets the mode of a number.
 local function getMode( ... ) 
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 
 	table.sort( input )
 	local sorted = {}
@@ -1037,14 +1037,14 @@ end
 
 -- Gets the range of the numbers.
 local function getRange( ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	local high, low = math.max( unpack( input ) ), math.min( unpack( input ) )
 	return high - low
 end
 
 -- Gets the variance of a set of numbers.
 local function getVariance( ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	local mean = getMean( ... )
 	local sum = 0 
 	for i = 1, #input do
@@ -1066,7 +1066,7 @@ end
 
 -- Gets the variation ratio of a data set. 
 local function getVariationRatio( ... )
-	local input = checkUserdata( ... )
+	local input = checkInput( ... )
 	local numbers, times = getMode( ... )
 	times = times * #numbers -- Account for bimodal data
 	return 1 - ( times / #input )
