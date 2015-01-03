@@ -1,3 +1,19 @@
+0.9.2
+====
+Added:
+----
+
+Changed:
+----
+- mlib.polygon.getPolygonIntersection now does not create duplicate local table.
+- mlib.line.getPerpendicularSlope now does not create a global variable.
+- mlib.math.getSummation now allows the error to go through instead of returning false if the stop value is not a number. 
+
+- Changed any instance of the term "userdata" with "input"
+
+Removed:
+----
+
 0.9.1
 ====
 Added:

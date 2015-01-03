@@ -11,7 +11,11 @@ You can download the latest __working__ version of MLib by downloading the lates
 To use MLib, simply place [mlib.lua](mlib.lua) inside the desired folder in your project. Then use the `require 'path.to.mlib'` to use any of the functions.
 
 ##Examples
-You can see some examples of the code in action [here](https://github.com/davisdude/mlib/tree/master/examples). 
+You can see some examples of the code in action [here](https://github.com/davisdude/mlib/tree/master/Examples/). 
+All examples are done using the *awesome* engine of [LÖVE](https://love2d.org/).
+To run them properly, download the [.love file](https://github.com/davisdude/mlib/blob/master/Examples/Shapes.love) and install LÖVE to your computer.
+After that, make sure you set .love files to open with "love.exe".
+For more, see [here](https://love2d.org/).
 
 ##When should I use MLib?
 - If you need to know exactly where two objects intersect.
@@ -627,16 +631,16 @@ end
 - Returns:
   - `standardDeviation`: Number. The standard deviation of the data set. 
 
-#####mlib.statistics.getVariation
+#####mlib.statistics.getVariance
 - Gets the variation of the data.
 - Synopses:
-  - `variation = mlib.statistics.getVariation( data )`
-  - `variation = mlib.statistics.getVariation( ... )`
+  - `variance = mlib.statistics.getVariance( data )`
+  - `variance = mlib.statistics.getVariance( ... )`
 - Arguments: 
   - `data`: Table. A table containing the values of data.
   - `...`: Numbers. All of the numbers in the data set.
 - Returns:
-  - `variation`: Number. The variation of the data set.
+  - `variance`: Number. The variation of the data set.
 
 #####mlib.statistics.getVariationRatio
 - Gets the variation ratio of the data.
