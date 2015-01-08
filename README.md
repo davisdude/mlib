@@ -45,7 +45,7 @@ And __then__ run one of the above commands. If none of those work, just take my 
 ##Functions
 - [mlib.line](https://github.com/davisdude/mlib#mlibline)
   - [mlib.line.checkPoint](https://github.com/davisdude/mlib#mliblinecheckpoint)
-  - [milb.line.getCircleIntersection](https://github.com/davisdude/mlib#mliblinegetcircleintersection)
+  - [mlib.line.getCircleIntersection](https://github.com/davisdude/mlib#mliblinegetcircleintersection)
   - [mlib.line.getClosestPoint](https://github.com/davisdude/mlib#mliblinegetclosestpoint)
   - [mlib.line.getDistance](https://github.com/davisdude/mlib#mliblinegetdistance)
   - [mlib.line.getIntercept](https://github.com/davisdude/mlib#mliblinegetintercept)
@@ -135,7 +135,7 @@ And __then__ run one of the above commands. If none of those work, just take my 
 - Notes:
   - You cannot use the format `mlib.line.checkPoint( px, px, slope, intercept )` because this would lead to errors on vertical lines.
 
-#####milb.line.getCircleIntersection
+#####mlib.line.getCircleIntersection
 - Returns the intersections of a circle and a line. 
 - Synopsis:
   - `intersections = mlib.line.getCircleIntersection( cx, cy, radius, x1, y1, x2, y2 )`
@@ -223,7 +223,7 @@ And __then__ run one of the above commands. If none of those work, just take my 
 - Returns: 
   - `length`: Number. The distance between the two points. 
 
-#####milb.line.getLineIntersection
+#####mlib.line.getLineIntersection
 - Gives the intersection of two lines.
 - Synopses:
   - `x, y = mlib.line.getLineIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )`
@@ -442,7 +442,7 @@ And __then__ run one of the above commands. If none of those work, just take my 
     - `true` if the segment is inside of the circle.
 	- `false` if the segment is not __completely__ inside of the circle.
 
-mlib.line.segment.isSegmentCompletelyInsidePolygon
+#####mlib.line.segment.isSegmentCompletelyInsidePolygon
 - Checks if a line segment is completely inside a polygon. 
 - Synopses:
   - `inPolygon = mlib.line.segment.isSegmentCompletelyInsidePolygon( x1, y1, x2, y2, vertices )`
@@ -669,7 +669,7 @@ end
 	- `false` if the line segment is not inside the polygon. 
 - Note: 
   - Only one of the points has to be in the polygon to be considered 'inside' of the polygon. 
-  - This is really just a faster version of [mlib.polygon.getPolygonIntersection](https://github.com/davisdude/mlib#milbpolygongetpolygonintersection) that does not give the points of intersection. 
+  - This is really just a faster version of [mlib.polygon.getPolygonIntersection](https://github.com/davisdude/mlib#mlibpolygongetpolygonintersection) that does not give the points of intersection. 
 
 #####mlib.polygon.isSegmentCompletelyInside
 - Checks if a line segment is completely inside a polygon. 
@@ -773,7 +773,7 @@ end
 -- 3: 	tangent 	5		6
 -- 4: 	tagnent 	4		5
 ```
-- For more see [mlib.circle.getSegmentIntersection](https://github.com/davisdude/mlib#mlibcirclegetsegmentintersection) or the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#753)
+- For more see [mlib.circle.getSegmentIntersection](https://github.com/davisdude/mlib#mlibcirclegetsegmentintersection) or the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L753)
 
 #####mlib.circle.getSegmentIntersection
 - Returns the intersections of a circle and a line segment. 
@@ -874,7 +874,7 @@ end
     - `true` if the polygon is inside of the circle.
 	- `false` if the polygon is not __completely__ inside of the circle.
 
-#####milb.circle.isSegmentCompletelyInside
+#####mlib.circle.isSegmentCompletelyInside
 - Checks if a polygon is completely inside of a circle.
 - Synopsis:
   - `completelyInside = mlib.circle.isSegmentCompletelyInside( circleX, circleY, circleRadius, x1, y1, x2, y2 )`
@@ -1089,7 +1089,7 @@ print( a, b ) --> 2, 3
   - `place (1)`: Number. The decimal place to round to. Defaults to 1. 
 - Returns: 
   - The rounded number. 
-  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L880.
+  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L880).
 
 ##License
 A math library made in Lua
