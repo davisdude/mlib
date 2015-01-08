@@ -97,6 +97,13 @@ local function copy( tab, cache )
     return new
 end
 
+local function validateNumber( n )
+	if type( n ) ~= 'number' then return false end
+	if n ~= n then return false end -- nan
+	if n == math.huge or n == -math.huge then return false end
+	return true
+end
+
 -------------------  Lines  --------------------
 -- Returns the length of a line.
 local function getLength( x1, y1, x2, y2 ) 
@@ -221,12 +228,12 @@ local function getLineLineIntersection( ... )
 			return false
 		end
 	else -- Regular lines
-		-- 		y = m1 * x + b1
-		-- 	  - y = m2 * x + b2
-		--		---------------
-		--      0 = x * ( m1 - m2 ) + ( b1 - b2 )
-		--     -( b1 - b2 ) = x * ( m1 - m2 )
-		--      x = ( -b1 + b2 ) / ( m1 - m2 )
+		--   y = m1 * x + b1
+		-- - y = m2 * x + b2
+		--   ---------------
+		--   0 = x * ( m1 - m2 ) + ( b1 - b2 )
+		--  -( b1 - b2 ) = x * ( m1 - m2 )
+		--   x = ( -b1 + b2 ) / ( m1 - m2 )
 		
 		x = ( -intercept1 + intercept2 ) / ( slope1 - slope2 )
 		y = slope1 * x + intercept1
@@ -637,7 +644,7 @@ local function getCircleSegmentIntersection( circleX, circleY, radius, x1, y1, x
 			if checkSegmentPoint( topX, topY, x1, y1, x2, y2 ) and checkSegmentPoint( bottomX, bottomY, x1, y1, x2, y2 ) then
 				return 'chord', topX, topY, bottomX, bottomY
 			elseif checkSegmentPoint( topX, topY, x1, y1, x2, y2 ) then
-				return 'tangent', topX, topX
+				return 'tangent', topX, topY
 			elseif checkSegmentPoint( bottomX, bottomY, x1, y1, x2, y2 ) then
 				return 'tangent', bottomX, bottomY
 			else
@@ -670,8 +677,26 @@ local function getCircleCircleIntersection( circle1x, circle1y, radius1, circle2
 	local p4x = p2x - h * ( circle2y - circle1y ) / length
 	local p4y = p2y + h * ( circle2x - circle1x ) / length
 	
-	if checkFuzzy( length, radius1 + radius2 ) then return 'tangent', p3x, p3y end 
+	if not validateNumber( p3x ) or not validateNumber( p3y ) or not validateNumber( p4x ) or not validateNumber( p4y ) then
+		return 'inside'
+	end
+	
+	if checkFuzzy( length, radius1 + radius2 ) or checkFuzzy( length, math.abs( radius1 - radius2 ) ) then return 'tangent', p3x, p3y end 
 	return 'intersection', p3x, p3y, p4x, p4y 
+end
+
+-- Checks if circle1 is entirely inside of circle2.
+local function isCircleCompletelyInsideCircle( circle1x, circle1y, circle1radius, circle2x, circle2y, circle2radius )
+	if not checkCirclePoint( circle1x, circle1y, circle2x, circle2y, circle2radius ) then return false end
+	local Type = getCircleCircleIntersection( circle2x, circle2y, circle2radius, circle1x, circle1y, circle1radius )
+	if ( Type ~= 'tangent' and Type ~= 'collinear' and Type ~= 'inside' ) then return false end
+	return true
+end
+
+-- Checks if a line-segment is entirely within a circle.
+local function isSegmentCompletelyInsideCircle( circleX, circleY, circleRadius, x1, y1, x2, y2 )
+	local Type = getCircleSegmentIntersection( circleX, circleY, circleRadius, x1, y1, x2, y2 )
+	return Type == 'enclosed'
 end
 
 -------------------- Polygon  --------------------
@@ -980,6 +1005,66 @@ local function isPolygonInsidePolygon( polygon1, polygon2 )
 	return bool
 end
 
+-- Checks if a segment is completely inside a polygon
+local function isSegmentCompletelyInsidePolygon( x1, y1, x2, y2, ... )
+	local polygon = checkInput( ... )
+	if not checkPolygonPoint( x1, y1, polygon ) 
+	or not checkPolygonPoint( x2, y2, polygon )
+	or getPolygonSegmentIntersection( x1, y1, x2, y2, polygon ) then
+		return false
+	end
+	return true
+end
+
+-- Checks if a polygon is completely inside another polygon
+local function isPolygonCompletelyInsidePolygon( polygon1, polygon2 )
+	for i = 1, #polygon1, 2 do
+		local x1, y1 = polygon1[i], polygon1[i + 1]
+		local x2, y2 = polygon1[i + 2] or polygon1[1], polygon1[i + 3] or polygon1[2]		
+		if not isSegmentCompletelyInsidePolygon( x1, y1, x2, y2, polygon2 ) then
+			return false
+		end
+	end
+	return true
+end
+
+-------------- Circle w/ Polygons --------------
+-- Gets if a polygon is completely within a circle
+-- circleX, circleY, circleRadius, polygonPoints
+local function isPolygonCompletelyInsideCircle( circleX, circleY, circleRadius, ... )
+	local input = checkInput( ... )
+	local function isDistanceLess( px, py, x, y, circleRadius ) -- Faster, does not use math.sqrt
+		local distanceX, distanceY = px - x, py - y
+		return distanceX * distanceX + distanceY * distanceY < circleRadius * circleRadius -- Faster. For comparing distances only.
+	end
+	
+	for i = 1, #input, 2 do
+		if not checkCirclePoint( input[i], input[i + 1], circleX, circleY, circleRadius ) then return false end
+	end
+	return true
+end
+
+-- Checks if a circle is completely within a polygon
+-- circleX, circleY, circleRadius, polygonPoints
+local function isCircleCompletelyInsidePolygon( circleX, circleY, circleRadius, ... )
+	local input = checkInput( ... )
+	if not checkPolygonPoint( circleX, circleY, ... ) then return false end
+	
+	local function distance2( x1, y1, x2, y2 ) -- Faster since it does not use math.sqrt
+		local dx, dy = x1 - x2, y1 - y2
+		return dx * dx + dy * dy
+	end
+	local rad2 = circleRadius * circleRadius
+	
+	for i = 1, #input, 2 do
+		local x1, y1 = input[i], input[i + 1]
+		local x2, y2 = input[i + 2] or input[1], input[i + 3] or input[2]
+		if distance2( x1, y1, circleX, circleY ) <= rad2 then return false end
+		if getCircleSegmentIntersection( circleX, circleY, circleRadius, x1, y1, x2, y2 ) then return false end
+	end
+	return true
+end
+
 ------------------ Statistics ------------------
 -- Gets the average of a list of points
 -- points
@@ -1078,7 +1163,7 @@ local function getDispersion( ... )
 end
 
 return {
-	_VERSION = 'MLib 0.9.2', 
+	_VERSION = 'MLib 0.9.3', 
 	_DESCRIPTION = 'A math and collisions library aimed at LÖVE.', 
 	_URL = 'https://github.com/davisdude/mlib', 
 	_LICENSE = [[
@@ -1104,7 +1189,6 @@ return {
 	]], 
 	line = {
 		getLength = getLength, 
-		getDistance = getLength, -- Alias
 		getMidpoint = getMidpoint, 
 		getSlope = getSlope, 
 		getPerpendicularSlope = getPerpendicularSlope, 
@@ -1115,9 +1199,23 @@ return {
 		getSegmentIntersection = getLineSegmentIntersection, 
 		checkPoint = checkLinePoint, 
 		
+		-- Aliases
+		getDistance = getLength,
+		getCircleIntersection = getCircleLineIntersection, 
+		getPolygonIntersection = getPolygonLineIntersection, 
+		getLineIntersection = getLineLineIntersection, 
+		
 		segment = {
 			checkPoint = checkSegmentPoint, 
 			getIntersection = getSegmentSegmentIntersection, 
+			
+			-- Aliases
+			getCircleIntersection = getCircleSegmentIntersection, 
+			getPolygonIntersection = getPolygonSegmentIntersection, 
+			getLineIntersection = getLineSegmentIntersection, 
+			getSegmentIntersection = getSegmentSegmentIntersection, 
+			isSegmentCompletelyInsideCircle = isSegmentCompletelyInsideCircle,
+			isSegmentCompletelyInsidePolygon = isSegmentCompletelyInsidePolygon, 
 		}, 
 	},
 	polygon = {
@@ -1133,6 +1231,12 @@ return {
 		getCircleIntersection = getPolygonCircleIntersection, 
 		isCircleInside = isCircleInsidePolygon, 
 		isPolygonInside = isPolygonInsidePolygon, 
+		isCircleCompletelyInside = isCircleCompletelyInsidePolygon, 
+		isPolygonCompletelyInside = isPolygonCompletelyInsidePolygon, 
+		isSegmentCompletelyInside = isSegmentCompletelyInsidePolygon, 
+		
+		-- Aliases
+		isCircleCompletelyOver = isPolygonCompletelyInsideCircle,
 	}, 
 	circle = {
 		getArea = getCircleArea, 
@@ -1141,7 +1245,15 @@ return {
 		getLineIntersection = getCircleLineIntersection, 
 		getSegmentIntersection = getCircleSegmentIntersection, 
 		getCircleIntersection = getCircleCircleIntersection, 
+		isCircleCompletelyInside = isCircleCompletelyInsideCircle, 
+		isPolygonCompletelyInside = isPolygonCompletelyInsideCircle, 
+		isSegmentCompletelyInside = isSegmentCompletelyInsideCircle,
 		isPointOnCircle = isPointOnCircle, 
+		
+		-- Aliases
+		getPolygonIntersection = getPolygonCircleIntersection, 
+		isCircleInsidePolygon = isCircleInsidePolygon, 
+		isCircleCompletelyInsidePolygon = isCircleCompletelyInsidePolygon, 
 	}, 
 	statistics = {
 		getMean = getMean, 

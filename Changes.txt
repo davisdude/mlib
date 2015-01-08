@@ -1,3 +1,50 @@
+0.9.3
+====
+Added:
+----
+- milb.circle.isCircleCompletelyInside
+- mlib.circle.isPolygonCompletelyInside
+- milb.circle.isSegmentCompletelyInside
+- mlib.polygon.isCircleCompletelyInside
+- mlib.polygon.isPolygonCompletelyInside
+- mlib.polygon.isSegmentCompletelyInside
+
+		- ALIASES -
+- mlib.circle.getPolygonIntersection
+- mlib.circle.isCircleInsidePolygon
+- mlib.circle.isCircleCompletelyInsidePolygon
+- milb.line.getCircleIntersection
+- milb.line.getPolygonIntersection
+- milb.line.getLineIntersection
+- mlib.line.segment.getCircleIntersection
+- mlib.line.segment.getPolygonIntersection
+- mlib.line.segment.getLineIntersection
+- mlib.line.segment.getSegmentIntersection
+- mlib.line.segment.isSegmentCompletelyInsideCircle
+- mlib.line.segment.isSegmentCompletelyInsidePolygon
+- mlib.polygon.isCircleCompletelyOver
+
+Changed:
+----
+- mlib.circle.getCircleIntersection now returns 'inside' instead of 'intersection' if the point has not intersections but is within the circle.
+- Fixed problem involving mlib.circle.getSegmentIntersection
+
+- README.md now has more information on how to run specs and other minor improvements.
+- Fixed some commenting on explanation of derivation of mlib.line.getIntersection.
+- Updated the example to use the current version of mlib.
+- Made/Changed some comments in the example main.lua.
+
+Removed:
+----
+
+To-Do
+----
+- Make examples file on github (examples/shapes/main.lua, etc.) not just one line. 
+- Determine if isCompletelyInsideFunctions should return true with tangents.
+- Make argument order more logical.
+- Make sure to see if any aliases were missed. (e.g. isSegmentInside)
+- Update spec links in README
+
 0.9.2
 ====
 Added:

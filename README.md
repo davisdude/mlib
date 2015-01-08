@@ -29,30 +29,46 @@ For more, see [here](https://love2d.org/).
 You can find the tests [here](spec.lua).
 You can run them via [Telescope](https://github.com/norman/telescope/) and type the following command in the command-line of the root folder:
 ```
-tsc -f specs
+tsc -f specs.lua
 ```
+If that does not work, you made need to put a link to Lua inside of the folder for `telescope` and run the following command:
+```
+lua tsc -f specs.lua
+```
+If you encounter further errors, try to run the command line as an administrator (usually located in `C:\Windows\System32\`), then right-click on `cmd.exe` and select `Run as administrator`, then do 
+```
+cd C:\Path\to\telescope\
+```
+And __then__ run one of the above commands. If none of those work, just take my word for it that all the tests pass and look at this picture.
+![Success](Reference Pictures/Success.png)
 
 ##Functions
 - [mlib.line](https://github.com/davisdude/mlib#mlibline)
   - [mlib.line.checkPoint](https://github.com/davisdude/mlib#mliblinecheckpoint)
+  - [milb.line.getCircleIntersection](https://github.com/davisdude/mlib#mliblinegetcircleintersection)
   - [mlib.line.getClosestPoint](https://github.com/davisdude/mlib#mliblinegetclosestpoint)
   - [mlib.line.getDistance](https://github.com/davisdude/mlib#mliblinegetdistance)
   - [mlib.line.getIntercept](https://github.com/davisdude/mlib#mliblinegetintercept)
   - [mlib.line.getIntersection](https://github.com/davisdude/mlib#mliblinegetintersection)
   - [mlib.line.getLength](https://github.com/davisdude/mlib#mliblinegetlength)
+  - [mlib.line.getLineIntersection](https://github.com/davisdude/mlib#mliblinegetlineintersection)
   - [mlib.line.getMidpoint](https://github.com/davisdude/mlib#mliblinegetmidpoint)
   - [mlib.line.getPerpendicularBisector](https://github.com/davisdude/mlib#mliblinegetperpendicularbisector)
   - [mlib.line.getPerpendicularSlope](https://github.com/davisdude/mlib#mliblinegetperpendicularslope)
+  - [mlib.line.getPolygonIntersection](https://github.com/davisdude/mlib#mliblinegetpolygonintersection)
   - [mlib.line.getSegmentIntersection](https://github.com/davisdude/mlib#mliblinegetsegmentintersection)
   - [mlib.line.getSlope](https://github.com/davisdude/mlib#mliblinegetslope)
-  - [mlib.line.segment](https://github.com/davisdude/mlib#mliblinesegment)
-    - [mlib.line.segment.checkPoint](https://github.com/davisdude/mlib#mliblinesegmentcheckpoint)
-	- [mlib.line.segment.getIntersection](https://github.com/davisdude/mlib#mliblinesegmentgetintersection)
+- [mlib.line.segment](https://github.com/davisdude/mlib#mliblinesegment)
+  - [mlib.line.segment.checkPoint](https://github.com/davisdude/mlib#mliblinesegmentcheckpoint)
+  - [mlib.line.segment.getCircleIntersection](https://github.com/davisdude/mlib#mliblinesegmentgetcircleintersection)
+  - [mlib.line.segment.getPolygonIntersection](https://github.com/davisdude/mlib#mliblinesegmentgetpolygonintersection)
+  - [mlib.line.segment.getLineIntersection](https://github.com/davisdude/mlib#mliblinesegmentgetlineintersection)
+  - [mlib.line.segment.getIntersection](https://github.com/davisdude/mlib#mliblinesegmentgetintersection)
+  - [mlib.line.segment.getSegmentIntersection](https://github.com/davisdude/mlib#mliblinesegmentgetsegmentintersection)
+  - [mlib.line.segment.isSegmentCompletelyInsideCircle](https://github.com/davisdude/mlib#mliblinesegmentissegmentcompletelyinsidecircle)
+  - [mlib.line.segment.isSegmentCompletelyInsidePolygon](https://github.com/davisdude/mlib#mliblinesegmentissegmentcompletelyinsidepolygon)
 - [mlib.polygon](https://github.com/davisdude/mlib#mlibpolygon)
   - [mlib.polygon.checkPoint](https://github.com/davisdude/mlib#mlibpolygoncheckpoint)
-  - [mlib.polygon.isCircleInside](https://github.com/davisdude/mlib#mlibpolygoniscircleinside)
-  - [mlib.polygon.isPolygonInside](https://github.com/davisdude/mlib#mlibpolygonispolygoninside)
-  - [mlib.polygon.isSegmentInside](https://github.com/davisdude/mlib#mlibpolygonissegmentinside)
   - [mlib.polygon.getCentroid](https://github.com/davisdude/mlib#mlibpolygongetcentroid)
   - [mlib.polygon.getCircleIntersection](https://github.com/davisdude/mlib#mlibpolygongetcircleintersection)
   - [mlib.polygon.getLineIntersection](https://github.com/davisdude/mlib#mlibpolygongetlineintersection)
@@ -61,14 +77,27 @@ tsc -f specs
   - [mlib.polygon.getSegmentIntersection](https://github.com/davisdude/mlib#mlibpolygongetsegmentintersection)
   - [mlib.polygon.getSignedPolygonArea](https://github.com/davisdude/mlib#mlibpolygongetsignedpolygonarea)
   - [mlib.polygon.getTriangleHeight](https://github.com/davisdude/mlib#mlibpolygongettriangleheight)
+  - [mlib.polygon.isCircleInside](https://github.com/davisdude/mlib#mlibpolygoniscircleinside)
+  - [mlib.polygon.isCircleCompletelyInside](https://github.com/davisdude/mlib#mlibpolygoniscirclecompletelyinside)
+  - [mlib.polygon.isCircleCompletelyOver](https://github.com/davisdude/mlib#mlibpolygoniscirclecompletelyover)
+  - [mlib.polygon.isPolygonInside](https://github.com/davisdude/mlib#mlibpolygonispolygoninside)
+  - [mlib.polygon.isPolygonCompletelyInside](https://github.com/davisdude/mlib#mlibpolygonispolygoncompletelyinside)
+  - [mlib.polygon.isSegmentInside](https://github.com/davisdude/mlib#mlibpolygonissegmentinside)
+  - [mlib.polygon.isSegmentCompletelyInside](https://github.com/davisdude/mlib#mlibpolygonissegmentcompletelyinside)
 - [mlib.circle](https://github.com/davisdude/mlib#mlibcircle)
   - [mlib.circle.checkPoint](https://github.com/davisdude/mlib#mlibcirclecheckpoint)
-  - [mlib.circle.isPointOnCircle](https://github.com/davisdude/mlib#mlibcircleispointoncircle)
   - [mlib.circle.getArea](https://github.com/davisdude/mlib#mlibcirclegetarea)
   - [mlib.circle.getCircleIntersection](https://github.com/davisdude/mlib#mlibcirclegetcircleintersection)
   - [mlib.circle.getCircumference](https://github.com/davisdude/mlib#mlibcirclegetcircumference)
   - [mlib.circle.getLineIntersection](https://github.com/davisdude/mlib#mlibcirclegetlineintersection)
+  - [mlib.circle.getPolygonIntersection](https://github.com/davisdude/mlib#mlibcirclegetpolygonintersection)
   - [mlib.circle.getSegmentIntersection](https://github.com/davisdude/mlib#mlibcirclegetsegmentintersection)
+  - [mlib.circle.isCircleCompletelyInside](https://github.com/davisdude/mlib#mlibcircleiscirclecompletelyinside)
+  - [mlib.circle.isCircleCompletelyInsidePolygon](https://github.com/davisdude/mlib#mlibcircleiscirclecompletelyinsidepolygon)
+  - [mlib.circle.isCircleInsidePolygon](https://github.com/davisdude/mlib#mlibcircleiscircleinsidepolygon)
+  - [mlib.circle.isPointOnCircle](https://github.com/davisdude/mlib#mlibcircleispointoncircle)
+  - [mlib.circle.isPolygonCompletelyInside](https://github.com/davisdude/mlib#mlibcircleispolygoncompletelyinside)
+  - [mlib.circle.isSegmentCompletelyInside](https://github.com/davisdude/mlib#mlibcircleissegmentcompletelyinside)
 - [mlib.statistics](https://github.com/davisdude/mlib#mlibstatistics)
   - [mlib.statistics.getCentralTendency](https://github.com/davisdude/mlib#mlibstatisticsgetcentraltendency)
   - [mlib.statistics.getDispersion](https://github.com/davisdude/mlib#mlibstatisticsgetdispersion)
@@ -80,14 +109,14 @@ tsc -f specs
   - [mlib.statistics.getVariance](https://github.com/davisdude/mlib#mlibstatisticsgetvariance)
   - [mlib.statistics.getVariationRatio](https://github.com/davisdude/mlib#mlibstatisticsgetvariationratio)
 - [mlib.math](https://github.com/davisdude/mlib#mlibmath)
+  - [mlib.math.getAngle](https://github.com/davisdude/mlib#mlibmathgetangle)
+  - [mlib.math.getPercentage](https://github.com/davisdude/mlib#mlibmathgetpercentage)
+  - [mlib.math.getPercentOfChange](https://github.com/davisdude/mlib#mlibmathgetpercentofchange)
+  - [mlib.math.getQuadraticRoots](https://github.com/davisdude/mlib#mlibmathgetquadraticroots)
   - [mlib.math.getRoot](https://github.com/davisdude/mlib#mlibmathgetroot)
+  - [mlib.math.getSummation](https://github.com/davisdude/mlib#mlibmathgetsummation)
   - [mlib.math.isPrime](https://github.com/davisdude/mlib#mlibmathisprime)
   - [mlib.math.round](https://github.com/davisdude/mlib#mlibmathround)
-  - [mlib.math.getSummation](https://github.com/davisdude/mlib#mlibmathgetsummation)
-  - [mlib.math.getPercentOfChange](https://github.com/davisdude/mlib#mlibmathgetpercentofchange)
-  - [mlib.math.getPercentage](https://github.com/davisdude/mlib#mlibmathgetpercentage)
-  - [mlib.math.getQuadraticRoots](https://github.com/davisdude/mlib#mlibmathgetquadraticroots)
-  - [mlib.math.getAngle](https://github.com/davisdude/mlib#mlibmathgetangle)
   
 ####mlib.line
 - Deals with linear aspects, such as slope and length. 
@@ -105,6 +134,25 @@ tsc -f specs
 	- `false` if it does not. 
 - Notes:
   - You cannot use the format `mlib.line.checkPoint( px, px, slope, intercept )` because this would lead to errors on vertical lines.
+
+#####milb.line.getCircleIntersection
+- Returns the intersections of a circle and a line. 
+- Synopsis:
+  - `intersections = mlib.line.getCircleIntersection( cx, cy, radius, x1, y1, x2, y2 )`
+- Arguments:
+  - `cx`, `cy`: Numbers. The x and y coordinates for the center of the circle.
+  - `radius`: Number. The radius of the circle. 
+  - `x1`, `y1`, `x2`, `y2`: Numbers. Two x and y coordinates the lie on the line. 
+- Returns: 
+  - `intersections`: Table. A table with the type and where the intersections happened. Table is formatted:
+    - `type`, `x1`, `y1`, `x2`, `y2`
+	  - String (`'secant'`), Number, Number, Number, Number
+	    - The numbers are the x and y coordinates where the line intersects the circle.
+	  - String (`'tangent'`), Number, Number, Boolean (`nil`), Boolean (`nil`)
+	    - `x1` and `x2` represent where the line intersects the circle.
+	  - Boolean (`false`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`)
+	    - No intersection. 
+    - For more see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L233).
   
 #####mlib.line.getClosestPoint
 - Gives the closest point to a line. 
@@ -175,6 +223,28 @@ tsc -f specs
 - Returns: 
   - `length`: Number. The distance between the two points. 
 
+#####milb.line.getLineIntersection
+- Gives the intersection of two lines.
+- Synopses:
+  - `x, y = mlib.line.getLineIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )`
+  - `x, y = mlib.line.getLineIntersection( slope1, intercept1, x3, y3, x4, y4 )`
+  - `x, y = mlib.line.getLineIntersection( slope1, intercept1, slope2, intercept2 )`
+- Arguments: 
+  - `x1`, `y1`, `x2`, `y2`: Numbers. Two x and y coordinates that lie on the first line. 
+  - `x3`, `y3`, `x4`, `y4`: Numbers. Two x and y coordinates that lie on the second line.
+  - `slope1`, `intercept1`: 
+    - Numbers. The slope and y-intercept of the first line.
+	- Booleans (`false`). The slope and y-intercept of the first line (if the first line is vertical).
+  - `slope2`, `intercept2`: 
+    - Numbers. The slope and y-intercept of the second line.
+	- Booleans (`false`). The slope and y-intercept of the second line (if the second line is vertical).
+- Returns:
+  - `x`, `y`:
+    - Numbers. The x and y coordinate where the lines intersect.
+	- Boolean:
+	  - `true`, `nil`: The lines are collinear.
+	  - `false`, `nil`: The lines are parallel and __not__ collinear.
+
 #####mlib.line.getMidpoint
 - Gives the midpoint of two points. 
 - Synopsis:
@@ -209,6 +279,20 @@ tsc -f specs
     - Number. The perpendicular slope of the line. 
 	- Boolean (`false`). The perpendicular slope of the line (if the original line was horizontal).
 
+#####mlib.line.getPolygonIntersection
+- Returns the coordinates of where a line intersects a polygon. 
+- Synopses: 
+  - `intersections = mlib.line.getPolygonIntersection( x1, y1, x2, y2, vertices )`
+  - `intersections = mlib.line.getPolygonIntersection( x1, y1, x2, y2, ... )
+- Arguments: 
+  - `x1`, `y1`, `x2`, `y2`: Numbers. Two x and y coordinates.
+  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
+- Returns: 
+  - `intersections`: Table. Contains the intersections.
+- Notes:
+  - With collinear lines, they are actually broken up. i.e. `{ 0, 4, 0, 0 }` would become `{ 0, 4 }, { 0, 0 }`.
+
 #####mlib.line.getSegmentIntersection
 - Gives the intersection of a line segment and a line. 
 - Synopses: 
@@ -240,7 +324,7 @@ tsc -f specs
     - Number. The slope of the line. 
 	- Boolean (`false`). The slope of the line (if the line is vertical).
 
-#####mlib.line.segment
+####mlib.line.segment
 - Deals with line segments. 
 
 #####mlib.line.segment.checkPoint
@@ -254,6 +338,63 @@ tsc -f specs
   - `onSegment`: Boolean.
     - `true` if the point lies on the line segment.
 	- `false` if the point does not lie on the line segment. 
+
+#####mlib.line.segment.getCircleIntersection
+- Returns the intersections of a circle and a line segment. 
+- Synopsis:
+  - `intersections = mlib.line.segment.getCircleIntersection( cx, cy, radius, x1, y1, x2, y2 )`
+- Arguments:
+  - `cx`, `cy`: Numbers. The x and y coordinates for the center of the circle.
+  - `radius`: Number. The radius of the circle. 
+  - `x1`, `y1`, `x2`, `y2`: Numbers. The two x and y coordinates of the line segment. 
+- Returns: 
+  - `intersections`: Table. A table with the type and where the intersections happened. Table is formatted:
+    - `type`, `x1`, `y1`, `x2`, `y2`
+	  - String (`'chord'`), Number, Number, Number, Number
+	    - The numbers are the x and y coordinates where the line segment is on both edges of the circle. 
+	  - String (`'enclosed'`), Number, Number, Number, Number
+	    - The numbers are the x and y coordinates of the line segment if it is fully inside of the circle.
+	  - String (`'secant'`), Number, Number, Number, Number
+	    - The numbers are the x and y coordinates where the line segment intersects the circle.
+	  - String (`'tangent'`), Number, Number, Boolean (`nil`), Boolean (`nil`)
+	    - `x1` and `x2` represent where the line segment intersects the circle.
+	  - Boolean (`false`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`)
+	    - No intersection. 
+    - For more see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L324).
+
+#####mlib.line.segment.getPolygonIntersection
+- Returns the coordinates of where a line segmeing intersects a polygon. 
+- Synopses: 
+  - `intersections = mlib.line.segment.getPolygonIntersection( x1, y1, x2, y2, vertices )`
+  - `intersections = mlib.line.segment.getPolygonIntersection( x1, y1, x2, y2, ... )
+- Arguments: 
+  - `x1`, `y1`, `x2`, `y2`: Numbers. Two x and y coordinates.
+  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
+- Returns: 
+  - `intersections`: Table. Contains the intersections.
+- Notes:
+  - With collinear line segments, they are __not__ broken up. See the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L346) for more. 
+
+#####mlib.line.segment.getLineIntersection
+- Gives the intersection of a line segment and a line. 
+- Synopses: 
+  - `x1, y1, x2, y2 = mlib.line.segment.getLineIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )`
+  - `x1, y1, x2, y2 = mlib.line.segment.getLineIntersection( x1, y1, x2, y2, slope, intercept )`
+- Arguments: 
+  - `x1`, `y1`, `x2`, `y2`: Numbers. Two x and y coordinates that lie on the line segment.
+  - `x3`, `y3`, `x4`, `y4`: Numbers. Two x and y coordinates that lie on the line.
+  - `slope`, `intercept`: 
+    - Numbers. The slope and y-intercept of the the line.
+	- Booleans (`false`). The slope and y-intercept of the line (if the line is vertical).
+- Returns:
+  - `x1`, `y1`, `x2`, `y2`: 
+    - Number, Number, Number, Number. 
+	  - The points of the line segment if the line and segment are collinear.
+	- Number, Number, Boolean (`nil`), Boolean (`nil`). 
+	  - The coordinate of intersection if the line and segment intersect and are not collinear.
+	- Boolean (`false`), Boolean (`nil`), Boolean (`nil`), 
+	  - Boolean (`nil`). If the line and segment don't intersect. 
 
 #####mlib.line.segment.getIntersection
 - Checks if two line segments intersect. 
@@ -271,6 +412,50 @@ tsc -f specs
 	- Boolean (`false`), Boolean (`nil`), Boolean (`nil`) , Boolean (`nil`).
 	  - If the line segments don't intersect. 
 
+#####mlib.line.segment.getSegmentIntersection
+- Checks if two line segments intersect. 
+- Synopsis: 
+  - `cx1, cy1, cx2, cy2 = mlib.line.segment.getIntersection( x1, y1, x2, y2, x3, y3 x4, y4 )`
+- Arguments: 
+  - `x1`, `y1`, `x2`, `y2`: Numbers. Two x and y coordinates of the first line segment.
+  - `x3`, `y3`, `x4`, `y4`: Numbers. Two x and y coordinates of the second line segment.
+- Returns: 
+  - `cx1`, `cy1`, `cx2`, `cy2`: 
+    - Number, Number, Number, Number. 
+	  - The points of the resulting intersection if the line segments are collinear.
+	- Number, Number, Boolean (`nil`), Boolean (`nil`). 
+	  - The point of the resulting intersection if the line segments are not collinear. 
+	- Boolean (`false`), Boolean (`nil`), Boolean (`nil`) , Boolean (`nil`).
+	  - If the line segments don't intersect. 
+
+#####mlib.line.segment.isSegmentCompletelyInsideCircle
+- Checks if a polygon is completely inside of a circle.
+- Synopsis:
+  - `completelyInside = mlib.line.segment.isSegmentCompletelyInsideCircle( circleX, circleY, circleRadius, x1, y1, x2, y2 )`
+- Arguments: 
+  - `circleX`, `circleY`: Numbers. The x and y coordinates of the circle. 
+  - `circleRadius`: Number. The radius of the circle.
+  - `x1`, `y1`: Numbers. The x and y coordinates of one end of the segment.
+  - `x2`, `y2`: Numbers. The x and y coordinates of the other end of the segment.
+- Returns: 
+  - `completelyInside`: Boolean. 
+    - `true` if the segment is inside of the circle.
+	- `false` if the segment is not __completely__ inside of the circle.
+
+mlib.line.segment.isSegmentCompletelyInsidePolygon
+- Checks if a line segment is completely inside a polygon. 
+- Synopses:
+  - `inPolygon = mlib.line.segment.isSegmentCompletelyInsidePolygon( x1, y1, x2, y2, vertices )`
+  - `inPolygon = mlib.line.segment.isSegmentCompletelyInsidePolygon( x1, y1, x2, y2, ... )`
+- Arguments: 
+  - `x1`, `y1`, `x2`, `y2`: Numbers. The x and y coordinates of the line segment. 
+  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
+- Returns: 
+  - `inPolygon`: Boolean. 
+    - `true` if the line segment is __completely__ inside the polygon. 
+	- `false` if the line segment is not inside the polygon. 
+
 ####mlib.polygon
 - Handles aspects involving polygons. 
 
@@ -287,53 +472,6 @@ tsc -f specs
   - `inPolygon`: Boolean.
     - `true` if the point is inside the polygon. 
 	- `false` if the point is not inside the polygon. 
-
-#####mlib.polygon.isCircleInside
-- Checks if a circle is inside the polygon. 
-- Synopses:
-  - `inPolygon = mlib.polygon.isCircleInside( cx, cy, radius, vertices )`
-  - `inPolygon = mlib.polygon.isCircleInside( cx, cy, radius, ... )`
-- Arguments: 
-  - `cx`, `cy`: Numbers. The x and y coordinates for the center of the circle.
-  - `radius`: Number. The radius of the circle.
-  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
-  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
-- Returns: 
-  - `inPolygon`: Boolean.
-    - `true` if the circle is inside the polygon. 
-	- `false` if the circle is not inside the polygon. 
-- Notes:
-  - Only returns true if the center of the circle is inside the circle. 
-
-#####mlib.polygon.isPolygonInside
-- Checks if a polygon is inside a polygon. 
-- Synopsis: 
-  - `inPolygon = mlib.polygon.isPolygonInside( polygon1, polygon2 )`
-- Arguments: 
-  - `polygon1`: Table. The vertices of the first polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
-  - `polygon2`: Table. The vertices of the second polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
-- Returns: 
-  - `inPolygon`: Boolean. 
-    - `true` if the `polygon2` is inside of `polygon1`.
-	- `false` if `polygon2` is not inside of `polygon2`.
-- Notes: 
-  - Returns true as long as any of the line segments of `polygon2` are inside of the `polygon1`.
-
-#####mlib.polygon.isSegmentInside
-- Checks if a line segment is inside a polygon. 
-- Synopses:
-  - `inPolygon = mlib.polygon.isSegmentInside( x1, y1, x2, y2, vertices )`
-  - `inPolygon = mlib.polygon.isSegmentInside( x1, y1, x2, y2, ... )`
-- Arguments: 
-  - `x1`, `y1`, `x2`, `y2`: Numbers. The x and y coordinates of the line segment. 
-  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
-  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
-- Returns: 
-  - `inPolygon`: Boolean. 
-    - `true` if the line segment is inside the polygon. 
-	- `false` if the line segment is not inside the polygon. 
-- Note: 
-  - Only one of the points has to be in the polygon to be considered 'inside' of the polygon. 
 
 #####mlib.polygon.getCentroid
 - Returns the centroid of the polygon. 
@@ -369,7 +507,7 @@ end
 -- 3: 	tangent 	5		6
 -- 4: 	tagnent 	4		5
 ```
-- For more see [mlib.circle.getSegmentIntersection](https://github.com/davisdude/mlib#mlibcirclegetsegmentintersection) or the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L397)
+- For more see [mlib.circle.getSegmentIntersection](https://github.com/davisdude/mlib#mlibcirclegetsegmentintersection) or the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L557)
 
 #####mlib.polygon.getLineIntersection
 - Returns the coordinates of where a line intersects a polygon. 
@@ -418,7 +556,7 @@ end
 - Returns: 
   - `intersections`: Table. Contains the intersections.
 - Notes:
-  - With collinear line segments, they are __not__ broken up. See the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L359) for more. 
+  - With collinear line segments, they are __not__ broken up. See the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L507) for more. 
 
 #####mlib.polygon.getSignedPolygonArea
 - Gets the signed area of the polygon. If the points are ordered counter-clockwise the area is positive. If the points are ordered clockwise the number is negative. 
@@ -443,8 +581,112 @@ end
 - Returns: 
   - `height`: Number. The height of the triangle. 
 
+#####mlib.polygon.isCircleInside
+- Checks if a circle is inside the polygon. 
+- Synopses:
+  - `inPolygon = mlib.polygon.isCircleInside( cx, cy, radius, vertices )`
+  - `inPolygon = mlib.polygon.isCircleInside( cx, cy, radius, ... )`
+- Arguments: 
+  - `cx`, `cy`: Numbers. The x and y coordinates for the center of the circle.
+  - `radius`: Number. The radius of the circle.
+  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
+- Returns: 
+  - `inPolygon`: Boolean.
+    - `true` if the circle is inside the polygon. 
+	- `false` if the circle is not inside the polygon. 
+- Notes:
+  - Only returns true if the center of the circle is inside the circle. 
+
+#####mlib.polygon.isCircleCompletelyInside
+- Checks if a circle is completely inside the polygon. 
+- Synopses:
+  - `inPolygon = mlib.polygon.isCircleCompletelyInside( cx, cy, radius, vertices )`
+  - `inPolygon = mlib.polygon.isCircleCompletelyInside( cx, cy, radius, ... )`
+- Arguments: 
+  - `cx`, `cy`: Numbers. The x and y coordinates for the center of the circle.
+  - `radius`: Number. The radius of the circle.
+  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
+- Returns: 
+  - `inPolygon`: Boolean.
+    - `true` if the circle is __completely__ inside the polygon. 
+	- `false` if the circle is not inside the polygon. 
+
+#####mlib.polygon.isCircleCompletelyOver
+- Checks if a polygon is completely inside of a circle.
+- Synopsis:
+  - `completelyInside = mlib.polygon.isCircleCompletelyOver( circleX, circleY, circleRadius, vertices )`
+  - `completelyInside = mlib.polygon.isCircleCompletelyOver( circleX, circleY, circleRadius, ... )`
+- Arguments: 
+  - `circleX`, `circleY`: Numbers. The x and y coordinates of the circle. 
+  - `circleRadius`: Number. The radius of the circle.
+  - `vertices`: Table. A table containing all of the vertices of the polygon. 
+  - `...`: Numbers. All of the points of the polygon.
+- Returns: 
+  - `completelyInside`: Boolean. 
+    - `true` if the polygon is inside of the circle.
+	- `false` if the polygon is not __completely__ inside of the circle.
+
+#####mlib.polygon.isPolygonInside
+- Checks if a polygon is inside a polygon. 
+- Synopsis: 
+  - `inPolygon = mlib.polygon.isPolygonInside( polygon1, polygon2 )`
+- Arguments: 
+  - `polygon1`: Table. The vertices of the first polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `polygon2`: Table. The vertices of the second polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+- Returns: 
+  - `inPolygon`: Boolean. 
+    - `true` if the `polygon2` is inside of `polygon1`.
+	- `false` if `polygon2` is not inside of `polygon2`.
+- Notes: 
+  - Returns true as long as any of the line segments of `polygon2` are inside of the `polygon1`.
+
+#####mlib.polygon.isPolygonCompletelyInside
+- Checks if a polygon is completely inside a polygon. 
+- Synopsis: 
+  - `inPolygon = mlib.polygon.isPolygonCompletelyInside( polygon1, polygon2 )`
+- Arguments: 
+  - `polygon1`: Table. The vertices of the first polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `polygon2`: Table. The vertices of the second polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+- Returns: 
+  - `inPolygon`: Boolean. 
+    - `true` if the `polygon2` is __completely__ inside of `polygon1`.
+	- `false` if `polygon2` is not inside of `polygon2`.
+
+#####mlib.polygon.isSegmentInside
+- Checks if a line segment is inside a polygon. 
+- Synopses:
+  - `inPolygon = mlib.polygon.isSegmentInside( x1, y1, x2, y2, vertices )`
+  - `inPolygon = mlib.polygon.isSegmentInside( x1, y1, x2, y2, ... )`
+- Arguments: 
+  - `x1`, `y1`, `x2`, `y2`: Numbers. The x and y coordinates of the line segment. 
+  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
+- Returns: 
+  - `inPolygon`: Boolean. 
+    - `true` if the line segment is inside the polygon. 
+	- `false` if the line segment is not inside the polygon. 
+- Note: 
+  - Only one of the points has to be in the polygon to be considered 'inside' of the polygon. 
+  - This is really just a faster version of [mlib.polygon.getPolygonIntersection](https://github.com/davisdude/mlib#milbpolygongetpolygonintersection) that does not give the points of intersection. 
+
+#####mlib.polygon.isSegmentCompletelyInside
+- Checks if a line segment is completely inside a polygon. 
+- Synopses:
+  - `inPolygon = mlib.polygon.isSegmentCompletelyInside( x1, y1, x2, y2, vertices )`
+  - `inPolygon = mlib.polygon.isSegmentCompletelyInside( x1, y1, x2, y2, ... )`
+- Arguments: 
+  - `x1`, `y1`, `x2`, `y2`: Numbers. The x and y coordinates of the line segment. 
+  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
+- Returns: 
+  - `inPolygon`: Boolean. 
+    - `true` if the line segment is __completely__ inside the polygon. 
+	- `false` if the line segment is not inside the polygon. 
+
 ####mlib.circle
-- Handles aspsects involcing circles.
+- Handles aspects involving circles.
 
 #####mlib.circle.checkPoint
 - Checks if a point is on the inside or on the edge the circle.
@@ -458,21 +700,6 @@ end
   - `inCircle`: Boolean.
     - `true` if the point is inside or on the circle. 
 	- `false` if the point is outside of the circle. 
-
-#####mlib.circle.isPointOnCircle
-- Checks if a point is __exactly__ on the edge of the circle.
-- Synopsis:
-  - `onCircle = mlib.circle.checkPoint( px, px, cx, cy, radius )`
-- Arguments: 
-  - `px`, `py`: Numbers. The x and y coordinates of the point being tested. 
-  - `cx`, `cy`: Numbers. The x and y coordinates of the center of the circle.
-  - `radius`: Number. The radius of the circle.
-- Returns: 
-  - `onCircle`: Boolean.
-    - `true` if the point is on the circle. 
-	- `false` if the point is on the inside or outside of the circle. 
-- Notes: 
-  - Will return false if the point is inside __or__ outside of the circle.
 
 #####mlib.circle.getArea
 - Gives the area of a circle. 
@@ -493,7 +720,7 @@ end
   - `c2x`, `c2y`: Numbers. The x and y coordinate of the second circle. 
   - `radius2`: Number. The radius of the second circle.
 - Returns: 
-  - `intersections`: Table. A table that contains the type and where the circle collide. See the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L503) for more. 
+  - `intersections`: Table. A table that contains the type and where the circle collides. See the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L697) for more. 
 
 #####mlib.circle.getCircumference
 - Returns the circumference of a circle.
@@ -521,7 +748,32 @@ end
 	    - `x1` and `x2` represent where the line intersects the circle.
 	  - Boolean (`false`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`)
 	    - No intersection. 
-    - For more see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L465).
+    - For more see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L659).
+
+#####mlib.circle.getPolygonIntersection
+- Returns the coordinates of where a circle intersects a polygon. 
+- Synopses: 
+  - `intersections = mlib.circle.getPolygonIntersection( cx, cy, radius, vertices )`
+  - `intersections = mlib.circle.getPolygonIntersection( cx, cy, radius, ... )
+- Arguments: 
+  - `cx`, `cy`: Number. The coordinates of the center of the circle.
+  - `radius`: Number. The radius of the circle. 
+  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
+- Returns: 
+  - `intersections`: Table. Contains the intersections and type. 
+- Example: 
+```lua
+local tab = _.circle.getPolygonIntersection( 5, 5, 1, 4, 4, 6, 4, 6, 6, 4, 6 )
+for i = 1, #tab do
+	print( i .. ':', unpack( tab[i] ) )
+end
+-- 1: 	tangent		5		4
+-- 2: 	tangent		6 		5
+-- 3: 	tangent 	5		6
+-- 4: 	tagnent 	4		5
+```
+- For more see [mlib.circle.getSegmentIntersection](https://github.com/davisdude/mlib#mlibcirclegetsegmentintersection) or the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#753)
 
 #####mlib.circle.getSegmentIntersection
 - Returns the intersections of a circle and a line segment. 
@@ -544,7 +796,97 @@ end
 	    - `x1` and `x2` represent where the line segment intersects the circle.
 	  - Boolean (`false`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`)
 	    - No intersection. 
-    - For more see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L481).
+    - For more see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L675).
+
+#####mlib.circle.isCircleCompletelyInside
+- Checks if one circle is completely inside of another circle.
+- Synopsis:
+  - `completelyInside = mlib.circle.isCircleCompletelyInside( c1x, c1y, c1radius, c2x, c2y, c2radius )`
+- Arguments: 
+  - `c1x`, `c1y`: Numbers. The x and y coordinates of the first circle. 
+  - `c1radius`: Number. The radius of the first circle.
+  - `c2x`, `c2y`: Numbers. The x and y coordinates of the second circle. 
+  - `c2radius`: Number. The radius of the second circle.
+- Returns: 
+  - `completelyInside`: Boolean. 
+    - `true` if circle1 is inside of circle2.
+	- `false` if circle1 is not __completely__ inside of circle2.
+
+#####mlib.circle.isCircleCompletelyInsidePolygon
+- Checks if a circle is completely inside the polygon. 
+- Synopses:
+  - `inPolygon = mlib.polygon.isCircleCompletelyInside( cx, cy, radius, vertices )`
+  - `inPolygon = mlib.polygon.isCircleCompletelyInside( cx, cy, radius, ... )`
+- Arguments: 
+  - `cx`, `cy`: Numbers. The x and y coordinates for the center of the circle.
+  - `radius`: Number. The radius of the circle.
+  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
+- Returns: 
+  - `inPolygon`: Boolean.
+    - `true` if the circle is __completely__ inside the polygon. 
+	- `false` if the circle is not inside the polygon. 
+
+#####mlib.circle.isCircleInsidePolygon
+- Checks if a circle is inside a polygon. 
+- Synopses:
+  - `inPolygon = mlib.circle.isCircleInsidePolygon( cx, cy, radius, vertices )`
+  - `inPolygon = mlib.circle.isCircleInsidePolygon( cx, cy, radius, ... )`
+- Arguments: 
+  - `cx`, `cy`: Numbers. The x and y coordinates for the center of the circle.
+  - `radius`: Number. The radius of the circle.
+  - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
+  - `...`: Numbers. The x and y coordinates of the polygon. (Same as using `unpack( vertices )`)
+- Returns: 
+  - `inPolygon`: Boolean.
+    - `true` if the circle is inside the polygon. 
+	- `false` if the circle is not inside the polygon. 
+- Notes:
+  - Only returns true if the center of the circle is inside the circle. 
+
+#####mlib.circle.isPointOnCircle
+- Checks if a point is __exactly__ on the edge of the circle.
+- Synopsis:
+  - `onCircle = mlib.circle.checkPoint( px, px, cx, cy, radius )`
+- Arguments: 
+  - `px`, `py`: Numbers. The x and y coordinates of the point being tested. 
+  - `cx`, `cy`: Numbers. The x and y coordinates of the center of the circle.
+  - `radius`: Number. The radius of the circle.
+- Returns: 
+  - `onCircle`: Boolean.
+    - `true` if the point is on the circle. 
+	- `false` if the point is on the inside or outside of the circle. 
+- Notes: 
+  - Will return false if the point is inside __or__ outside of the circle.
+
+#####mlib.circle.isPolygonCompletelyInside
+- Checks if a polygon is completely inside of a circle.
+- Synopsis:
+  - `completelyInside = mlib.circle.isPolygonCompletelyInside( circleX, circleY, circleRadius, vertices )`
+  - `completelyInside = mlib.circle.isPolygonCompletelyInside( circleX, circleY, circleRadius, ... )`
+- Arguments: 
+  - `circleX`, `circleY`: Numbers. The x and y coordinates of the circle. 
+  - `circleRadius`: Number. The radius of the circle.
+  - `vertices`: Table. A table containing all of the vertices of the polygon. 
+  - `...`: Numbers. All of the points of the polygon.
+- Returns: 
+  - `completelyInside`: Boolean. 
+    - `true` if the polygon is inside of the circle.
+	- `false` if the polygon is not __completely__ inside of the circle.
+
+#####milb.circle.isSegmentCompletelyInside
+- Checks if a polygon is completely inside of a circle.
+- Synopsis:
+  - `completelyInside = mlib.circle.isSegmentCompletelyInside( circleX, circleY, circleRadius, x1, y1, x2, y2 )`
+- Arguments: 
+  - `circleX`, `circleY`: Numbers. The x and y coordinates of the circle. 
+  - `circleRadius`: Number. The radius of the circle.
+  - `x1`, `y1`: Numbers. The x and y coordinates of one end of the segment.
+  - `x2`, `y2`: Numbers. The x and y coordinates of the other end of the segment.
+- Returns: 
+  - `completelyInside`: Boolean. 
+    - `true` if the segment is inside of the circle.
+	- `false` if the segment is not __completely__ inside of the circle.
 
 ####mlib.statistics
 - Handles statistical aspects of math.
@@ -656,6 +998,44 @@ end
 ####mlib.math
 - Miscellaneous functions that have no home. 
 
+#####mlib.math.getAngle
+- Gets the angle between three points. 
+- Synopsis: 
+  - `angle = mlib.math.getAngle( x1, y1, x2, y2, x3, y3 )`
+- Arguments: 
+  - `x1`, `y1`: Numbers. The x and y coordinates of the first point. 
+  - `x2`, `y2`: Numbers. The x and y coordinates of the vertex of the two points. 
+  - `x3`, `y3`: Numbers. The x and y coordinates of the second point. 
+
+#####mlib.math.getPercentage
+- Gets the percentage of a number. 
+- Synopsis: 
+  - `percentage = mlib.math.getPercentage( percent, number )`
+- Arguments: 
+  - `percent`: Number. The decimal value of the percent (i.e. 100% is 1, 50% is .5).
+  - `number`: Number. The number to get the percentage of. 
+- Returns: 
+  - `percentage`: Number. The `percent`age or `number`.
+
+#####mlib.math.getPercentOfChange
+- Gets the percent of change from one to another. 
+- Synopsis: 
+  - `change = mlib.math.getPercentOfChange( old, new )`
+- Arguments: 
+  - `old`: Number. The original number. 
+  - `new`: Number. The new number. 
+- Returns: 
+  - `change`: Number. The percent of change from `old` to `new`. 
+
+#####mlib.math.getQuadraticRoots
+- Gets the quadratic roots of the the equation.
+- Synopsis:
+  - `root1, root2 = mlib.math.getQuadraticRoots( a, b, c )`
+- Arguments: 
+  - `a`, `b`, `c`: Numbers. The a, b, and c values of the equation `a * x ^ 2 + b * x ^ 2 + c`.
+- Returns: 
+  - `root1`, `root2`: Numbers. The roots of the equation (where `a * x ^ 2 + b * x ^ 2 + c = 0`).
+
 #####mlib.math.getRoot
 - Gets the `n`th root of a number.
 - Synopsis: 
@@ -672,7 +1052,22 @@ local b = mlib.math.getRoot( 27, 3 )
 
 print( a, b ) --> 2, 3
 ```
-  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L578).
+  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L859).
+
+#####mlib.math.getSummation
+- Gets the summation of numbers. 
+- Synopsis: 
+  - `summation = mlib.math.getSummation( start, stop, func )`
+- Arguments: 
+  - `start`: Number. The number at which to start the summation.
+  - `stop`: Number. The number at which to stop the summation.
+  - `func`: Function. The method to add the numbers.
+    - Arguments: 
+	  - `i`: Number. Index.
+	  - `previous`: Table. The previous values used. 
+- Returns: 
+  - `Summation`: Number. The summation of the numbers.
+  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L896).  
 
 #####mlib.math.isPrime
 - Checks if a number is prime. 
@@ -694,60 +1089,7 @@ print( a, b ) --> 2, 3
   - `place (1)`: Number. The decimal place to round to. Defaults to 1. 
 - Returns: 
   - The rounded number. 
-  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L599).
-
-#####mlib.math.getSummation
-- Gets the summation of numbers. 
-- Synopsis: 
-  - `summation = mlib.math.getSummation( start, stop, func )`
-- Arguments: 
-  - `start`: Number. The number at which to start the summation.
-  - `stop`: Number. The number at which to stop the summation.
-  - `func`: Function. The method to add the numbers.
-    - Arguments: 
-	  - `i`: Number. Index.
-	  - `previous`: Table. The previous values used. 
-- Returns: 
-  - `Summation`: Number. The summation of the numbers.
-  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L615).  
-
-#####mlib.math.getPercentOfChange
-- Gets the percent of change from one to another. 
-- Synopsis: 
-  - `change = mlib.math.getPercentOfChange( old, new )`
-- Arguments: 
-  - `old`: Number. The original number. 
-  - `new`: Number. The new number. 
-- Returns: 
-  - `change`: Number. The percent of change from `old` to `new`. 
-
-#####mlib.math.getPercentage
-- Gets the percentage of a number. 
-- Synopsis: 
-  - `percentage = mlib.math.getPercentage( percent, number )`
-- Arguments: 
-  - `percent`: Number. The decimal value of the percent (i.e. 100% is 1, 50% is .5).
-  - `number`: Number. The number to get the percentage of. 
-- Returns: 
-  - `percentage`: Number. The `percent`age or `number`.
-
-#####mlib.math.getQuadraticRoots
-- Gets the quadratic roots of the the equation.
-- Synopsis:
-  - `root1, root2 = mlib.math.getQuadraticRoots( a, b, c )`
-- Arguments: 
-  - `a`, `b`, `c`: Numbers. The a, b, and c values of the equation `a * x ^ 2 + b * x ^ 2 + c`.
-- Returns: 
-  - `root1`, `root2`: Numbers. The roots of the equation (where `a * x ^ 2 + b * x ^ 2 + c = 0`).
-
-#####mlib.math.getAngle
-- Gets the angle between three points. 
-- Synopsis: 
-  - `angle = mlib.math.getAngle( x1, y1, x2, y2, x3, y3 )`
-- Arguments: 
-  - `x1`, `y1`: Numbers. The x and y coordinates of the first point. 
-  - `x2`, `y2`: Numbers. The x and y coordinates of the vertex of the two points. 
-  - `x3`, `y3`: Numbers. The x and y coordinates of the second point. 
+  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L880.
 
 ##License
 A math library made in Lua
