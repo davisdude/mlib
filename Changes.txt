@@ -1,3 +1,28 @@
+0.9.4
+====
+Added:
+----
+
+Changed:
+----
+- mlib.line.getDistance is now slightly faster.
+- Made code much easier to debug by using new utility `cycle`.
+- Added new utility.
+- Various other minor changes.
+
+Removed:
+----
+- Unused local utility function copy
+
+To-Do
+----
+- Determine if isCompletelyInsideFunctions should return true with tangents.
+- Make argument order more logical.
+- Improve speed and error checking.
+- Make sure to see if any aliases were missed. (e.g. isSegmentInside)
+- Implement mlib.shapes again(?)
+- Clean up README (add "Home" link, etc.)
+
 0.9.3
 ====
 Added:

@@ -547,8 +547,8 @@ end
 #####mlib.polygon.getSegmentIntersection
 - Returns the coordinates of where a line segmeing intersects a polygon. 
 - Synopses: 
-  - `intersections = mlib.polygon.getLineIntersection( x1, y1, x2, y2, vertices )`
-  - `intersections = mlib.polygon.getLineIntersection( x1, y1, x2, y2, ... )
+  - `intersections = mlib.polygon.getSegmentIntersection( x1, y1, x2, y2, vertices )`
+  - `intersections = mlib.polygon.getSegmentIntersection( x1, y1, x2, y2, ... )
 - Arguments: 
   - `x1`, `y1`, `x2`, `y2`: Numbers. Two x and y coordinates.
   - `vertices`: Table. The vertices of the polygon in the format `{ x1, y1, x2, y2, x3, y3, ... }`
