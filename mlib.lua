@@ -794,8 +794,9 @@ local function checkPolygonPoint( px, py, ... )
 
 	local function getGreatestPoint( points, offset )
 		offset = offset or 1
-		local greatest = points[1]
-		local least = points[1]
+		local start = 2 - offset
+		local greatest = points[start]
+		local least = points[start]
 		for i = 2, #points / 2 do
 			i = i * 2 - offset
 			if points[i] > greatest then
@@ -812,10 +813,10 @@ local function checkPolygonPoint( px, py, ... )
 		return num >= min and num <= max
 	end
 
-	local greatest, least = getGreatestPoint( points )
-	if not isWithinBounds( least, px, greatest ) then return false end
-	greatest, least = getGreatestPoint( points, 0 )
+	local greatest, least = getGreatestPoint( points, 0 )
 	if not isWithinBounds( least, py, greatest ) then return false end
+	greatest, least = getGreatestPoint( points )
+	if not isWithinBounds( least, px, greatest ) then return false end
 
 	local count = 0
 	for i = 1, #points, 2 do
