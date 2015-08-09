@@ -49,7 +49,7 @@ local function generateRandomPolygon( numberOfPoints, minimumX, minimumY, maxWid
 		table.remove( x, largestReference )
 		table.remove( y, largestReference )
 		local m = mlib.line.getSlope( smallestX, largestX, smallestXY, largestXY )
-		local b = mlib.line.getIntercept( smallestX, smallestXY, m )
+		local b = mlib.line.getYIntercept( smallestX, smallestXY, m )
 		
 		local upperX = {}
 		local upperY = {}
@@ -385,7 +385,7 @@ function love.update( dt )
 							circles[#circles + 1] = { x1, y1 }
 						end
 					elseif shape2.type == 'line' then
-						local x1, y1, x2, y2 = mlib.line.segment.getIntersection( shape.x1, shape.y1, shape.x2, shape.y2, shape2.x1, shape2.y1, shape2.x2, shape2.y2 )
+						local x1, y1, x2, y2 = mlib.segment.getIntersection( shape.x1, shape.y1, shape.x2, shape.y2, shape2.x1, shape2.y1, shape2.x2, shape2.y2 )
 						if x1 then
 							intersection = true
 							shape2.collided = true
@@ -466,7 +466,7 @@ function love.mousepressed( x, y, button )
 				shape.offsets = offsets
 			end
 		elseif shape.type == 'line' then
-			if mlib.line.segment.checkPoint( x, y, shape.x1, shape.y1, shape.x2, shape.y2 ) then
+			if mlib.segment.checkPoint( x, y, shape.x1, shape.y1, shape.x2, shape.y2 ) then
 				shape.clicked = true
 				shape.offsets = {
 					shape.x1 - x, 

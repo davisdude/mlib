@@ -50,6 +50,28 @@ local function removeDuplicatePairs( tab )
 	return tab
 end
 
+
+local function removeDuplicates4Points( tab )
+    for index1 = #tab, 1, -1 do
+        local first = tab[index1]
+        for index2 = #tab, 1, -1 do
+            local second = tab[index2]
+            if index1 ~= index2 then
+                if type( first[1] ) ~= type( second[1] ) then return false end
+                if type( first[2] ) == 'number' and type( second[2] ) == 'number' and type( first[3] ) == 'number' and type( second[3] ) == 'number' then
+                    if checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
+                        table.remove( tab, index1 )
+                    end
+                elseif checkFuzzy( first[1], second[1] ) and checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
+                    table.remove( tab, index1 )
+                end
+            end
+        end
+    end
+    return tab
+end
+
+
 -- Add points to the table.
 local function addPoints( tab, x, y )
     tab[#tab + 1] = x
@@ -82,6 +104,27 @@ local function validateNumber( n )
 end
 
 local function cycle( tab, index ) return tab[( index - 1 ) % #tab + 1] end
+
+local function getGreatestPoint( points, offset )
+    offset = offset or 1
+    local start = 2 - offset
+    local greatest = points[start]
+    local least = points[start]
+    for i = 2, #points / 2 do
+        i = i * 2 - offset
+        if points[i] > greatest then
+            greatest = points[i]
+        end
+        if points[i] < least then
+            least = points[i]
+        end
+    end
+    return greatest, least
+end
+
+local function isWithinBounds( min, num, max )
+    return num >= min and num <= max
+end
 
 local function distance2( x1, y1, x2, y2 ) -- Faster since it does not use math.sqrt
 	local dx, dy = x1 - x2, y1 - y2
@@ -386,8 +429,7 @@ end -- }}}
 -- Math ----------------------------------------- {{{
 -- Get the root of a number (i.e. the 2nd (square) root of 4 is 2)
 local function getRoot( number, root )
-	local num = number ^ ( 1 / root )
-	return num
+	return number ^ ( 1 / root )
 end
 
 -- Checks if a number is prime.
@@ -399,53 +441,33 @@ local function isPrime( number )
 			return false
 		end
 	end
-
 	return true
 end
 
--- Rounds a number to the xth place (round( 3.14159265359, 4 ) --> 3.1416)
+-- Rounds a number to the xth decimal place (round( 3.14159265359, 4 ) --> 3.1416)
 local function round( number, place )
-	local place, returnValue = place and 10 ^ place or 1
-
-	local high = math.ceil( number * place )
-	local low = math.floor( number * place )
-
-	local highDifferance = high - ( number * place )
-	local lowDifferance = ( number * place ) - low
-
-	if checkFuzzy( high, number ) then
-		returnValue = number
-	else
-		if highDifferance <= lowDifferance then returnValue = high
-		else returnValue = low end
-	end
-
-	return returnValue / place
+	local pow = 10 ^ ( place or 0 )
+    return math.floor( number * pow + .5 ) / pow
 end
 
 -- Gives the summation given a local function
-local function getSummation( start, stop, func ) -- No need for error checking, since it is done automatically by the for-loop.
-	local returnValue = {}
-	local value = 0
-
+local function getSummation( start, stop, func ) 
+	local returnValues = {}
+	local sum = 0
 	for i = start, stop do
-		local new = func( i, returnValue )
-
-		returnValue[i] = new
-		value = value + new
+		local value = func( i, returnValues )
+		returnValues[i] = value
+		sum = sum + value
 	end
-
-	return value
+	return sum
 end
 
 -- Gives the percent of change.
 local function getPercentOfChange( old, new )
 	if old == 0 and new == 0 then
-		return 0
-	elseif old == 0 then
-		return false
+        return 0
 	else
-		return ( new - old ) / math.abs( old )
+		return ( new - old ) / math.abs( old ) * 100
 	end
 end
 
@@ -458,10 +480,8 @@ end
 local function getQuadraticRoots( a, b, c )
 	local discriminant = b ^ 2 - ( 4 * a * c )
 	if discriminant < 0 then return false end
-
 	discriminant = math.sqrt( discriminant )
 	local denominator = ( 2 * a )
-
 	return ( -b - discriminant ) / denominator, ( -b + discriminant ) / denominator
 end
 
@@ -480,12 +500,12 @@ local function getCircleArea( radius )
 	return math.pi * ( radius * radius )
 end
 
--- Checks if a point is on the radius of a circle.
+-- Checks if a point is within the radius of a circle.
 local function checkCirclePoint( x, y, circleX, circleY, radius )
 	return getLength( circleX, circleY, x, y ) <= radius
 end
 
--- Checks if a point is inside a circle.
+-- Checks if a point is on a circle.
 local function isPointOnCircle( x, y, circleX, circleY, radius )
 	return checkFuzzy( getLength( circleX, circleY, x, y ), radius )
 end
@@ -518,7 +538,6 @@ local function getCircleLineIntersection( circleX, circleY, radius, x1, y1, x2, 
 			return 'secant', x1, y1, x2, y2
 		end
 	else -- Vertical Lines
-		-- Theory: *see Reference Pictures/Circle.png for information on how it works.
 		local lengthToPoint1 = circleX - x1
 		local remainingDistance = lengthToPoint1 - radius
 		local intercept = math.sqrt( -( lengthToPoint1 ^ 2 - radius ^ 2 ) )
@@ -580,7 +599,6 @@ local function getCircleSegmentIntersection( circleX, circleY, radius, x1, y1, x
 			end
 		end
 	else
-		-- Theory: *see Reference Images/Circle.png for information on how it works.
 		local lengthToPoint1 = circleX - x1
 		local remainingDistance = lengthToPoint1 - radius
 		local intercept = math.sqrt( -( lengthToPoint1 ^ 2 - radius ^ 2 ) )
@@ -677,7 +695,7 @@ local function getPolygonArea( ... )
 end
 
 -- Gives the height of a triangle, given the base.
--- base, x1, 	y1, x2, y2, x3, y3, x4, y4
+-- base, x1, y1, x2, y2, x3, y3, x4, y4
 -- base, area
 local function getTriangleHeight( base, ... )
 	local input = checkInput( ... )
@@ -737,7 +755,8 @@ local function getPolygonLineIntersection( x1, y1, x2, y2, ... )
 	for i = 1, #input, 2 do
 		local x1, y1, x2, y2 = getLineSegmentIntersection( input[i], input[i + 1], cycle( input, i + 2 ), cycle( input, i + 3 ), x3, y3, x4, y4 )
 		if x1 and not x2 then choices[#choices + 1] = { x1, y1 }
-		elseif x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
+		elseif x1 and x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
+        -- No need to check 2-point sets since they only intersect each poly line once.
 	end
 
 	local final = removeDuplicatePairs( choices )
@@ -764,27 +783,6 @@ end
 local function checkPolygonPoint( px, py, ... )
 	local points = { unpack( checkInput( ... ) ) } -- Make a new table, as to not edit values of previous.
 
-	local function getGreatestPoint( points, offset )
-		offset = offset or 1
-		local start = 2 - offset
-		local greatest = points[start]
-		local least = points[start]
-		for i = 2, #points / 2 do
-			i = i * 2 - offset
-			if points[i] > greatest then
-				greatest = points[i]
-			end
-			if points[i] < least then
-				least = points[i]
-			end
-		end
-		return greatest, least
-	end
-
-	local function isWithinBounds( min, num, max )
-		return num >= min and num <= max
-	end
-
 	local greatest, least = getGreatestPoint( points, 0 )
 	if not isWithinBounds( least, py, greatest ) then return false end
 	greatest, least = getGreatestPoint( points )
@@ -794,6 +792,7 @@ local function checkPolygonPoint( px, py, ... )
 	for i = 1, #points, 2 do
 		if checkFuzzy( points[i + 1], py ) then
 			points[i + 1] = py + .001 -- Handles vertices that lie on the point.
+            -- Not exactly mathematically correct, but a lot easier. 
 		end
 		if points[i + 3] and checkFuzzy( points[i + 3], py ) then
 			points[i + 3] = py + .001 -- Do not need to worry about alternate case, since points[2] has already been done.
@@ -827,18 +826,18 @@ local function getPolygonPolygonIntersection( polygon1, polygon2 )
 
 	for index1 = 1, #polygon1, 2 do
 		local intersections = getPolygonSegmentIntersection( polygon1[index1], polygon1[index1 + 1], cycle( polygon1, index1 + 2 ), cycle( polygon1, index1 + 3 ), polygon2 )
-		if intersections and #intersections > 0 then
+		if intersections then
 			for index2 = 1, #intersections do
-				choices[#choices + 1] = { unpack( intersections[index2] ) }
+				choices[#choices + 1] = intersections[index2] 
 			end
 		end
 	end
 
 	for index1 = 1, #polygon2, 2 do
 		local intersections = getPolygonSegmentIntersection( polygon2[index1], polygon2[index1 + 1], cycle( polygon2, index1 + 2 ), cycle( polygon2, index1 + 3 ), polygon1 )
-		if intersections and #intersections > 0 then
+		if intersections then
 			for index2 = 1, #intersections do
-				choices[#choices + 1] = { unpack( intersections[index2] ) }
+				choices[#choices + 1] = intersections[index2]
 			end
 		end
 	end
@@ -859,26 +858,6 @@ local function getPolygonCircleIntersection( x, y, radius, ... )
 	local input = checkInput( ... )
 	local choices = {}
 
-	local function removeDuplicates( tab )
-		for index1 = #tab, 1, -1 do
-			local first = tab[index1]
-			for index2 = #tab, 1, -1 do
-				local second = tab[index2]
-				if index1 ~= index2 then
-					if type( first[1] ) ~= type( second[1] ) then return false end
-					if type( first[2] ) == 'number' and type( second[2] ) == 'number' and type( first[3] ) == 'number' and type( second[3] ) == 'number' then
-						if checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
-							table.remove( tab, index1 )
-						end
-					elseif checkFuzzy( first[1], second[1] ) and checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
-						table.remove( tab, index1 )
-					end
-				end
-			end
-		end
-		return tab
-	end
-
 	for i = 1, #input, 2 do
 		local Type, x1, y1, x2, y2 = getCircleSegmentIntersection( x, y, radius, input[i], input[i + 1], cycle( input, i + 2 ), cycle( input, i + 3 ) )
 		if x2 then
@@ -886,7 +865,7 @@ local function getPolygonCircleIntersection( x, y, radius, ... )
 		elseif x1 then choices[#choices + 1] = { Type, x1, y1 } end
 	end
 
-	local final = removeDuplicates( choices )
+	local final = removeDuplicates4Points( choices )
 
 	return #final > 0 and final
 end
@@ -1063,7 +1042,7 @@ local function getDispersion( ... )
 end -- }}}
 
 return {
-	_VERSION = 'MLib 0.9.4',
+	_VERSION = 'MLib 0.10.0',
 	_DESCRIPTION = 'A math and collisions library for Lua',
 	_URL = 'https://github.com/davisdude/mlib',
 	line = {
@@ -1071,7 +1050,6 @@ return {
 		getMidpoint = getMidpoint,
 		getSlope = getSlope,
 		getPerpendicularSlope = getPerpendicularSlope,
-		getPerpendicularBisector = getPerpendicularBisector,
 		getYIntercept = getYIntercept,
 		getIntersection = getLineLineIntersection,
 		getClosestPoint = getClosestPoint,
@@ -1086,6 +1064,7 @@ return {
     },
     segment = {
         checkPoint = checkSegmentPoint,
+		getPerpendicularBisector = getPerpendicularBisector,
         getIntersection = getSegmentSegmentIntersection,
 
         -- Aliases

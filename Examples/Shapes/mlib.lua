@@ -1,4 +1,4 @@
---[[
+--[[ License
 	A math library made in Lua
 	copyright (C) 2014 Davis Claiborne
 	This program is free software; you can redistribute it and/or modify
@@ -15,12 +15,7 @@
 	Contact me at davisclaib@gmail.com
 ]]
 
---- https://www.youtube.com/watch?v=Aqhn4REbK6c
----- @ 5:00
--- Also, do pre-checks using circle intersects
--- Get circle via centroid and distance to longest point
-
------------- Local Utility Functions ------------
+-- Local Utility Functions ---------------------- {{{
 local unpack = table.unpack or unpack
 
 -- Used to handle variable-argument functions and whether they are passed as func{ table } or func( unpack( table ) )
@@ -28,26 +23,6 @@ local function checkInput( ... )
 	local input = {}
 	if type( ... ) ~= 'table' then input = { ... } else input = ... end
 	return input
-end
-
---[[
-	Returns a number and an index given a local function. If the local function returns true it updates the key.
-
-	Example:
-
-	numbers = { 1, 2, 3, 4, 10 }
-	largestNumber, reference = sortWithReference( numbers, function ( value1, value2 ) return value1 > value2 end )
-	print( largestNumber, reference ) --> 10, 5
-]]
-local function sortWithReference( tab, func )
-    if #tab == 0 then return nil, nil end
-    local key, value = 1, tab[1]
-    for i = 2, #tab do
-        if func( value, tab[i] ) then
-            key, value = i, tab[i]
-        end
-    end
-    return value, key
 end
 
 -- Deals with floats / verify false false values. This can happen because of significant figures.
@@ -75,6 +50,51 @@ local function removeDuplicatePairs( tab )
 	return tab
 end
 
+
+local function removeDuplicates4Points( tab )
+    for index1 = #tab, 1, -1 do
+        local first = tab[index1]
+        for index2 = #tab, 1, -1 do
+            local second = tab[index2]
+            if index1 ~= index2 then
+                if type( first[1] ) ~= type( second[1] ) then return false end
+                if type( first[2] ) == 'number' and type( second[2] ) == 'number' and type( first[3] ) == 'number' and type( second[3] ) == 'number' then
+                    if checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
+                        table.remove( tab, index1 )
+                    end
+                elseif checkFuzzy( first[1], second[1] ) and checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
+                    table.remove( tab, index1 )
+                end
+            end
+        end
+    end
+    return tab
+end
+
+
+-- Add points to the table.
+local function addPoints( tab, x, y )
+    tab[#tab + 1] = x
+    tab[#tab + 1] = y
+end
+
+-- Like removeDuplicatePairs but specifically for numbers in a flat table
+local function removeDuplicatePointsFlat( tab )
+    for i = #tab, 1 -2 do
+        for ii = #tab - 2, 3, -2 do
+            if i ~= ii then
+                local x1, y1 = tab[i], tab[i + 1]
+                local x2, y2 = tab[ii], tab[ii + 1]
+                if checkFuzzy( x1, x2 ) and checkFuzzy( y1, y2 ) then
+                    table.remove( tab, ii ); table.remove( tab, ii + 1 )
+                end
+            end
+        end
+    end
+    return tab
+end
+
+
 -- Check if input is actually a number
 local function validateNumber( n )
 	if type( n ) ~= 'number' then return false
@@ -83,16 +103,35 @@ local function validateNumber( n )
 	else return true end
 end
 
-local function cycle( tab, index )
-	return tab[( index - 1 ) % #tab + 1]
+local function cycle( tab, index ) return tab[( index - 1 ) % #tab + 1] end
+
+local function getGreatestPoint( points, offset )
+    offset = offset or 1
+    local start = 2 - offset
+    local greatest = points[start]
+    local least = points[start]
+    for i = 2, #points / 2 do
+        i = i * 2 - offset
+        if points[i] > greatest then
+            greatest = points[i]
+        end
+        if points[i] < least then
+            least = points[i]
+        end
+    end
+    return greatest, least
+end
+
+local function isWithinBounds( min, num, max )
+    return num >= min and num <= max
 end
 
 local function distance2( x1, y1, x2, y2 ) -- Faster since it does not use math.sqrt
 	local dx, dy = x1 - x2, y1 - y2
 	return dx * dx + dy * dy
-end
+end -- }}}
 
--------------------  Lines  --------------------
+-- Lines --------------------------------------- {{{
 -- Returns the length of a line.
 local function getLength( x1, y1, x2, y2 )
 	local dx, dy = x1 - x2, y1 - y2
@@ -124,21 +163,14 @@ local function getPerpendicularSlope( ... )
 	end
 
 	if not slope then return 0 -- Vertical lines become horizontal.
-	elseif checkFuzzy( slope, 0 ) then return false end -- Horizontal lines become vertical.
-	return -1 / slope
-end
-
--- Gives the perpendicular bisector of a line.
-local function getPerpendicularBisector( x1, y1, x2, y2 )
-	local slope = getSlope( x1, y1, x2, y2 )
-	local midpointX, midpointY = getMidpoint( x1, y1, x2, y2 )
-	return midpointX, midpointY, getPerpendicularSlope( slope )
+	elseif checkFuzzy( slope, 0 ) then return false -- Horizontal lines become vertical.
+    else return -1 / slope end
 end
 
 -- Gives the y-intercept of a line.
 -- x1, y1, x2, y2
 -- x1, y1, slope
-local function getIntercept( x, y, ... )
+local function getYIntercept( x, y, ... )
 	local input = checkInput( ... )
 	local slope
 
@@ -148,14 +180,14 @@ local function getIntercept( x, y, ... )
 		slope = getSlope( x, y, unpack( input ) )
 	end
 
-	if not slope then return false end
+	if not slope then return x end -- This way we have some information on the line.
 	return y - slope * x
 end
 
 -- Gives the intersection of two lines.
--- slope1, 	slope2, 		x1, 	y1, 		x2, y2
--- slope1, 	intercept1, 	slope2, intercept2
--- x1, 		y1, 			x2, 	y2, 		x3, y3, x4, y4
+-- slope1, slope2, x1, y1, x2, y2
+-- slope1, intercept1, slope2, intercept2
+-- x1, y1, x2, y2, x3, y3, x4, y4
 local function getLineLineIntersection( ... )
 	local input = checkInput( ... )
 	local x1, y1, x2, y2, x3, y3, x4, y4
@@ -167,46 +199,45 @@ local function getLineLineIntersection( ... )
 		slope1, intercept1, slope2, intercept2 = unpack( input )
 
 		-- Since these are lines, not segments, we can use arbitrary points, such as ( 1, y ), ( 2, y )
-		y1 = slope1 * 1 + intercept1
-		y2 = slope1 * 2 + intercept1
-		y3 = slope2 * 1 + intercept2
-		y4 = slope2 * 2 + intercept2
-		x1 = ( y1 - intercept1 ) / slope1
-		x2 = ( y2 - intercept1 ) / slope1
-		x3 = ( y3 - intercept1 ) / slope1
-		x4 = ( y4 - intercept1 ) / slope1
+		y1 = slope1 and slope1 * 1 + intercept1 or 1
+		y2 = slope1 and slope1 * 2 + intercept1 or 2
+		y3 = slope2 and slope2 * 1 + intercept2 or 1
+		y4 = slope2 and slope2 * 2 + intercept2 or 2
+		x1 = slope1 and ( y1 - intercept1 ) / slope1 or intercept1
+		x2 = slope1 and ( y2 - intercept1 ) / slope1 or intercept1
+		x3 = slope2 and ( y3 - intercept2 ) / slope2 or intercept2
+		x4 = slope2 and ( y4 - intercept2 ) / slope2 or intercept2
 	elseif #input == 6 then -- Given slope1, intercept1, and 2 points on the other line.
-		slope1 = input[1]
-		intercept1 = input[2]
+		slope1, intercept1 = input[1], input[2]
 		slope2 = getSlope( input[3], input[4], input[5], input[6] )
-		intercept2 =  getIntercept( input[3], input[4], input[5], input[6] )
+		intercept2 = getYIntercept( input[3], input[4], input[5], input[6] )
 
-		y1 = slope1 * 1 + intercept1
-		y2 = slope1 * 2 + intercept1
+		y1 = slope1 and slope1 * 1 + intercept1 or 1
+		y2 = slope1 and slope1 * 2 + intercept1 or 2
 		y3 = input[4]
 		y4 = input[6]
-		x1 = ( y1 - intercept1 ) / slope1
-		x2 = ( y2 - intercept1 ) / slope1
+		x1 = slope1 and ( y1 - intercept1 ) / slope1 or intercept1
+		x2 = slope1 and ( y2 - intercept1 ) / slope1 or intercept1
 		x3 = input[3]
 		x4 = input[5]
 	elseif #input == 8 then -- Given 2 points on line 1 and 2 points on line 2.
 		slope1 = getSlope( input[1], input[2], input[3], input[4] )
-		intercept1 = getIntercept( input[1], input[2], input[3], input[4] )
+		intercept1 = getYIntercept( input[1], input[2], input[3], input[4] )
 		slope2 = getSlope( input[5], input[6], input[7], input[8] )
-		intercept2 = getIntercept( input[5], input[6], input[7], input[8] )
+		intercept2 = getYIntercept( input[5], input[6], input[7], input[8] )
 
 		x1, y1, x2, y2, x3, y3, x4, y4 = unpack( input )
 	end
 
 	if not slope1 and not slope2 then -- Both are vertical lines
-		if x1 == x3 then -- Have to have the same x and y positions to intersect
+		if x1 == x3 then -- Have to have the same x positions to intersect
 			return true
 		else
 			return false
 		end
 	elseif not slope1 then -- First is vertical
 		x = x1 -- They have to meet at this x, since it is this line's only x
-		y = slope2 * x + intercept2
+		y = slope2 and slope2 * x + intercept2 or 1
 	elseif not slope2 then -- Second is vertical
 		x = x3 -- Vice-Versa
 		y = slope1 * x + intercept1
@@ -224,29 +255,29 @@ local function getLineLineIntersection( ... )
 	return x, y
 end
 
--- Gives the closest point to a line.
--- perpendicularX, perpendicularY, x1, 		y1, 		x2, y2
--- perpendicularX, perpendicularY, slope, 	intercept
+-- Gives the closest point on a line to a point.
+-- perpendicularX, perpendicularY, x1, y1, x2, y2
+-- perpendicularX, perpendicularY, slope, intercept
 local function getClosestPoint( perpendicularX, perpendicularY, ... )
 	local input = checkInput( ... )
-	local x1, y1, x2, y2, slope, intercept
-	local x, y
+	local x, y, x1, y1, x2, y2, slope, intercept
 
 	if #input == 4 then -- Given perpendicularX, perpendicularY, x1, y1, x2, y2
 		x1, y1, x2, y2 = unpack( input )
 		slope = getSlope( x1, y1, x2, y2 )
-		intercept = getIntercept( x1, y1, x2, y2 )
+		intercept = getYIntercept( x1, y1, x2, y2 )
 	elseif #input == 2 then -- Given perpendicularX, perpendicularY, slope, intercept
 		slope, intercept = unpack( input )
+        x1, y1 = 1, slope and slope * 1 + intercept or 1 -- Need x1 and y1 in case of vertical/horizontal lines.
 	end
 
 	if not slope then -- Vertical line
-		x, y = x1, perpendicularY -- Closest point is always perpendicular, so you know where the point is.
-	elseif slope == 0 then -- Horizontal line
+		x, y = x1, perpendicularY -- Closest point is always perpendicular.
+	elseif checkFuzzy( slope, 0 ) then -- Horizontal line
 		x, y = perpendicularX, y1
 	else
 		local perpendicularSlope = getPerpendicularSlope( slope )
-		local perpendicularIntercept = getIntercept( perpendicularX, perpendicularY, perpendicularSlope )
+		local perpendicularIntercept = getYIntercept( perpendicularX, perpendicularY, perpendicularSlope )
 		x, y = getLineLineIntersection( slope, intercept, perpendicularSlope, perpendicularIntercept )
 	end
 
@@ -254,24 +285,26 @@ local function getClosestPoint( perpendicularX, perpendicularY, ... )
 end
 
 -- Gives the intersection of a line and a line segment.
--- x1, y1, x2, y2, x3, 		y3, x4, y4
--- x1, y1, x2, y2, slope, 	intercept
+-- x1, y1, x2, y2, x3, y3, x4, y4
+-- x1, y1, x2, y2, slope, intercept
 local function getLineSegmentIntersection( x1, y1, x2, y2, ... )
 	local input = checkInput( ... )
 
-	local slope1, intercept1
-	local slope2, intercept2 = getSlope( x1, y1, x2, y2 ), getIntercept( x1, y1, x2, y2 )
-	local x, y
+	local slope1, intercept1, x, y, lineX1, lineY1, lineX2, lineY2
+	local slope2, intercept2 = getSlope( x1, y1, x2, y2 ), getYIntercept( x1, y1, x2, y2 )
 
 	if #input == 2 then -- Given slope, intercept
 		slope1, intercept1 = input[1], input[2]
+        lineX1, lineY1 = 1, slope1 and slope1 + intercept1
+        lineX2, lineY2 = 2, slope1 and slope1 * 2 + intercept1
 	else -- Given x3, y3, x4, y4
+        lineX1, lineY1, lineX2, lineY2 = unpack( input )
 		slope1 = getSlope( unpack( input ) )
-		intercept1 = getIntercept( unpack( input ) )
+		intercept1 = getYIntercept( unpack( input ) )
 	end
 
 	if not slope1 and not slope2 then -- Vertical lines
-		if checkFuzzy( x1, input[1] ) then
+		if checkFuzzy( x1, lineX1 ) then
 			return x1, y1, x2, y2
 		else
 			return false
@@ -305,20 +338,25 @@ end
 -- Does not support the format using slope because vertical lines would be impossible to check.
 local function checkLinePoint( x, y, x1, y1, x2, y2 )
 	local m = getSlope( x1, y1, x2, y2 )
-	local b = getIntercept( x1, y1, m )
+	local b = getYIntercept( x1, y1, m )
 
 	if not m then -- Vertical
 		return checkFuzzy( x, x1 )
 	end
-
 	return checkFuzzy( y, m * x + b )
+end -- }}}
+
+-- Segment -------------------------------------- {{{
+-- Gives the perpendicular bisector of a line.
+local function getPerpendicularBisector( x1, y1, x2, y2 )
+	local slope = getSlope( x1, y1, x2, y2 )
+	local midpointX, midpointY = getMidpoint( x1, y1, x2, y2 )
+	return midpointX, midpointY, getPerpendicularSlope( slope )
 end
 
-----------------  Line Segment  ----------------
 -- Gives whether or not a point lies on a line segment.
 local function checkSegmentPoint( px, py, x1, y1, x2, y2 )
-	-- Explanation around 5:20
-	-- https://www.youtube.com/watch?v=A86COO8KC58
+	-- Explanation around 5:20: https://www.youtube.com/watch?v=A86COO8KC58
 	local x = checkLinePoint( px, py, x1, y1, x2, y2 )
 	if not x then return false end
 
@@ -362,40 +400,18 @@ end
 
 -- Gives the point of intersection between two line segments.
 local function getSegmentSegmentIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )
-	local slope1, intercept1 = getSlope( x1, y1, x2, y2 ), getIntercept( x1, y1, x2, y2 )
-	local slope2, intercept2 = getSlope( x3, y3, x4, y4 ), getIntercept( x3, y3, x4, y4 )
+	local slope1, intercept1 = getSlope( x1, y1, x2, y2 ), getYIntercept( x1, y1, x2, y2 )
+	local slope2, intercept2 = getSlope( x3, y3, x4, y4 ), getYIntercept( x3, y3, x4, y4 )
 
-	-- Add points to the table.
-	local function addPoints( tab, x, y )
-		tab[#tab + 1] = x
-		tab[#tab + 1] = y
-	end
-
-	local function removeDuplicatePairs( tab )
-		for i = #tab - 1, 1, -2 do
-			local x1, y1 = tab[i], tab[i + 1]
-			for ii = #tab - 1, 1, -2 do
-				local x2, y2 = tab[ii], tab[ii + 1]
-				if i ~= ii then
-					if checkFuzzy( x1, x2 ) and checkFuzzy( y1, y2 ) then
-						table.remove( tab, i )
-						table.remove( tab, i )
-					end
-				end
-			end
-		end
-		return tab
-	end
-
-	if slope1 == slope2 then -- Parallel lines
-		if intercept1 == intercept2 then -- The same lines, possibly in different points.
+	if ( ( slope1 and slope2 ) and checkFuzzy( slope1, slope2 ) ) or ( not slope1 and not slope2 ) then -- Parallel lines
+		if checkFuzzy( intercept1, intercept2 ) then -- The same lines, possibly in different points.
 			local points = {}
 			if checkSegmentPoint( x1, y1, x3, y3, x4, y4 ) then addPoints( points, x1, y1 ) end
 			if checkSegmentPoint( x2, y2, x3, y3, x4, y4 ) then addPoints( points, x2, y2 ) end
 			if checkSegmentPoint( x3, y3, x1, y1, x2, y2 ) then addPoints( points, x3, y3 ) end
 			if checkSegmentPoint( x4, y4, x1, y1, x2, y2 ) then addPoints( points, x4, y4 ) end
 
-			points = removeDuplicatePairs( points )
+			points = removeDuplicatePointsFlat( points )
 			if #points == 0 then return false end
 			return unpack( points )
 		else
@@ -407,15 +423,13 @@ local function getSegmentSegmentIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )
 	if x and checkSegmentPoint( x, y, x1, y1, x2, y2 ) and checkSegmentPoint( x, y, x3, y3, x4, y4 ) then
 		return x, y
 	end
-
 	return false
-end
+end -- }}}
 
---------------------- Math ---------------------
+-- Math ----------------------------------------- {{{
 -- Get the root of a number (i.e. the 2nd (square) root of 4 is 2)
 local function getRoot( number, root )
-	local num = number ^ ( 1 / root )
-	return num
+	return number ^ ( 1 / root )
 end
 
 -- Checks if a number is prime.
@@ -427,53 +441,33 @@ local function isPrime( number )
 			return false
 		end
 	end
-
 	return true
 end
 
--- Rounds a number to the xth place (round( 3.14159265359, 4 ) --> 3.1416)
+-- Rounds a number to the xth decimal place (round( 3.14159265359, 4 ) --> 3.1416)
 local function round( number, place )
-	local place, returnValue = place and 10 ^ place or 1
-
-	local high = math.ceil( number * place )
-	local low = math.floor( number * place )
-
-	local highDifferance = high - ( number * place )
-	local lowDifferance = ( number * place ) - low
-
-	if checkFuzzy( high, number ) then
-		returnValue = number
-	else
-		if highDifferance <= lowDifferance then returnValue = high
-		else returnValue = low end
-	end
-
-	return returnValue / place
+	local pow = 10 ^ ( place or 0 )
+    return math.floor( number * pow + .5 ) / pow
 end
 
 -- Gives the summation given a local function
-local function getSummation( start, stop, func ) -- No need for error checking, since it is done automatically by the for-loop.
-	local returnValue = {}
-	local value = 0
-
+local function getSummation( start, stop, func ) 
+	local returnValues = {}
+	local sum = 0
 	for i = start, stop do
-		local new = func( i, returnValue )
-
-		returnValue[i] = new
-		value = value + new
+		local value = func( i, returnValues )
+		returnValues[i] = value
+		sum = sum + value
 	end
-
-	return value
+	return sum
 end
 
 -- Gives the percent of change.
 local function getPercentOfChange( old, new )
 	if old == 0 and new == 0 then
-		return 0
-	elseif old == 0 then
-		return false
+        return 0
 	else
-		return ( new - old ) / math.abs( old )
+		return ( new - old ) / math.abs( old ) * 100
 	end
 end
 
@@ -486,10 +480,8 @@ end
 local function getQuadraticRoots( a, b, c )
 	local discriminant = b ^ 2 - ( 4 * a * c )
 	if discriminant < 0 then return false end
-
 	discriminant = math.sqrt( discriminant )
 	local denominator = ( 2 * a )
-
 	return ( -b - discriminant ) / denominator, ( -b + discriminant ) / denominator
 end
 
@@ -500,20 +492,20 @@ local function getAngle( x1, y1, x2, y2, x3, y3 )
     local c = getLength( x1, y1, x3, y3 )
 
    return math.acos( ( a * a + b * b - c * c ) / ( 2 * a * b ) )
-end
+end -- }}}
 
--------------------  Circle  -------------------
+-- Circle --------------------------------------- {{{
 -- Gives the area of the circle.
 local function getCircleArea( radius )
 	return math.pi * ( radius * radius )
 end
 
--- Checks if a point is on the radius of a circle.
+-- Checks if a point is within the radius of a circle.
 local function checkCirclePoint( x, y, circleX, circleY, radius )
 	return getLength( circleX, circleY, x, y ) <= radius
 end
 
--- Checks if a point is inside a circle.
+-- Checks if a point is on a circle.
 local function isPointOnCircle( x, y, circleX, circleY, radius )
 	return checkFuzzy( getLength( circleX, circleY, x, y ), radius )
 end
@@ -526,7 +518,7 @@ end
 -- Gives the intersection of a line and a circle.
 local function getCircleLineIntersection( circleX, circleY, radius, x1, y1, x2, y2 )
 	slope = getSlope( x1, y1, x2, y2 )
-	intercept = getIntercept( x1, y1, slope )
+	intercept = getYIntercept( x1, y1, slope )
 
 	if slope then
 		local a = ( 1 + slope ^ 2 )
@@ -546,7 +538,6 @@ local function getCircleLineIntersection( circleX, circleY, radius, x1, y1, x2, 
 			return 'secant', x1, y1, x2, y2
 		end
 	else -- Vertical Lines
-		-- Theory: *see Reference Pictures/Circle.png for information on how it works.
 		local lengthToPoint1 = circleX - x1
 		local remainingDistance = lengthToPoint1 - radius
 		local intercept = math.sqrt( -( lengthToPoint1 ^ 2 - radius ^ 2 ) )
@@ -569,7 +560,7 @@ local function getCircleSegmentIntersection( circleX, circleY, radius, x1, y1, x
 	local Type, x3, y3, x4, y4 = getCircleLineIntersection( circleX, circleY, radius, x1, y1, x2, y2 )
 	if not Type then return false end
 
-	local slope, intercept = getSlope( x1, y1, x2, y2 ), getIntercept( x1, y1, x2, y2 )
+	local slope, intercept = getSlope( x1, y1, x2, y2 ), getYIntercept( x1, y1, x2, y2 )
 
 	if isPointOnCircle( x1, y1, circleX, circleY, radius ) and isPointOnCircle( x2, y2, circleX, circleY, radius ) then -- Both points are on line-segment.
 		return 'chord', x1, y1, x2, y2
@@ -608,7 +599,6 @@ local function getCircleSegmentIntersection( circleX, circleY, radius, x1, y1, x
 			end
 		end
 	else
-		-- Theory: *see Reference Images/Circle.png for information on how it works.
 		local lengthToPoint1 = circleX - x1
 		local remainingDistance = lengthToPoint1 - radius
 		local intercept = math.sqrt( -( lengthToPoint1 ^ 2 - radius ^ 2 ) )
@@ -679,9 +669,9 @@ end
 local function isSegmentCompletelyInsideCircle( circleX, circleY, circleRadius, x1, y1, x2, y2 )
 	local Type = getCircleSegmentIntersection( circleX, circleY, circleRadius, x1, y1, x2, y2 )
 	return Type == 'enclosed'
-end
+end -- }}}
 
--------------------- Polygon  --------------------
+-- Polygon -------------------------------------- {{{
 -- Gives the signed area.
 -- If the points are clockwise the number is negative, otherwise, it's positive.
 local function getSignedPolygonArea( ... )
@@ -695,7 +685,7 @@ local function getSignedPolygonArea( ... )
 		function( index )
 			index = index * 2 - 1 -- Convert it to work properly.
 			return ( ( points[index] * cycle( points, index + 3 ) ) - ( cycle( points, index + 2 ) * points[index + 1] ) )
-		end 
+		end
 	) )
 end
 
@@ -705,7 +695,7 @@ local function getPolygonArea( ... )
 end
 
 -- Gives the height of a triangle, given the base.
--- base, x1, 	y1, x2, y2, x3, y3, x4, y4
+-- base, x1, y1, x2, y2, x3, y3, x4, y4
 -- base, area
 local function getTriangleHeight( base, ... )
 	local input = checkInput( ... )
@@ -751,7 +741,7 @@ local function getPolygonLineIntersection( x1, y1, x2, y2, ... )
 	local choices = {}
 
 	local slope = getSlope( x1, y1, x2, y2 )
-	local intercept = getIntercept( x1, y1, slope )
+	local intercept = getYIntercept( x1, y1, slope )
 
 	local x3, y3, x4, y4
 	if slope then
@@ -765,7 +755,8 @@ local function getPolygonLineIntersection( x1, y1, x2, y2, ... )
 	for i = 1, #input, 2 do
 		local x1, y1, x2, y2 = getLineSegmentIntersection( input[i], input[i + 1], cycle( input, i + 2 ), cycle( input, i + 3 ), x3, y3, x4, y4 )
 		if x1 and not x2 then choices[#choices + 1] = { x1, y1 }
-		elseif x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
+		elseif x1 and x2 then choices[#choices + 1] = { x1, y1, x2, y2 } end
+        -- No need to check 2-point sets since they only intersect each poly line once.
 	end
 
 	local final = removeDuplicatePairs( choices )
@@ -792,27 +783,6 @@ end
 local function checkPolygonPoint( px, py, ... )
 	local points = { unpack( checkInput( ... ) ) } -- Make a new table, as to not edit values of previous.
 
-	local function getGreatestPoint( points, offset )
-		offset = offset or 1
-		local start = 2 - offset
-		local greatest = points[start]
-		local least = points[start]
-		for i = 2, #points / 2 do
-			i = i * 2 - offset
-			if points[i] > greatest then
-				greatest = points[i]
-			end
-			if points[i] < least then
-				least = points[i]
-			end
-		end
-		return greatest, least
-	end
-
-	local function isWithinBounds( min, num, max )
-		return num >= min and num <= max
-	end
-
 	local greatest, least = getGreatestPoint( points, 0 )
 	if not isWithinBounds( least, py, greatest ) then return false end
 	greatest, least = getGreatestPoint( points )
@@ -822,6 +792,7 @@ local function checkPolygonPoint( px, py, ... )
 	for i = 1, #points, 2 do
 		if checkFuzzy( points[i + 1], py ) then
 			points[i + 1] = py + .001 -- Handles vertices that lie on the point.
+            -- Not exactly mathematically correct, but a lot easier. 
 		end
 		if points[i + 3] and checkFuzzy( points[i + 3], py ) then
 			points[i + 3] = py + .001 -- Do not need to worry about alternate case, since points[2] has already been done.
@@ -855,18 +826,18 @@ local function getPolygonPolygonIntersection( polygon1, polygon2 )
 
 	for index1 = 1, #polygon1, 2 do
 		local intersections = getPolygonSegmentIntersection( polygon1[index1], polygon1[index1 + 1], cycle( polygon1, index1 + 2 ), cycle( polygon1, index1 + 3 ), polygon2 )
-		if intersections and #intersections > 0 then
+		if intersections then
 			for index2 = 1, #intersections do
-				choices[#choices + 1] = { unpack( intersections[index2] ) }
+				choices[#choices + 1] = intersections[index2] 
 			end
 		end
 	end
 
 	for index1 = 1, #polygon2, 2 do
 		local intersections = getPolygonSegmentIntersection( polygon2[index1], polygon2[index1 + 1], cycle( polygon2, index1 + 2 ), cycle( polygon2, index1 + 3 ), polygon1 )
-		if intersections and #intersections > 0 then
+		if intersections then
 			for index2 = 1, #intersections do
-				choices[#choices + 1] = { unpack( intersections[index2] ) }
+				choices[#choices + 1] = intersections[index2]
 			end
 		end
 	end
@@ -887,26 +858,6 @@ local function getPolygonCircleIntersection( x, y, radius, ... )
 	local input = checkInput( ... )
 	local choices = {}
 
-	local function removeDuplicates( tab )
-		for index1 = #tab, 1, -1 do
-			local first = tab[index1]
-			for index2 = #tab, 1, -1 do
-				local second = tab[index2]
-				if index1 ~= index2 then
-					if type( first[1] ) ~= type( second[1] ) then return false end
-					if type( first[2] ) == 'number' and type( second[2] ) == 'number' and type( first[3] ) == 'number' and type( second[3] ) == 'number' then
-						if checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
-							table.remove( tab, index1 )
-						end
-					elseif checkFuzzy( first[1], second[1] ) and checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
-						table.remove( tab, index1 )
-					end
-				end
-			end
-		end
-		return tab
-	end
-
 	for i = 1, #input, 2 do
 		local Type, x1, y1, x2, y2 = getCircleSegmentIntersection( x, y, radius, input[i], input[i + 1], cycle( input, i + 2 ), cycle( input, i + 3 ) )
 		if x2 then
@@ -914,7 +865,7 @@ local function getPolygonCircleIntersection( x, y, radius, ... )
 		elseif x1 then choices[#choices + 1] = { Type, x1, y1 } end
 	end
 
-	local final = removeDuplicates( choices )
+	local final = removeDuplicates4Points( choices )
 
 	return #final > 0 and final
 end
@@ -991,9 +942,9 @@ local function isCircleCompletelyInsidePolygon( circleX, circleY, circleRadius, 
 		if getCircleSegmentIntersection( circleX, circleY, circleRadius, x1, y1, x2, y2 ) then return false end
 	end
 	return true
-end
+end -- }}}
 
------------------- Statistics ------------------
+-- Statistics ----------------------------------- {{{
 -- Gets the average of a list of points
 -- points
 local function getMean( ... )
@@ -1088,40 +1039,18 @@ end
 -- Gets the measures of dispersion of a data set.
 local function getDispersion( ... )
 	return getVariationRatio( ... ), getRange( ... ), getStandardDeviation( ... )
-end
+end -- }}}
 
 return {
-	_VERSION = 'MLib 0.9.4',
-	_DESCRIPTION = 'A math and collisions library aimed at LÖVE.',
+	_VERSION = 'MLib 0.10.0',
+	_DESCRIPTION = 'A math and collisions library for Lua',
 	_URL = 'https://github.com/davisdude/mlib',
-	_LICENSE = [[
-		A math library made in Lua
-
-		copyright (C) 2014 Davis Claiborne
-
-		This program is free software; you can redistribute it and/or modify
-		it under the terms of the GNU General Public License as published by
-		the Free Software Foundation; either version 2 of the License, or
-		(at your option) any later version.
-
-		This program is distributed in the hope that it will be useful,
-		but WITHOUT ANY WARRANTY; without even the implied warranty of
-		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-		GNU General Public License for more details.
-
-		You should have received a copy of the GNU General Public License along
-		with this program; if not, write to the Free Software Foundation, Inc.,
-		51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-		Contact me at davisclaib@gmail.com
-	]],
 	line = {
 		getLength = getLength,
 		getMidpoint = getMidpoint,
 		getSlope = getSlope,
 		getPerpendicularSlope = getPerpendicularSlope,
-		getPerpendicularBisector = getPerpendicularBisector,
-		getIntercept = getIntercept,
+		getYIntercept = getYIntercept,
 		getIntersection = getLineLineIntersection,
 		getClosestPoint = getClosestPoint,
 		getSegmentIntersection = getLineSegmentIntersection,
@@ -1132,43 +1061,34 @@ return {
 		getCircleIntersection = getCircleLineIntersection,
 		getPolygonIntersection = getPolygonLineIntersection,
 		getLineIntersection = getLineLineIntersection,
+    },
+    segment = {
+        checkPoint = checkSegmentPoint,
+		getPerpendicularBisector = getPerpendicularBisector,
+        getIntersection = getSegmentSegmentIntersection,
 
-		segment = {
-			checkPoint = checkSegmentPoint,
-			getIntersection = getSegmentSegmentIntersection,
-
-			-- Aliases
-			getCircleIntersection = getCircleSegmentIntersection,
-			getPolygonIntersection = getPolygonSegmentIntersection,
-			getLineIntersection = getLineSegmentIntersection,
-			getSegmentIntersection = getSegmentSegmentIntersection,
-			isSegmentCompletelyInsideCircle = isSegmentCompletelyInsideCircle,
-			isSegmentCompletelyInsidePolygon = isSegmentCompletelyInsidePolygon,
-		},
+        -- Aliases
+        getCircleIntersection = getCircleSegmentIntersection,
+        getPolygonIntersection = getPolygonSegmentIntersection,
+        getLineIntersection = getLineSegmentIntersection,
+        getSegmentIntersection = getSegmentSegmentIntersection,
+        isSegmentCompletelyInsideCircle = isSegmentCompletelyInsideCircle,
+        isSegmentCompletelyInsidePolygon = isSegmentCompletelyInsidePolygon,
 	},
-	polygon = {
-		getTriangleHeight = getTriangleHeight,
-		getSignedArea = getSignedPolygonArea,
-		getArea = getPolygonArea,
-		getCentroid = getCentroid,
-		checkPoint = checkPolygonPoint,
-		getLineIntersection = getPolygonLineIntersection,
-		getSegmentIntersection = getPolygonSegmentIntersection,
-		isSegmentInside = isSegmentInsidePolygon,
-		getPolygonIntersection = getPolygonPolygonIntersection,
-		getCircleIntersection = getPolygonCircleIntersection,
-		isCircleInside = isCircleInsidePolygon,
-		isPolygonInside = isPolygonInsidePolygon,
-		isCircleCompletelyInside = isCircleCompletelyInsidePolygon,
-		isPolygonCompletelyInside = isPolygonCompletelyInsidePolygon,
-		isSegmentCompletelyInside = isSegmentCompletelyInsidePolygon,
-
-		-- Aliases
-		isCircleCompletelyOver = isPolygonCompletelyInsideCircle,
+	math = {
+		getRoot = getRoot,
+		isPrime = isPrime,
+		round = round,
+		getSummation =	getSummation,
+		getPercentOfChange = getPercentOfChange,
+		getPercentage = getPercentage,
+		getQuadraticRoots = getQuadraticRoots,
+		getAngle = getAngle,
 	},
 	circle = {
 		getArea = getCircleArea,
 		checkPoint = checkCirclePoint,
+		isPointOnCircle = isPointOnCircle,
 		getCircumference = getCircumference,
 		getLineIntersection = getCircleLineIntersection,
 		getSegmentIntersection = getCircleSegmentIntersection,
@@ -1176,12 +1096,31 @@ return {
 		isCircleCompletelyInside = isCircleCompletelyInsideCircle,
 		isPolygonCompletelyInside = isPolygonCompletelyInsideCircle,
 		isSegmentCompletelyInside = isSegmentCompletelyInsideCircle,
-		isPointOnCircle = isPointOnCircle,
 
 		-- Aliases
 		getPolygonIntersection = getPolygonCircleIntersection,
 		isCircleInsidePolygon = isCircleInsidePolygon,
 		isCircleCompletelyInsidePolygon = isCircleCompletelyInsidePolygon,
+	},
+	polygon = {
+		getSignedArea = getSignedPolygonArea,
+		getArea = getPolygonArea,
+		getTriangleHeight = getTriangleHeight,
+		getCentroid = getCentroid,
+		getLineIntersection = getPolygonLineIntersection,
+		getSegmentIntersection = getPolygonSegmentIntersection,
+		checkPoint = checkPolygonPoint,
+		isSegmentInside = isSegmentInsidePolygon,
+		getPolygonIntersection = getPolygonPolygonIntersection,
+		getCircleIntersection = getPolygonCircleIntersection,
+		isCircleInside = isCircleInsidePolygon,
+		isPolygonInside = isPolygonInsidePolygon,
+		isCircleCompletelyInside = isCircleCompletelyInsidePolygon,
+		isSegmentCompletelyInside = isSegmentCompletelyInsidePolygon,
+		isPolygonCompletelyInside = isPolygonCompletelyInsidePolygon,
+
+		-- Aliases
+		isCircleCompletelyOver = isPolygonCompletelyInsideCircle,
 	},
 	statistics = {
 		getMean = getMean,
@@ -1193,15 +1132,5 @@ return {
 		getCentralTendency = getCentralTendency,
 		getVariationRatio = getVariationRatio,
 		getDispersion = getDispersion,
-	},
-	math = {
-		getRoot = getRoot,
-		isPrime = isPrime,
-		round = round,
-		getSummation =	getSummation,
-		getPercentOfChange = getPercentOfChange,
-		getPercentage = getPercentage,
-		getQuadraticRoots = getQuadraticRoots,
-		getAngle = getAngle,
 	},
 }
