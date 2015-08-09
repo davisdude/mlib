@@ -69,6 +69,7 @@ local function removeDuplicatePointsFlat( tab )
             end
         end
     end
+    return tab
 end
 
 
@@ -359,7 +360,7 @@ local function getSegmentSegmentIntersection( x1, y1, x2, y2, x3, y3, x4, y4 )
 	local slope1, intercept1 = getSlope( x1, y1, x2, y2 ), getYIntercept( x1, y1, x2, y2 )
 	local slope2, intercept2 = getSlope( x3, y3, x4, y4 ), getYIntercept( x3, y3, x4, y4 )
 
-	if checkFuzy( slope1, slope2 ) then -- Parallel lines
+	if ( ( slope1 and slope2 ) and checkFuzzy( slope1, slope2 ) ) or ( not slope1 and not slope2 ) then -- Parallel lines
 		if checkFuzzy( intercept1, intercept2 ) then -- The same lines, possibly in different points.
 			local points = {}
 			if checkSegmentPoint( x1, y1, x3, y3, x4, y4 ) then addPoints( points, x1, y1 ) end
