@@ -1,3 +1,35 @@
+0.10.0
+====
+Added: 
+----
+
+Changed: 
+----
+- mlib.line.segment is now mlib.segment.
+- mlib.line.getIntercept has been renamed to mlib.line.getYIntercept
+- mlib.line.getYIntercept now returns the x-coordinate for vertical lines instead of false.
+- mlib.line.getPerpendicularBisector is now mlib.segment.getPerpendicularBisector. 
+- mlib.math.getPercentOfChange now returns the percentage instead of the decimal answer.
+
+Fixed: 
+----
+- mlib.line.getIntersection now should handle vertical slopes better. 
+- mlib.line.getClosestPoint now uses local function checkFuzzy for checking horizontal lines. 
+- Fixed possible bug in mlib.line.getSegmentIntersection and vertical lines. 
+- mlib.segment.getIntersection now uses fuzzy checking for parallel lines. 
+- mlib.math.round is now much more efficient.
+- Removed some useless code from mlib.polygon.isSegmentInside.
+
+To-Do
+----
+- Determine if isCompletelyInsideFunctions should return true with tangents.
+- Check argument order for logicality and consistency. 
+- Improve speed.
+- Add error checking.
+- Make sure to see if any aliases were missed. (e.g. isSegmentInside)
+- Implement mlib.shapes again(?)
+- Clean up and correct README (add "Home" link, etc.)
+
 0.9.4
 ====
 Added:
