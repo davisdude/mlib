@@ -11,9 +11,10 @@ You can download the latest __working__ version of MLib by downloading the lates
 To use MLib, simply place [mlib.lua](mlib.lua) inside the desired folder in your project. Then use the `require 'path.to.mlib'` to use any of the functions.
 
 ##Examples
-You can see some examples of the code in action [here](https://github.com/davisdude/mlib/tree/master/Examples/).
+If you don't have [LÖVE](https://love2d.org/) installed, you can download the .zip of the demo from the [Executables](Examples/Executables) folder and extract and run the .exe that way. 
+You can see some examples of the code in action [here](Examples).
 All examples are done using the *awesome* engine of [LÖVE](https://love2d.org/).
-To run them properly, download the [.love file](https://github.com/davisdude/mlib/blob/master/Examples/Shapes.love) and install LÖVE to your computer.
+To run them properly, download the [.love file](Examples/LOVE) and install LÖVE to your computer.
 After that, make sure you set .love files to open with "love.exe".
 For more, see [here](https://love2d.org/).
 
@@ -26,7 +27,11 @@ For more, see [here](https://love2d.org/).
 - All of the objects in a platformer, or other game, for instance, should not be registered with MLib. Only ones that need very specific information.
 
 ##Specs
-You can find the tests [here](spec.lua).
+####For Windows
+If you run Windows and have Telescope in `%USERPROFILE%\Documents\GitHub` (you can also manually change the path in [test.bat](test.bat)) you can simply run [test.bat](test.bat) and it will display the results, and then clean up after it's finished. 
+
+####Default
+Alternatively, you can find the tests [here](spec.lua). Keep in mind that you may need to change certain semantics to suit your OS.
 You can run them via [Telescope](https://github.com/norman/telescope/) and type the following command in the command-line of the root folder:
 ```
 tsc -f specs.lua
