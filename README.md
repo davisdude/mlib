@@ -336,7 +336,7 @@ end
 -- 3: 	tangent 	5		6
 -- 4: 	tagnent 	4		5
 ```
-- For more see [mlib.circle.getSegmentIntersection](https://github.com/davisdude/mlib#mlibcirclegetsegmentintersection) or the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L557)
+- For more see [mlib.circle.getSegmentIntersection](#mlibcirclegetsegmentintersection) or the [specs](spec.lua#L676)
 
 #####mlib.polygon.getLineIntersection
 - Returns the coordinates of where a line intersects a polygon.
@@ -385,7 +385,7 @@ end
 - Returns:
   - `intersections`: Table. Contains the intersections.
 - Notes:
-  - With collinear line segments, they are __not__ broken up. See the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L507) for more.
+  - With collinear line segments, they are __not__ broken up. See the [specs](spec.lua#L508) for more.
 
 #####mlib.polygon.getSignedPolygonArea
 - Gets the signed area of the polygon. If the points are ordered counter-clockwise the area is positive. If the points are ordered clockwise the number is negative.
@@ -483,7 +483,7 @@ end
 	- `false` if the line segment is not inside the polygon.
 - Note:
   - Only one of the points has to be in the polygon to be considered 'inside' of the polygon.
-  - This is really just a faster version of [mlib.polygon.getPolygonIntersection](https://github.com/davisdude/mlib#mlibpolygongetpolygonintersection) that does not give the points of intersection.
+  - This is really just a faster version of [mlib.polygon.getPolygonIntersection](#mlibpolygongetpolygonintersection) that does not give the points of intersection.
 
 #####mlib.polygon.isSegmentCompletelyInside
 - Checks if a line segment is completely inside a polygon.
@@ -534,7 +534,7 @@ end
   - `c2x`, `c2y`: Numbers. The x and y coordinate of the second circle.
   - `radius2`: Number. The radius of the second circle.
 - Returns:
-  - `intersections`: Table. A table that contains the type and where the circle collides. See the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L697) for more.
+  - `intersections`: Table. A table that contains the type and where the circle collides. See the [specs](spec.lua#L698) for more.
 
 #####mlib.circle.getCircumference
 - Returns the circumference of a circle.
@@ -562,7 +562,7 @@ end
 	    - `x1` and `x2` represent where the line intersects the circle.
 	  - Boolean (`false`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`)
 	    - No intersection.
-    - For more see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L659).
+    - For more see the [specs](spec.lua#L660).
 
 #####mlib.circle.getSegmentIntersection
 - Returns the intersections of a circle and a line segment.
@@ -585,7 +585,7 @@ end
 	    - `x1` and `x2` represent where the line segment intersects the circle.
 	  - Boolean (`false`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`)
 	    - No intersection.
-    - For more see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L675).
+    - For more see the [specs](spec.lua#L676).
 
 #####mlib.circle.isCircleCompletelyInside
 - Checks if one circle is completely inside of another circle.
@@ -658,7 +658,7 @@ end
   - `data`: Table. A table containing the values of data.
   - `...`: Numbers. All of the numbers in the data set.
 - Returns:
-  - `modes, occurrences`: Table, Number. The modes of the data and the number of times it occurs. See [mlib.statistics.getMode](https://github.com/davisdude/mlib#mlibstatisticsgetmode).
+  - `modes, occurrences`: Table, Number. The modes of the data and the number of times it occurs. See [mlib.statistics.getMode](#mlibstatisticsgetmode).
   - `median`: Number. The median of the data set.
   - `mean`: Number. The mean of the data set.
 
@@ -810,7 +810,7 @@ local b = mlib.math.getRoot( 27, 3 )
 
 print( a, b ) --> 2, 3
 ```
-  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L859).
+  - For more, see the [specs](spec.lua#L860).
 
 #####mlib.math.getSummation
 - Gets the summation of numbers.
@@ -825,7 +825,7 @@ print( a, b ) --> 2, 3
 	  - `previous`: Table. The previous values used.
 - Returns:
   - `Summation`: Number. The summation of the numbers.
-  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L896).
+  - For more, see the [specs](spec.lua#L897).
 
 #####mlib.math.isPrime
 - Checks if a number is prime.
@@ -847,7 +847,7 @@ print( a, b ) --> 2, 3
   - `place (1)`: Number. The decimal place to round to. Defaults to 1.
 - Returns:
   - The rounded number.
-  - For more, see the [specs](https://github.com/davisdude/mlib/blob/master/spec.lua#L880).
+  - For more, see the [specs](spec.lua#L881).
 
 ####Aliases
 | Alias                                         | Corresponding Function                                                            |
