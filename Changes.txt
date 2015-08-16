@@ -1,4 +1,4 @@
-0.10.0
+0.10.0 (working)
 ====
 Added: 
 ----
@@ -8,8 +8,8 @@ Changed:
 - mlib.line.segment is now mlib.segment.
 - mlib.line.getIntercept has been renamed to mlib.line.getYIntercept
 - mlib.line.getYIntercept now returns the x-coordinate for vertical lines instead of false.
+- mlib.line.getYIntercept now returns the value `isVertical` as the second return value. 
 - mlib.line.getPerpendicularBisector is now mlib.segment.getPerpendicularBisector. 
-- mlib.math.getPercentOfChange now returns the percentage instead of the decimal answer.
 
 Fixed: 
 ----

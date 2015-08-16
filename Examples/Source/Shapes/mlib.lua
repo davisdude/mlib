@@ -180,8 +180,8 @@ local function getYIntercept( x, y, ... )
 		slope = getSlope( x, y, unpack( input ) )
 	end
 
-	if not slope then return x end -- This way we have some information on the line.
-	return y - slope * x
+	if not slope then return x, true end -- This way we have some information on the line.
+	return y - slope * x, false
 end
 
 -- Gives the intersection of two lines.

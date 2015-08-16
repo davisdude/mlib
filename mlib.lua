@@ -180,8 +180,8 @@ local function getYIntercept( x, y, ... )
 		slope = getSlope( x, y, unpack( input ) )
 	end
 
-	if not slope then return x end -- This way we have some information on the line.
-	return y - slope * x
+	if not slope then return x, true end -- This way we have some information on the line.
+	return y - slope * x, false
 end
 
 -- Gives the intersection of two lines.
@@ -451,7 +451,7 @@ local function round( number, place )
 end
 
 -- Gives the summation given a local function
-local function getSummation( start, stop, func ) 
+local function getSummation( start, stop, func )
 	local returnValues = {}
 	local sum = 0
 	for i = start, stop do
@@ -467,7 +467,7 @@ local function getPercentOfChange( old, new )
 	if old == 0 and new == 0 then
         return 0
 	else
-		return ( new - old ) / math.abs( old ) * 100
+		return ( new - old ) / math.abs( old )
 	end
 end
 
@@ -792,7 +792,7 @@ local function checkPolygonPoint( px, py, ... )
 	for i = 1, #points, 2 do
 		if checkFuzzy( points[i + 1], py ) then
 			points[i + 1] = py + .001 -- Handles vertices that lie on the point.
-            -- Not exactly mathematically correct, but a lot easier. 
+            -- Not exactly mathematically correct, but a lot easier.
 		end
 		if points[i + 3] and checkFuzzy( points[i + 3], py ) then
 			points[i + 3] = py + .001 -- Do not need to worry about alternate case, since points[2] has already been done.
@@ -828,7 +828,7 @@ local function getPolygonPolygonIntersection( polygon1, polygon2 )
 		local intersections = getPolygonSegmentIntersection( polygon1[index1], polygon1[index1 + 1], cycle( polygon1, index1 + 2 ), cycle( polygon1, index1 + 3 ), polygon2 )
 		if intersections then
 			for index2 = 1, #intersections do
-				choices[#choices + 1] = intersections[index2] 
+				choices[#choices + 1] = intersections[index2]
 			end
 		end
 	end
@@ -1043,7 +1043,7 @@ end -- }}}
 
 return {
 	_VERSION = 'MLib 0.10.0',
-	_DESCRIPTION = 'A math and collisions library for Lua',
+	_DESCRIPTION = 'A math and shape-intersection detection library for Lua',
 	_URL = 'https://github.com/davisdude/mlib',
 	line = {
 		getLength = getLength,
