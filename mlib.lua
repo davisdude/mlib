@@ -131,6 +131,18 @@ local function distance2( x1, y1, x2, y2 ) -- Faster since it does not use math.
 	return dx * dx + dy * dy
 end -- }}}
 
+-- Points -------------------------------------- {{{
+local function rotatePoint( x, y, rotation, ox, oy )
+    ox, oy = ox or 0, oy or 0
+    return ( x - ox ) * math.cos( rotation ) + ox - ( y - oy ) * math.sin( rotation ), ( x - ox ) * math.sin( rotation ) + ( y - oy ) * math.cos( rotation ) + oy
+end
+
+local function scalePoint( x, y, scale, ox, oy )
+    ox, oy = ox or 0, oy or 0
+    return ( x - ox ) * scale + ox, ( y - oy ) * scale + oy
+end
+-- }}}
+
 -- Lines --------------------------------------- {{{
 -- Returns the length of a line.
 local function getLength( x1, y1, x2, y2 )
@@ -1045,6 +1057,10 @@ return {
 	_VERSION = 'MLib 0.10.0',
 	_DESCRIPTION = 'A math and shape-intersection detection library for Lua',
 	_URL = 'https://github.com/davisdude/mlib',
+    point = {
+        rotate = rotatePoint,
+        scale = scalePoint,
+    },
 	line = {
 		getLength = getLength,
 		getMidpoint = getMidpoint,

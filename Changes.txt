@@ -1,4 +1,27 @@
-0.10.0 (working)
+0.10.1 (working)
+====
+Added: 
+----
+- Point category
+	- point.rotate
+	- point.scale
+
+Changed:
+----
+- math.getPercent now returns decimals (instead of percentages) since those are more common to use.
+
+To-Do:
+----
+- Determine if isCompletelyInsideFunctions should return true with tangents.
+- Check argument order for logicality and consistency. 
+- Improve speed.
+- Add error checking.
+- Make sure to see if any aliases were missed. (e.g. isSegmentInside)
+- Implement mlib.shapes again(?)
+- Clean up and correct README (add "Home" link, etc.)
+- Implement objects that can be used.
+
+0.10.0
 ====
 Added: 
 ----
@@ -20,7 +43,7 @@ Fixed:
 - mlib.math.round is now much more efficient.
 - Removed some useless code from mlib.polygon.isSegmentInside.
 
-To-Do
+To-Do:
 ----
 - Determine if isCompletelyInsideFunctions should return true with tangents.
 - Check argument order for logicality and consistency. 

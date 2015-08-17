@@ -5,7 +5,7 @@ __MLib__ is a math and shape-intersection detection library written in Lua. It's
 
 ##Downloading
 You can download the latest __stable__ version of MLib by downloading the latest [release](../../releases/).
-You can download the latest __working__ version of MLib by downloading the latest [commit](../../commits/master/).
+You can download the latest __working__ version of MLib by downloading the latest [commit](../../commits/master/). Documentation will __only__ be updated upon releases, not upon commits.
 
 ##Implementing
 To use MLib, simply place [mlib.lua](mlib.lua) inside the desired folder in your project. Then use the `require 'path.to.mlib'` to use any of the functions.
