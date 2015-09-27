@@ -142,10 +142,14 @@ local function scalePoint( x, y, scale, ox, oy )
     return ( x - ox ) * scale + ox, ( y - oy ) * scale + oy
 end
 
-local function polarToCartesian( radius, theta, ox, oy )
+local function polarToCartesian( radius, theta, offsetRadius, offsetTheta )
+    local ox, oy = 0, 0
+    if offsetRadius and offsetTheta then
+        ox, oy = polarToCartesian( offsetRadius, offsetTheta )
+    end
     local x = radius * math.cos( theta )
     local y = radius * math.sin( theta )
-    return x + ( ox or 0 ), y + ( oy or 0 )
+    return x + ox, y + oy
 end
 
 local function cartesianToPolar( x, y, ox, oy )

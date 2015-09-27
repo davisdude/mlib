@@ -101,9 +101,9 @@ context( 'mlib', function()
             end )
 
             test( 'Offset', function()
-                assert_multiple_fuzzy_equal( { _.point.polarToCartesian( 10, math.pi / 2, 5, 3 ) }, { 5, 13 } )
-                assert_multiple_fuzzy_equal( { _.point.polarToCartesian( math.sqrt( 2 ), math.pi / 4, 9, 10 ) }, { 10, 11 } )
-                assert_multiple_fuzzy_equal( { _.point.polarToCartesian( math.sqrt( 2 ), 5 * math.pi / 4, -3.5, 2 ) }, { -4.5, 1 } )
+                assert_multiple_fuzzy_equal( { _.point.polarToCartesian( 10, math.pi / 2, 5.8309518948453, 0.54041950027058 ) }, { 5, 13 } )
+                assert_multiple_fuzzy_equal( { _.point.polarToCartesian( math.sqrt( 2 ), math.pi / 4, 13.453624047074, 0.83798122500839 ) }, { 10, 11 } )
+                assert_multiple_fuzzy_equal( { _.point.polarToCartesian( math.sqrt( 2 ), 5 * math.pi / 4, 4.0311288741493, 2.6224465393433 ) }, { -4.5, 1 } )
             end )
         end )
 
