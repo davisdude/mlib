@@ -5,6 +5,8 @@ Added:
 - Point category
 	- point.rotate
 	- point.scale
+	- point.polarToCartesian
+	- point.cartesianToPolar
 
 Changed:
 ----
@@ -14,12 +16,9 @@ To-Do:
 ----
 - Determine if isCompletelyInsideFunctions should return true with tangents.
 - Check argument order for logicality and consistency. 
-- Improve speed.
 - Add error checking.
 - Make sure to see if any aliases were missed. (e.g. isSegmentInside)
-- Implement mlib.shapes again(?)
 - Clean up and correct README (add "Home" link, etc.)
-- Implement objects that can be used.
 
 0.10.0
 ====

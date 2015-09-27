@@ -141,6 +141,21 @@ local function scalePoint( x, y, scale, ox, oy )
     ox, oy = ox or 0, oy or 0
     return ( x - ox ) * scale + ox, ( y - oy ) * scale + oy
 end
+
+local function polarToCartesian( radius, theta, ox, oy )
+    local x = radius * math.cos( theta )
+    local y = radius * math.sin( theta )
+    return x + ( ox or 0 ), y + ( oy or 0 )
+end
+
+local function cartesianToPolar( x, y, ox, oy )
+    x, y = x - ( ox or 0 ), y - ( oy or 0 )
+    local theta = math.atan2( y, x )
+    -- Convert to absolute angle
+    theta = theta > 0 and theta or theta + 2 * math.pi
+    local radius = math.sqrt( x ^ 2 + y ^ 2 )
+    return radius, theta 
+end
 -- }}}
 
 -- Lines --------------------------------------- {{{
@@ -1060,6 +1075,8 @@ return {
     point = {
         rotate = rotatePoint,
         scale = scalePoint,
+        polarToCartesian = polarToCartesian, 
+        cartesianToPolar = cartesianToPolar, 
     },
 	line = {
 		getLength = getLength,
