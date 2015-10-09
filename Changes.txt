@@ -4,7 +4,12 @@ Added:
 ----
 - mlib.vec2 component
 
-0.10.1 (working)
+To-Do: 
+----
+- Update README.md
+- Update spec.lua
+
+0.10.1
 ====
 Added:
 ----

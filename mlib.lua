@@ -1072,6 +1072,7 @@ local function getDispersion( ... )
 	return getVariationRatio( ... ), getRange( ... ), getStandardDeviation( ... )
 end -- }}}
 
+-- Vector 2 ------------------------------------- {{{
 --[[
 Vector2 Copyright (c) 2010-2013 Matthias Richter
 
@@ -1256,7 +1257,7 @@ end
 
 local function lerpVector(a, b, s)
 	return a + s * (b - a)
-end
+end -- }}}
 
 return {
 	_VERSION = 'MLib 0.11.0',
@@ -1385,5 +1386,21 @@ return {
 		trim = trimVector,
 		angleTo = angleToVector,
 		lerp = lerpVector,
+
+        -- Aliases
+        copy = cloneVector,
+        subtract = subtractVector, 
+        multiply = mulVector,
+        divide = divVector,
+        equal = eqVector,
+        lessThan = ltVector,
+        lessThanOrEqualTo = leVector,
+        greaterThan = gtVector,
+        greaterThanOrEqualTo = geVector,
+        dotProduct = dotVector,
+        length = lenVector,
+        length2 = len2Vector,
+        distance = distVector,
+        distance2 = dist2Vector,
 	},
 }
