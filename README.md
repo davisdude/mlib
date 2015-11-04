@@ -3,7 +3,7 @@ MLib
 
 __MLib__ is a math and shape-intersection detection library written in Lua. It's aim is to be __robust__ and __easy to use__.
 
-__NOTE:__ I am currently slowing development of MLib while moving over to helping with [CPML](https://github.com/excessive/cpml). To discuss this, please comment [here](https://github.com/davisdude/mlib/issues/12).
+__NOTE:__ I am currently slowing development of MLib while moving over to helping with [CPML](https://github.com/excessive/cpml). To discuss this, please comment [here](../../issues/12).
 
 If you are looking for a library that handles updating/collision responses for you, take a look at [hxdx](https://github.com/adonaac/hxdx). It uses MLib functions as well as Box2d to handle physics calculations. 
 
