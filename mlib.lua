@@ -16,8 +16,8 @@ local unpack = unpack or table.unpack
 local function validateNumber( n )
 	if type( n ) ~= 'number' then return false
 	elseif n ~= n then return false -- nan
-	elseif math.abs( n ) == math.huge then return false end
-	return true
+	elseif math.abs( n ) == math.huge then return false
+	else return true end
 end
 
 -- Convert varargs into a table
