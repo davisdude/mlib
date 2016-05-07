@@ -4,5 +4,6 @@ description="A shape intersection library for 2D"
 format="markdown"
 backtick_references=false
 file = {
-	"../mlib.lua"
+	"../mlib.lua",
+	"../mlib_turbo.lua"
 }

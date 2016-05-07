@@ -27,371 +27,42 @@
 <h1>MLib</h1>
 
 
-<h2>Contents</h2>
-<ul>
-<li><a href="#Line_functions">Line functions </a></li>
-</ul>
 
 
 <h2>Modules</h2>
 <ul class="nowrap">
-  <li><strong>mlib</strong></li>
+  <li><a href="modules/mlib.html">mlib</a></li>
+  <li><a href="modules/mlib_turbo.html">mlib_turbo</a></li>
 </ul>
 
 </div>
 
 <div id="content">
 
-<h1>Module <code>mlib</code></h1>
-<p>
 
-</p>
-<p>
+  <h2>A shape intersection library for 2D</h2>
 
-</p>
-    <h3>Info:</h3>
-    <ul>
-        <li><strong>Copyright</strong>: 2016</li>
-        <li><strong>License</strong>: MIT</li>
-        <li><strong>Author</strong>: Davis Claiborne</li>
-    </ul>
+<h2>Modules</h2>
+<table class="module_list">
+	<tr>
+		<td class="name"  nowrap><a href="modules/mlib.html">mlib</a></td>
+		<td class="summary">
 
+</td>
+	</tr>
+	<tr>
+		<td class="name"  nowrap><a href="modules/mlib_turbo.html">mlib_turbo</a></td>
+		<td class="summary">
 
-<h2><a href="#Line_functions">Line functions </a></h2>
-<table class="function_list">
-	<tr>
-	<td class="name" nowrap><a href="#line.getSlope">line.getSlope (x1, y1, x2, y2)</a></td>
-	<td class="summary">Get the slope of a line</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#line.getSlope">line.getSlope (p1, x2, y2)</a></td>
-	<td class="summary">Get the slope of a line</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#line.getSlope">line.getSlope (x1, y1, p2)</a></td>
-	<td class="summary">Get the slope of a line</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#line.getSlope">line.getSlope (p1, p2)</a></td>
-	<td class="summary">Get the slope of a line</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#line.getPerpendicularSlope">line.getPerpendicularSlope (x1, y1, x2, y2)</a></td>
-	<td class="summary">Get the perpendicular slope of a line (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#line.getPerpendicularSlope">line.getPerpendicularSlope (m)</a></td>
-	<td class="summary">Get the perpendicular slope of a line</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#line.getMidpoint">line.getMidpoint (x1, y1, x2, y2)</a></td>
-	<td class="summary">Get the midpoint between two points (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)</td>
-	</tr>
-	<tr>
-	<td class="name" nowrap><a href="#line.getLength">line.getLength (x1, y1, x2, y2)</a></td>
-	<td class="summary">Get the distance between two points (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)</td>
+</td>
 	</tr>
 </table>
-
-<br/>
-<br/>
-
-
-    <h2 class="section-header "><a name="Line_functions"></a>Line functions </h2>
-
-    <dl class="function">
-    <dt>
-    <a name = "line.getSlope"></a>
-    <strong>line.getSlope (x1, y1, x2, y2)</strong>
-    </dt>
-    <dd>
-    Get the slope of a line
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">x1</span>
-            <span class="types"><span class="type">number</span></span>
-         The x-coordinate of the first point
-        </li>
-        <li><span class="parameter">y1</span>
-            <span class="types"><span class="type">number</span></span>
-         The y-coordinate of the first point
-        </li>
-        <li><span class="parameter">x2</span>
-            <span class="types"><span class="type">number</span></span>
-         The x-coordinate of the second point
-        </li>
-        <li><span class="parameter">y2</span>
-            <span class="types"><span class="type">number</span></span>
-         The y-coordinate of the second point
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><span class="type">number</span></span>
-        The slope of the line
-    </ol>
-     <h3>Or</h3>
-    <ol>
-
-           <span class="types"><span class="type">boolean</span></span>
-        <code>false</code> if the line is vertical
-    </ol>
-
-
-
-
-</dd>
-    <dt>
-    <a name = "line.getSlope"></a>
-    <strong>line.getSlope (p1, x2, y2)</strong>
-    </dt>
-    <dd>
-    Get the slope of a line
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">p1</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
-         The coordinates in the form <code>{ x1, y1 }</code>
-        </li>
-        <li><span class="parameter">x2</span>
-            <span class="types"><span class="type">number</span></span>
-         The x-coordinate of the second point
-        </li>
-        <li><span class="parameter">y2</span>
-            <span class="types"><span class="type">number</span></span>
-         The y-coordinate of the second point
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "line.getSlope"></a>
-    <strong>line.getSlope (x1, y1, p2)</strong>
-    </dt>
-    <dd>
-    Get the slope of a line
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">x1</span>
-            <span class="types"><span class="type">number</span></span>
-         The x-coordinate of the second point
-        </li>
-        <li><span class="parameter">y1</span>
-            <span class="types"><span class="type">number</span></span>
-         The y-coordinate of the second point
-        </li>
-        <li><span class="parameter">p2</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
-         The coordinates in the form <code>{ x2, y2 }</code>
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "line.getSlope"></a>
-    <strong>line.getSlope (p1, p2)</strong>
-    </dt>
-    <dd>
-    Get the slope of a line
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">p1</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
-         The coordinates in the form <code>{ x1, y1 }</code>
-        </li>
-        <li><span class="parameter">p2</span>
-            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
-         The coordinates in the form <code>{ x2, y2 }</code>
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "line.getPerpendicularSlope"></a>
-    <strong>line.getPerpendicularSlope (x1, y1, x2, y2)</strong>
-    </dt>
-    <dd>
-    Get the perpendicular slope of a line (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">x1</span>
-            <span class="types"><span class="type">number</span></span>
-         The x-coordinate of the first point
-        </li>
-        <li><span class="parameter">y1</span>
-            <span class="types"><span class="type">number</span></span>
-         The y-coordinate of the first point
-        </li>
-        <li><span class="parameter">x2</span>
-            <span class="types"><span class="type">number</span></span>
-         The x-coordinate of the second point
-        </li>
-        <li><span class="parameter">y2</span>
-            <span class="types"><span class="type">number</span></span>
-         The y-coordinate of the second point
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><span class="type">number</span></span>
-        The slope of the line
-    </ol>
-     <h3>Or</h3>
-    <ol>
-
-           <span class="types"><span class="type">boolean</span></span>
-        <code>false</code> if the line is vertical
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-    </ul>
-
-
-</dd>
-    <dt>
-    <a name = "line.getPerpendicularSlope"></a>
-    <strong>line.getPerpendicularSlope (m)</strong>
-    </dt>
-    <dd>
-    Get the perpendicular slope of a line
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">m</span>
-            <span class="types"><span class="type">number</span> or <span class="type">boolean</span></span>
-         The slope of the line (<code>false</code> if the line is vertical)
-        </li>
-    </ul>
-
-
-
-
-
-</dd>
-    <dt>
-    <a name = "line.getMidpoint"></a>
-    <strong>line.getMidpoint (x1, y1, x2, y2)</strong>
-    </dt>
-    <dd>
-    Get the midpoint between two points (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">x1</span>
-            <span class="types"><span class="type">number</span></span>
-         The x-coordinate of the first point
-        </li>
-        <li><span class="parameter">y1</span>
-            <span class="types"><span class="type">number</span></span>
-         The y-coordinate of the first point
-        </li>
-        <li><span class="parameter">x2</span>
-            <span class="types"><span class="type">number</span></span>
-         The x-coordinate of the second point
-        </li>
-        <li><span class="parameter">y2</span>
-            <span class="types"><span class="type">number</span></span>
-         The y-coordinate of the second point
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-        <li>
-           <span class="types"><span class="type">number</span></span>
-        x The x-coordinate of the midpoint</li>
-        <li>
-           <span class="types"><span class="type">number</span></span>
-        y The y-coordinate of the midpoint</li>
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-    </ul>
-
-
-</dd>
-    <dt>
-    <a name = "line.getLength"></a>
-    <strong>line.getLength (x1, y1, x2, y2)</strong>
-    </dt>
-    <dd>
-    Get the distance between two points (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">x1</span>
-            <span class="types"><span class="type">number</span></span>
-         The x-coordinate of the first point
-        </li>
-        <li><span class="parameter">y1</span>
-            <span class="types"><span class="type">number</span></span>
-         The y-coordinate of the first point
-        </li>
-        <li><span class="parameter">x2</span>
-            <span class="types"><span class="type">number</span></span>
-         The x-coordinate of the second point
-        </li>
-        <li><span class="parameter">y2</span>
-            <span class="types"><span class="type">number</span></span>
-         The y-coordinate of the second point
-        </li>
-    </ul>
-
-    <h3>Returns:</h3>
-    <ol>
-
-           <span class="types"><span class="type">number</span></span>
-        d The x-coordinate of the midpoint
-    </ol>
-
-
-    <h3>See also:</h3>
-    <ul>
-    </ul>
-
-
-</dd>
-</dl>
-
 
 </div> <!-- id="content" -->
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
-<i style="float:right;">Last updated 2016-03-29 21:54:01 </i>
+<i style="float:right;">Last updated 2016-05-07 00:07:28 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>

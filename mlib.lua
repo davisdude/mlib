@@ -9,12 +9,15 @@ local mlib = {
 	_DESCRIPTION = 'A math and collisions library for Lua.',
 }
 
--- General Functions {{{
+-- {{{ General Functions
+local turbo = require 'mlib_turbo'
+local unpack = unpack or table.unpack
+
 local function validateNumber( n )
 	if type( n ) ~= 'number' then return false
 	elseif n ~= n then return false -- nan
-	elseif math.abs( n ) == math.huge then return false
-	else return true end
+	elseif math.abs( n ) == math.huge then return false end
+	return true
 end
 
 -- Convert varargs into a table
@@ -31,10 +34,15 @@ end
 local function err( errCode, passed, ... )
 	local types = { ... }
 	local typeOfPassed = type( passed )
+	local errCode = errCode:gsub( '%%type%%', typeOfPassed )
+	-- Function passed
 	if type( types[1] ) == 'function' then
-		assert( types[1]( passed ), errCode:gsub( '%%type%%', typeOfPassed ) )
+		local returns = { types[1]( passed ) }
+		for i = 2, #returns do errCode = errCode:gsub( '%%' .. i - 1, returns[i] ) end
+		assert( returns[1], errCode )
 		return true
 	end
+	-- Types passed
 	local passed = false
 	for i = 1, #types do
 		if types[i] == typeOfPassed then
@@ -42,8 +50,7 @@ local function err( errCode, passed, ... )
 			break
 		end
 	end
-	errCode = errCode:gsub( '%%type%%', typeOfPassed )
-	assert( passed, 'Camera Error: ' .. errCode )
+	assert( passed, 'MLib: ' .. errCode )
 end
 
 local function checkFuzzy( x, y, delta )
@@ -69,17 +76,16 @@ local function flattenPoints( tab )
 end
 
 local function check4Points( name, args )
-	err( name .. ': arg 1: should be a number (x1) or a table in the form of { x1, y1 }, got %type%.', args[1], validatePoint )
-	err( name .. ': arg 2: should be a number (y1) or a table in the form of { x2, y2 }, got %type%.', args[2], validatePoint )
-	err( name .. ': arg 3: should be a number (x2) or a table in the form of { x2, y2 }, got %type%.', args[3], function( arg )
-		return validatePoint( arg ) or arg == nil
+	err( 'line.getSlope: point %1: Expected a number, got %2.', args, function( arg )
+		for i = 1, 4 do 
+			if type( arg[i] ) ~= 'number' then return false, i, type( arg[i] ) end
+		end
+		return true
 	end )
-	err( name .. ': arg 4: should be a number (y2), got %type%.', args[4], 'number', 'nil' )
 end
 -- }}}
 
--- mlib.line {{{
-
+-- {{{ mlib.line
 --- Line functions
 -- @section line
 local line = {}
@@ -110,11 +116,10 @@ local line = {}
 -- @tparam table p1 The coordinates in the form `{ x1, y1 }`
 -- @tparam table p2 The coordinates in the form `{ x2, y2 }`
 function line.getSlope( ... )
-	local args = varargs( 'line.getSlope', ... )
-	check4Points( args )
+	local args = varargs( ... )
 	local points = flattenPoints( args )
-	if checkFuzzy( points[1], points[3] ) then return false
-	else return ( points[2] - points[4] ) / ( points[1] - points[3] ) end
+	check4Points( 'line.getSlope', points )
+	return turbo.line.getSlope( unpack( points ) )
 end
 
 --- Get the perpendicular slope of a line (see [line.getSlope](index.html#line.getSlope) for other formats)
@@ -132,16 +137,15 @@ end
 -- @tparam number|boolean m The slope of the line (`false` if the line is vertical)
 function line.getPerpendicularSlope( ... )
 	local args = varargs( ... )
-	check4Points( 'line.getPerpendicularSlope', args )
 	local slope
 	if #args == 1 then
 		slope = args[1]
 	else
-		slope = mlib.line.getSlope( args )
+		local points = flattenPoints( args )
+		check4Points( 'line.getPerpendicularSlope', points )
+		slope = mlib.line.getSlope( points )
 	end
-	if not slope then return 0 -- Vertical lines become horizontal
-	elseif checkFuzzy( slope, 0 ) then return false -- Horizontal lines become vertical
-	else return -1 / slope end
+	return turbo.line.getPerpendicularSlope( slope )
 end
 
 --- Get the midpoint between two points (see [line.getSlope](index.html#line.getSlope) for other formats)
@@ -154,9 +158,9 @@ end
 -- @see line.getSlope for other formats
 function line.getMidpoint( ... )
 	local args = varargs( ... )
-	check4Points( 'line.getMidpoint', args )
 	local points = flattenPoints( args )
-	return ( points[1] + points[3] ) / 2, ( points[2] + points[4] ) / 2
+	check4Points( 'line.getMidpoint', points )
+	return turbo.line.getMidpoint( unpack( points ) )
 end
 
 --- Get the distance between two points (see [line.getSlope](index.html#line.getSlope) for other formats)
@@ -168,9 +172,9 @@ end
 -- @see line.getSlope for other formats
 function line.getLength( ... )
 	local args = varargs( ... )
-	check4Points( 'line.getLength', args )
 	local points = flattenPoints( args )
-	return ( ( points[1] - points[3] ) ^ 2 + ( points[2] - points[4] ) ^ 2 ) ^ .5
+	check4Points( 'line.getLength', points )
+	return turbo.line.getLength( unpack( points ) )
 end
 
 --- Get the y-intercept of a line (see [line.getSlope](index.html#line.getSlope) for other formats)
@@ -180,46 +184,25 @@ end
 -- @tparam number y2 The y-coordinate of the second point
 -- @treturn number b The y-intercept of the line
 -- @see line.getSlope for other formats
-
---- Get the y-intercept of a line (see [line.getSlope](index.html#line.getSlope) for other formats)
--- @function line.getIntercept
--- @tparam number x1 The x-coordinate of the first point
--- @tparam number y1 The y-coordinate of the first point
--- @tparam number m The y-intercept of the line
-
---- Get the y-intercept of a line (see [line.getSlope](index.html#line.getSlope) for other formats)
--- @function line.getIntercept
--- @tparam table p1 The coordinates in the form `{ x1, y1 }`
--- @tparam number m The y-intercept of the line
 function line.getIntercept( ... )
 	local args = varargs( ... )
-	err( name .. ': arg 1: should be a number (x1) or a table in the form of { x1, y1 }, got %type%.', args[1], validatePoint )
-	err( name .. ': arg 2: should be a number (y1 or slope) or a table in the form of { x2, y2 }, got %type%.', args[2], validatePoint )
-	--
-	--
-	--
-	-- finish checking points
-	--
-	--
-	--
-	--
-	local pass, m = pcall( function() mlib.line.getSlope( args ) end )
 	local points = flattenPoints( args )
-	if not points then
-		-- x1, y1, m; { x1, y1 }, m
-		m = flattenPoints( args )[3]
-		points[3] = nil
-	end
-	-- Vertical lines don't intercept the y-axis
-	if not m then return false
-	-- y = mx + b
-	else return points[2] - m * points[1] end
+	check4Points( 'line.getIntercept', points )
+	return turbo.line.getIntercept( mlib.line.getSlope( points ), points[1], points[2] )
 end
 
-function line.getLineIntersection( ... )
-	local args = varargs( ... )
-	check4Points( 'line.getLineIntersection', args )
-	check4Points( 'line.getLineIntersection', { args[5], args[6], args[7], args[8] } )
+--- Get the intersection between two lines
+-- @tparam table line1 The first line, in any form acceptable to [line.getSlope](index.html#line.getSlope)
+-- @tparam table line2 The second line
+-- @see line.getSlope for other formats
+function line.getLineIntersection( line1, line2 )
+	local points1 = flattenPoints( line1 )
+	local points2 = flattenPoints( line2 )
+	check4Points( 'line.getLineIntersection', points1 )
+	check4Points( 'line.getLineIntersection', points2 )
+	local m1, m2 = mlib.line.getSlope( points1 ), mlib.line.getSlope( points2 )
+	local b1, b2 = mlib.line.getIntercept( points1 ), mlib.line.getIntercept( points2 )
+	return turbo.line.getLineIntersection( { m1, b1 }, { m2, b2 } )
 end
 
 mlib.line = line
