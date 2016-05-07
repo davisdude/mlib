@@ -1,3 +1,5 @@
+--- A speedier math and collisions library with no error checking and less flexible syntax
+--- @module mlib_turbo
 --- @author Davis Claiborne
 --- @copyright 2016
 --- @license MIT
@@ -16,10 +18,14 @@ local function checkFuzzy( x, y, delta )
 	return math.abs( x - y ) <= ( delta or .00001 )
 end
 -- }}}
+-- {{{ turbo.line
 
--- {{{ mlib.line
+--- turbo.line
+-- - line functions
+-- @section turbo.line
+
 --- Get the slope of a line
--- @function mlibturbo.line.getSlope
+-- @function turbo.line.getSlope
 -- @tparam number x1
 -- @tparam number y1
 -- @tparam number x2
@@ -31,7 +37,7 @@ local function lineGetSlope( x1, y1, x2, y2 )
 end
 
 --- Get the perpendicular slope of a line
--- @function mlibturbo.line.getPerpendicularSlope
+-- @function turbo.line.getPerpendicularSlope
 -- @tparam number|boolean m The slope of the line (`false` if the line is vertical)
 -- @treturn number|booean pm The perpendicular slope (`false` if the new slope is vertical)
 local function lineGetPerpendicularSlope( m )
@@ -41,7 +47,7 @@ local function lineGetPerpendicularSlope( m )
 end
 
 --- Get the midpoint between two points
--- @function mlibturbo.line.getMidpoint
+-- @function turbo.line.getMidpoint
 -- @tparam number x1
 -- @tparam number y1
 -- @tparam number x2
@@ -53,7 +59,7 @@ local function lineGetMidpoint( x1, y1, x2, y2 )
 end
 
 --- Get the distance between two points
--- @function mlibturbo.line.getLength
+-- @function turbo.line.getLength
 -- @tparam number x1
 -- @tparam number y1
 -- @tparam number x2
@@ -64,7 +70,7 @@ local function lineGetLength( x1, y1, x2, y2 )
 end
 
 --- Get the y-intercept of a line
--- @function mlibturbo.line.getIntercept
+-- @function turbo.line.getIntercept
 -- @tparam number|boolean m slope
 -- @tparam number x
 -- @tparam number y
@@ -74,8 +80,8 @@ local function lineGetIntercept( m, x, y )
 	else return y - m * x end
 end
 
---- Get the intersection between two lines
--- @function mlibturbo.line.getLineIntersection
+--- Get the intersection of two lines
+-- @function turbo.line.getLineIntersection
 -- @tparam table line1 A line in the form { slope, b }
 -- @tparam table line2 Another line in the same form
 -- @treturn boolean|number x The x-coordinate of the intersection (`false` if they don't intersect)
@@ -87,6 +93,7 @@ local function lineGetLineIntersection( line1, line2 )
 	local y = m1 * x + b1
 	return x, y
 end
+-- @section end
 -- }}}
 
 return {

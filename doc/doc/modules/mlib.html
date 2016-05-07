@@ -32,7 +32,9 @@
 
 <h2>Contents</h2>
 <ul>
-<li><a href="#Line_functions">Line functions </a></li>
+<li><a href="#Fields">Fields</a></li>
+<li><a href="#mlib_line____line_functions">mlib.line
+ - line functions </a></li>
 </ul>
 
 
@@ -47,9 +49,7 @@
 <div id="content">
 
 <h1>Module <code>mlib</code></h1>
-<p>
-
-</p>
+<p>A math and collisions library</p>
 <p>
 
 </p>
@@ -61,7 +61,15 @@
     </ul>
 
 
-<h2><a href="#Line_functions">Line functions </a></h2>
+<h2><a href="#Fields">Fields</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#compatibility_mode">compatibility_mode</a></td>
+	<td class="summary">Set whether mlib should be compatible to turbo or not.</td>
+	</tr>
+</table>
+<h2><a href="#mlib_line____line_functions">mlib.line
+ - line functions </a></h2>
 <table class="function_list">
 	<tr>
 	<td class="name" nowrap><a href="#line.getSlope">line.getSlope (x1, y1, x2, y2)</a></td>
@@ -80,28 +88,32 @@
 	<td class="summary">Get the slope of a line</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#line.getPerpendicularSlope">line.getPerpendicularSlope (x1, y1, x2, y2)</a></td>
-	<td class="summary">Get the perpendicular slope of a line (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)</td>
-	</tr>
-	<tr>
 	<td class="name" nowrap><a href="#line.getPerpendicularSlope">line.getPerpendicularSlope (m)</a></td>
 	<td class="summary">Get the perpendicular slope of a line</td>
 	</tr>
 	<tr>
+	<td class="name" nowrap><a href="#line.getPerpendicularSlope">line.getPerpendicularSlope (x1, y1, x2, y2)</a></td>
+	<td class="summary">Get the perpendicular slope of a line (see <a href="#line.getSlope">line.getSlope</a> for other formats)</td>
+	</tr>
+	<tr>
 	<td class="name" nowrap><a href="#line.getMidpoint">line.getMidpoint (x1, y1, x2, y2)</a></td>
-	<td class="summary">Get the midpoint between two points (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)</td>
+	<td class="summary">Get the midpoint between two points (see <a href="#line.getSlope">line.getSlope</a> for other formats)</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#line.getLength">line.getLength (x1, y1, x2, y2)</a></td>
-	<td class="summary">Get the distance between two points (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)</td>
+	<td class="summary">Get the distance between two points (see <a href="#line.getSlope">line.getSlope</a> for other formats)</td>
 	</tr>
 	<tr>
-	<td class="name" nowrap><a href="#line.getIntercept">line.getIntercept (x1, y1, x2, y2)</a></td>
-	<td class="summary">Get the y-intercept of a line (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)</td>
+	<td class="name" nowrap><a href="#line.getIntercept">line.getIntercept (m, x, y, x1, y1, x2, y2)</a></td>
+	<td class="summary">Get the y-intercept of a line</td>
 	</tr>
 	<tr>
 	<td class="name" nowrap><a href="#line.getLineIntersection">line.getLineIntersection (line1, line2)</a></td>
-	<td class="summary">Get the intersection between two lines</td>
+	<td class="summary">Get the intersection of two lines</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#line.getLineIntersection">line.getLineIntersection (line1, line2)</a></td>
+	<td class="summary">Get the intersection of two lines</td>
 	</tr>
 </table>
 
@@ -109,7 +121,34 @@
 <br/>
 
 
-    <h2 class="section-header "><a name="Line_functions"></a>Line functions </h2>
+    <h2 class="section-header "><a name="Fields"></a>Fields</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "compatibility_mode"></a>
+    <strong>compatibility_mode</strong>
+    </dt>
+    <dd>
+    Set whether mlib should be compatible to turbo or not. </p>
+
+<p> If <code>true</code>, all functions must be called as if they are <a href="mlib_turbo.html">turbo</a> functions.</p>
+
+<p> If <code>false</code>, functions can be called in any way listed above.</p>
+
+<p> Use this option if you want to have better speed later, but need error checking now or to enforce a coding style.</p>
+
+<p> For the purpose of documentation, the first given syntax for a function is the "correct" way to call it.
+
+
+
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header "><a name="mlib_line____line_functions"></a>mlib.line
+ - line functions </h2>
 
     <dl class="function">
     <dt>
@@ -242,10 +281,37 @@
 </dd>
     <dt>
     <a name = "line.getPerpendicularSlope"></a>
+    <strong>line.getPerpendicularSlope (m)</strong>
+    </dt>
+    <dd>
+    Get the perpendicular slope of a line
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">m</span>
+            <span class="types"><span class="type">number</span> or <span class="type">boolean</span></span>
+         The slope of the line (<code>false</code> if the line is vertical)
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span> or <span class="type">booean</span></span>
+        pm The perpendicular slope (<code>false</code> if the new slope is vertical)
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "line.getPerpendicularSlope"></a>
     <strong>line.getPerpendicularSlope (x1, y1, x2, y2)</strong>
     </dt>
     <dd>
-    Get the perpendicular slope of a line (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)
+    Get the perpendicular slope of a line (see <a href="#line.getSlope">line.getSlope</a> for other formats)
 
 
     <h3>Parameters:</h3>
@@ -284,28 +350,8 @@
 
     <h3>See also:</h3>
     <ul>
+         <a href="../modules/mlib.html#line.getSlope">line.getSlope</a>
     </ul>
-
-
-</dd>
-    <dt>
-    <a name = "line.getPerpendicularSlope"></a>
-    <strong>line.getPerpendicularSlope (m)</strong>
-    </dt>
-    <dd>
-    Get the perpendicular slope of a line
-
-
-    <h3>Parameters:</h3>
-    <ul>
-        <li><span class="parameter">m</span>
-            <span class="types"><span class="type">number</span> or <span class="type">boolean</span></span>
-         The slope of the line (<code>false</code> if the line is vertical)
-        </li>
-    </ul>
-
-
-
 
 
 </dd>
@@ -314,7 +360,7 @@
     <strong>line.getMidpoint (x1, y1, x2, y2)</strong>
     </dt>
     <dd>
-    Get the midpoint between two points (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)
+    Get the midpoint between two points (see <a href="#line.getSlope">line.getSlope</a> for other formats)
 
 
     <h3>Parameters:</h3>
@@ -341,15 +387,16 @@
     <ol>
         <li>
            <span class="types"><span class="type">number</span></span>
-        x The x-coordinate of the midpoint</li>
+        mx The x-coordinate of the midpoint</li>
         <li>
            <span class="types"><span class="type">number</span></span>
-        y The y-coordinate of the midpoint</li>
+        my The y-coordinate of the midpoint</li>
     </ol>
 
 
     <h3>See also:</h3>
     <ul>
+         <a href="../modules/mlib.html#line.getSlope">line.getSlope</a>
     </ul>
 
 
@@ -359,7 +406,7 @@
     <strong>line.getLength (x1, y1, x2, y2)</strong>
     </dt>
     <dd>
-    Get the distance between two points (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)
+    Get the distance between two points (see <a href="#line.getSlope">line.getSlope</a> for other formats)
 
 
     <h3>Parameters:</h3>
@@ -386,26 +433,39 @@
     <ol>
 
            <span class="types"><span class="type">number</span></span>
-        d The x-coordinate of the midpoint
+        d The length of the line (segment, technically speaking)
     </ol>
 
 
     <h3>See also:</h3>
     <ul>
+         <a href="../modules/mlib.html#line.getSlope">line.getSlope</a>
     </ul>
 
 
 </dd>
     <dt>
     <a name = "line.getIntercept"></a>
-    <strong>line.getIntercept (x1, y1, x2, y2)</strong>
+    <strong>line.getIntercept (m, x, y, x1, y1, x2, y2)</strong>
     </dt>
     <dd>
-    Get the y-intercept of a line (see <a href="index.html#line.getSlope">line.getSlope</a> for other formats)
+    Get the y-intercept of a line
 
 
     <h3>Parameters:</h3>
     <ul>
+        <li><span class="parameter">m</span>
+            <span class="types"><span class="type">number</span> or <span class="type">boolean</span></span>
+         The slope of the line
+        </li>
+        <li><span class="parameter">x</span>
+            <span class="types"><span class="type">number</span></span>
+         An x-coordinate on the line
+        </li>
+        <li><span class="parameter">y</span>
+            <span class="types"><span class="type">number</span></span>
+         An y-coordinate on the line
+        </li>
         <li><span class="parameter">x1</span>
             <span class="types"><span class="type">number</span></span>
          The x-coordinate of the first point
@@ -426,14 +486,18 @@
 
     <h3>Returns:</h3>
     <ol>
-
+        <li>
+           <span class="types"><span class="type">number</span> or <span class="type">boolean</span></span>
+        b The y-intercept (<code>false</code> if the line is vertical)</li>
+        <li>
            <span class="types"><span class="type">number</span></span>
-        b The y-intercept of the line
+        b The y-intercept of the line</li>
     </ol>
 
 
     <h3>See also:</h3>
     <ul>
+         <a href="../modules/mlib.html#line.getSlope">line.getSlope</a>
     </ul>
 
 
@@ -443,14 +507,45 @@
     <strong>line.getLineIntersection (line1, line2)</strong>
     </dt>
     <dd>
-    Get the intersection between two lines
+    Get the intersection of two lines
 
 
     <h3>Parameters:</h3>
     <ul>
         <li><span class="parameter">line1</span>
             <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
-         The first line, in any form acceptable to <a href="index.html#line.getSlope">line.getSlope</a>
+         A line in the form <code>{ slope, y-intercept }</code>
+        </li>
+        <li><span class="parameter">line2</span>
+            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         Another line in the same form
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">boolean</span> or <span class="type">number</span></span>
+        x The x-coordinate of the intersection (<code>false</code> if they don't intersect)
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "line.getLineIntersection"></a>
+    <strong>line.getLineIntersection (line1, line2)</strong>
+    </dt>
+    <dd>
+    Get the intersection of two lines
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">line1</span>
+            <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         The first line, in any form acceptable to <a href="#line.getSlope">line.getSlope</a>
         </li>
         <li><span class="parameter">line2</span>
             <span class="types"><a class="type" href="http://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
@@ -462,6 +557,7 @@
 
     <h3>See also:</h3>
     <ul>
+         <a href="../modules/mlib.html#line.getSlope">line.getSlope</a>
     </ul>
 
 
@@ -473,7 +569,7 @@
 </div> <!-- id="main" -->
 <div id="about">
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
-<i style="float:right;">Last updated 2016-05-07 00:07:28 </i>
+<i style="float:right;">Last updated 2016-05-07 19:39:49 </i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
 </body>
