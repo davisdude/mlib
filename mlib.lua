@@ -239,33 +239,33 @@ end
 mlib.line = line
 -- @section end
 -- }}}
--- {{{ mlib.vector
+-- {{{ mlib.segment
 
---- mlib.vector
--- - vector functions
--- @section milb.vector
-local vector = {}
+--- mlib.segment
+-- - segment functions
+-- @section milb.segment
+local segment = {}
 
 --- Get the midpoint between two points (see [line.getSlope](#line.getSlope) for other formats)
 -- @tparam table point1 The first point in the form `{ x1, y1 }`
 -- @tparam table point2 The second point in the form `{ x2, y2 }`
 -- @treturn table midpoint The midpoint in the form `{ mx, my }`
 -- @see line.getSlope
-function vector.getMidpoint( ... )
+function segment.getMidpoint( ... )
 	local points
 	if mlib.compatibilityMode then
 		local p1, p2 = ...
-		err( 'vector.getMidpoint: arg 1: expected a table in compatibility mode, got %type%', p1, 'table' )
-		err( 'vector.getMidpoint: arg 2: expected a table in compatibility mode, got %type%', p2, 'table' )
-		err( 'vector.getMidpoint: expected 2 arguments, got %1', { ... }, function( args )
+		err( 'segment.getMidpoint: arg 1: expected a table in compatibility mode, got %type%', p1, 'table' )
+		err( 'segment.getMidpoint: arg 2: expected a table in compatibility mode, got %type%', p2, 'table' )
+		err( 'segment.getMidpoint: expected 2 arguments, got %1', { ... }, function( args )
 			local i = #i
 			return i == 2, i
 		end )
-		err( 'vector.getMidpoint: arg 1: expected table to have [1] and [2] be numbers, got %1 and %2', p1, function( p1 )
+		err( 'segment.getMidpoint: arg 1: expected table to have [1] and [2] be numbers, got %1 and %2', p1, function( p1 )
 			local t1, t2 = type( p1[1] ), type( p1[2] )
 			return t1 == 'number' and t2 == 'number', t1, t2
 		end )
-		err( 'vector.getMidpoint: arg 2: expected table to have [1] and [2] be numbers, got %1 and %2', p2, function( p2 )
+		err( 'segment.getMidpoint: arg 2: expected table to have [1] and [2] be numbers, got %1 and %2', p2, function( p2 )
 			local t1, t2 = type( p2[1] ), type( p2[2] )
 			return t1 == 'number' and t2 == 'number', t1, t2
 		end )
@@ -274,8 +274,8 @@ function vector.getMidpoint( ... )
 		points = varargs( ... )
 	end
 	points = flattenPoints( points )
-	check4Points( 'vector.getMidpoint', points )
-	return turbo.vector.getMidpoint( { points[1], points[2] }, { points[3], points[4] } )
+	check4Points( 'segment.getMidpoint', points )
+	return turbo.segment.getMidpoint( { points[1], points[2] }, { points[3], points[4] } )
 end
 
 --- Get the distance between two points (see [line.getSlope](#line.getSlope) for other formats)
@@ -283,21 +283,21 @@ end
 -- @tparam table p1 The second point in the form `{ x2, y2 }`
 -- @treturn number d The length of the segment
 -- @see line.getSlope
-function vector.getLength( ... )
+function segment.getLength( ... )
 	local points
 	if mlib.compatibilityMode then
 		local p1, p2 = ...
-		err( 'vector.getLength: arg 1: expected a table in compatibility mode, got %type%', p1, 'table' )
-		err( 'vector.getLength: arg 2: expected a table in compatibility mode, got %type%', p2, 'table' )
-		err( 'vector.getLength: expected 2 arguments, got %1', { ... }, function( args )
+		err( 'segment.getLength: arg 1: expected a table in compatibility mode, got %type%', p1, 'table' )
+		err( 'segment.getLength: arg 2: expected a table in compatibility mode, got %type%', p2, 'table' )
+		err( 'segment.getLength: expected 2 arguments, got %1', { ... }, function( args )
 			local i = #args
 			return i == 2, i
 		end )
-		err( 'vector.getLength: arg 1: expected table to have [1] and [2] be numbers, got %1 and %2', p1, function( p1 )
+		err( 'segment.getLength: arg 1: expected table to have [1] and [2] be numbers, got %1 and %2', p1, function( p1 )
 			local t1, t2 = type( p1[1] ), type( p1[2] )
 			return t1 == 'number' and t2 == 'number', t1, t2
 		end )
-		err( 'vector.getLength: arg 2: expected table to have [1] and [2] be numbers, got %1 and %2', p2, function( p2 )
+		err( 'segment.getLength: arg 2: expected table to have [1] and [2] be numbers, got %1 and %2', p2, function( p2 )
 			local t1, t2 = type( p2[1] ), type( p2[2] )
 			return t1 == 'number' and t2 == 'number', t1, t2
 		end )
@@ -306,11 +306,11 @@ function vector.getLength( ... )
 		points = varargs( ... )
 	end
 	points = flattenPoints( points )
-	check4Points( 'vector.getLength', points )
-	return turbo.vector.getLength( { points[1], points[2] }, { points[3], points[4] } )
+	check4Points( 'segment.getLength', points )
+	return turbo.segment.getLength( { points[1], points[2] }, { points[3], points[4] } )
 end
 
-mlib.vector = vector
+mlib.segment = segment
 -- @section end
 -- }}}
 

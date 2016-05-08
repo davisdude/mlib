@@ -72,29 +72,31 @@ local function lineGetLineIntersection( line1, line2 )
 end
 -- @section end
 -- }}}
--- {{{ turbo.vector
+-- {{{ turbo.segment
 
---- turbo.vector
--- - vector functions
--- @section turbo.vector
+--- turbo.segment
+-- - segment functions
+-- @section turbo.segment
 
 --- Get the midpoint between two points
--- @function turbo.vector.getMidpoint
+-- @function turbo.segment.getMidpoint
 -- @tparam table p1 `{ x1, y1 }`
 -- @tparam table p2 `{ x2, y2 }`
 -- @treturn table m `{ mx, my }`
-local function vectorGetMidpoint( p1, p2 )
+local function segmentGetMidpoint( p1, p2 )
 	return { ( p1[1] + p2[1] ) / 2, ( p1[2] + p2[2] ) / 2 }
 end
 
 --- Get the distance between two points
--- @function turbo.vector.getLength
+-- @function turbo.segment.getLength
 -- @tparam table p1 `{ x1, y1 }`
 -- @tparam table p2 `{ x2, y2 }`
 -- @treturn number d
-local function vectorGetLength( p1, p2 )
+local function segmentGetLength( p1, p2 )
 	return ( ( p1[1] - p2[1] ) ^ 2 + ( p1[2] - p2[2] ) ^ 2 ) ^ .5
 end
+
+--- Get the angle of the segment
 -- }}}
 
 return {
@@ -104,8 +106,8 @@ return {
 		getIntercept = lineGetIntercept,
 		getLineIntersection = lineGetLineIntersection,
 	},
-	vector = {
-		getMidpoint = vectorGetMidpoint,
-		getLength = vectorGetLength,
+	segment = {
+		getMidpoint = segmentGetMidpoint,
+		getLength = segmentGetLength,
 	}
 }
