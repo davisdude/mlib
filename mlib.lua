@@ -247,67 +247,43 @@ mlib.line = line
 local segment = {}
 
 --- Get the midpoint between two points (see [line.getSlope](#line.getSlope) for other formats)
--- @tparam table point1 The first point in the form `{ x1, y1 }`
--- @tparam table point2 The second point in the form `{ x2, y2 }`
--- @treturn table midpoint The midpoint in the form `{ mx, my }`
+-- @tparam number x1 The x-coordinate of the first point
+-- @tparam number y1 The y-coordinate of the first point
+-- @tparam number x2 The x-coordinate of the second point
+-- @tparam number y2 The y-coordinate of the second point
+-- @treturn number mx The x-coordinate of the midpoint
+-- @treturn number my The y-coordinate of the midpoint
 -- @see line.getSlope
 function segment.getMidpoint( ... )
 	local points
 	if mlib.compatibilityMode then
-		local p1, p2 = ...
-		err( 'segment.getMidpoint: arg 1: expected a table in compatibility mode, got %type%', p1, 'table' )
-		err( 'segment.getMidpoint: arg 2: expected a table in compatibility mode, got %type%', p2, 'table' )
-		err( 'segment.getMidpoint: expected 2 arguments, got %1', { ... }, function( args )
-			local i = #i
-			return i == 2, i
-		end )
-		err( 'segment.getMidpoint: arg 1: expected table to have [1] and [2] be numbers, got %1 and %2', p1, function( p1 )
-			local t1, t2 = type( p1[1] ), type( p1[2] )
-			return t1 == 'number' and t2 == 'number', t1, t2
-		end )
-		err( 'segment.getMidpoint: arg 2: expected table to have [1] and [2] be numbers, got %1 and %2', p2, function( p2 )
-			local t1, t2 = type( p2[1] ), type( p2[2] )
-			return t1 == 'number' and t2 == 'number', t1, t2
-		end )
-		points = { p1, p2 }
+		points = { ... }
+		check4Points( 'segment.getMidpoint', points, ' in compatibility mode' )
 	else
-		points = varargs( ... )
+		points = flattenPoints( varargs( ... ) )
+		check4Points( 'segment.getMidpoint', points )
 	end
-	points = flattenPoints( points )
-	check4Points( 'segment.getMidpoint', points )
-	return turbo.segment.getMidpoint( { points[1], points[2] }, { points[3], points[4] } )
+	return turbo.segment.getMidpoint( unpack( points ) )
 end
 
 --- Get the distance between two points (see [line.getSlope](#line.getSlope) for other formats)
--- @tparam table p1 The first point in the form `{ x1, y1 }`
--- @tparam table p1 The second point in the form `{ x2, y2 }`
--- @treturn number d The length of the segment
+-- @tparam number x1 The x-coordinate of the first point
+-- @tparam number y1 The y-coordinate of the first point
+-- @tparam number x2 The x-coordinate of the second point
+-- @tparam number y2 The y-coordinate of the second point
+-- @treturn number mx The x-coordinate of the midpoint
+-- @treturn number my The y-coordinate of the midpoint
 -- @see line.getSlope
 function segment.getLength( ... )
 	local points
 	if mlib.compatibilityMode then
-		local p1, p2 = ...
-		err( 'segment.getLength: arg 1: expected a table in compatibility mode, got %type%', p1, 'table' )
-		err( 'segment.getLength: arg 2: expected a table in compatibility mode, got %type%', p2, 'table' )
-		err( 'segment.getLength: expected 2 arguments, got %1', { ... }, function( args )
-			local i = #args
-			return i == 2, i
-		end )
-		err( 'segment.getLength: arg 1: expected table to have [1] and [2] be numbers, got %1 and %2', p1, function( p1 )
-			local t1, t2 = type( p1[1] ), type( p1[2] )
-			return t1 == 'number' and t2 == 'number', t1, t2
-		end )
-		err( 'segment.getLength: arg 2: expected table to have [1] and [2] be numbers, got %1 and %2', p2, function( p2 )
-			local t1, t2 = type( p2[1] ), type( p2[2] )
-			return t1 == 'number' and t2 == 'number', t1, t2
-		end )
-		points = { p1, p2 }
+		points = { ... }
+		check4Points( 'segments.getLength', points, ' in compatibility mode' )
 	else
-		points = varargs( ... )
+		points = flattenPoints( varargs( ... ) )
+		check4Points( 'segment.getLength', points )
 	end
-	points = flattenPoints( points )
-	check4Points( 'segment.getLength', points )
-	return turbo.segment.getLength( { points[1], points[2] }, { points[3], points[4] } )
+	return turbo.segment.getLength( unpack( points ) )
 end
 
 mlib.segment = segment

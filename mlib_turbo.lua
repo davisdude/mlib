@@ -80,23 +80,26 @@ end
 
 --- Get the midpoint between two points
 -- @function turbo.segment.getMidpoint
--- @tparam table p1 `{ x1, y1 }`
--- @tparam table p2 `{ x2, y2 }`
--- @treturn table m `{ mx, my }`
-local function segmentGetMidpoint( p1, p2 )
-	return { ( p1[1] + p2[1] ) / 2, ( p1[2] + p2[2] ) / 2 }
+-- @tparam number x1
+-- @tparam number y1
+-- @tparam number x2
+-- @tparam number y2
+-- @treturn number mx
+-- @treturn number my
+local function segmentGetMidpoint( x1, y1, x2, y2 )
+	return ( x1 + x2 ) / 2, ( y1 + y2 ) / 2
 end
 
 --- Get the distance between two points
 -- @function turbo.segment.getLength
--- @tparam table p1 `{ x1, y1 }`
--- @tparam table p2 `{ x2, y2 }`
+-- @tparam number x1
+-- @tparam number y1
+-- @tparam number x2
+-- @tparam number y2
 -- @treturn number d
-local function segmentGetLength( p1, p2 )
-	return ( ( p1[1] - p2[1] ) ^ 2 + ( p1[2] - p2[2] ) ^ 2 ) ^ .5
+local function segmentGetLength( x1, y1, x2, y2 )
+	return ( ( x1 - x2 ) ^ 2 + ( y1 - y2 ) ^ 2 ) ^ .5
 end
-
---- Get the angle of the segment
 -- }}}
 
 return {
