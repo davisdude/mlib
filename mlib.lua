@@ -19,7 +19,7 @@ local mlib = {
 -- Use this option if you want to have better speed later, but need error checking now or to enforce a coding style.
 --
 -- For the purpose of documentation, the first given syntax for a function is the "correct" way to call it.
-mlib.compatibility_mode = true
+mlib.compatibilityMode = true
 
 -- {{{ General Functions
 local turbo = require 'mlib_turbo'
@@ -131,7 +131,7 @@ local line = {}
 -- @tparam table p2 The coordinates in the form `{ x2, y2 }`
 function line.getSlope( ... )
 	local points
-	if not mlib.compatibility_mode then
+	if not mlib.compatibilityMode then
 		points = varargs( ... )
 		points = flattenPoints( points )
 		check4Points( 'line.getSlope', points )
@@ -161,7 +161,7 @@ function line.getPerpendicularSlope( ... )
 	local slope
 	if #args == 1 then
 		slope = args[1]
-	elseif not mlib.compatibility_mode then
+	elseif not mlib.compatibilityMode then
 		local points = flattenPoints( args )
 		check4Points( 'line.getPerpendicularSlope', points )
 		slope = mlib.line.getSlope( points )
@@ -181,7 +181,7 @@ end
 -- @see line.getSlope
 function line.getMidpoint( ... )
 	local points = varargs( ... )
-	if not mlib.compatibility_mode then points = flattenPoints( points ) end
+	if not mlib.compatibilityMode then points = flattenPoints( points ) end
 	check4Points( 'line.getMidpoint', points )
 	return turbo.line.getMidpoint( unpack( points ) )
 end
@@ -195,7 +195,7 @@ end
 -- @see line.getSlope
 function line.getLength( ... )
 	local points = varargs( ... )
-	if not mlib.compatibility_mode then points = flattenPoints( points ) end
+	if not mlib.compatibilityMode then points = flattenPoints( points ) end
 	check4Points( 'line.getLength', points )
 	return turbo.line.getLength( unpack( points ) )
 end
@@ -215,7 +215,7 @@ end
 -- @see line.getSlope
 function line.getIntercept( ... )
 	local points = varargs( ... )
-	if not mlib.compatibility_mode then points = flattenPoints( points ) end
+	if not mlib.compatibilityMode then points = flattenPoints( points ) end
 	check4Points( 'line.getIntercept', points )
 	return turbo.line.getIntercept( mlib.line.getSlope( points ), points[1], points[2] )
 end
@@ -244,7 +244,7 @@ function line.getLineIntersection( line1, line2 )
 		m1, b1 = unpack( points1 )
 		err( 'line.getLineIntersection: arg 1: index 1: expected a number, got %type%', m1, 'number' )
 		err( 'line.getLineIntersection: arg 1: index 2: expected a number, got %type%', b1, 'number' )
-	elseif not mlib.compatibility_mode then
+	elseif not mlib.compatibilityMode then
 		check4Points( 'line.getLineIntersection', points1 )
 		m1, b1 = mlib.line.getSlope( points1 ), mlib.line.getIntercept( points1 )
 	else
@@ -256,7 +256,7 @@ function line.getLineIntersection( line1, line2 )
 		m2, b2 = unpack( points2 )
 		err( 'line.getLineIntersection: arg 2: index 1: expected a number, got %type%', m2, 'number' )
 		err( 'line.getLineIntersection: arg 2: index 2: expected a number, got %type%', b2, 'number' )
-	elseif not mlib.compatibility_mode then
+	elseif not mlib.compatibilityMode then
 		check4Points( 'line.getLineIntersection', points2 )
 		m2, b2 = mlib.line.getSlope( points2 ), mlib.line.getIntercept( points2 )
 	else

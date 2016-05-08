@@ -18,7 +18,7 @@ end )
 -- {{{ line
 context( 'line', function()
 	before( function()
-		mlib.compatibility_mode = false
+		mlib.compatibilityMode = false
 	end )
 	-- {{{ line.getSlope
 	context( 'getSlope', function()
@@ -49,8 +49,8 @@ context( 'line', function()
 				assert_error( function() mlib.line.getSlope( '1', 0, 0, 0 ) end )
 				assert_error( function() mlib.line.getSlope( 1, 1 ) end )
 			end )
-			test( 'Errors if compatibility_mode is true', function()
-				mlib.compatibility_mode = true
+			test( 'Errors if compatibilityMode is true', function()
+				mlib.compatibilityMode = true
 				assert_error( function() mlib.line.getSlope( { 0, 0 }, 1, 1 ) end )
 				assert_error( function() mlib.line.getSlope( { 0, 0 }, { 1, 1 } ) end )
 				assert_error( function() mlib.line.getSlope( { 0, 0, 1, 1 } ) end )
@@ -81,8 +81,8 @@ context( 'line', function()
 				assert_false( mlib.line.getPerpendicularSlope( 0, 1, 1, 1 ) )
 				assert_false( mlib.line.getPerpendicularSlope( 30, 50, 20, 50 ) )
 			end )
-			test( 'Errors if compatibility_mode is not changed', function()
-				mlib.compatibility_mode = true
+			test( 'Errors if compatibilityMode is not changed', function()
+				mlib.compatibilityMode = true
 				assert_error( function() mlib.line.getPerpendicularSlope( { 0, 0 }, 1, 1 ) end )
 				assert_error( function() mlib.line.getPerpendicularSlope( { 0, 0 }, { 1, 1 } ) end )
 			end )
@@ -104,8 +104,8 @@ context( 'line', function()
 				assert_multipleFuzzyEqual( { mlib.line.getMidpoint( 0, 0, { 2, 2 } ) }, { 1, 1 } )
 				assert_error( function() mlib.line.getMidpoint( 0, 0, '2', 2 ) end )
 			end )
-			test( 'Errors if compatibility_mode is true', function()
-				mlib.compatibility_mode = true
+			test( 'Errors if compatibilityMode is true', function()
+				mlib.compatibilityMode = true
 				assert_error( function() mlib.line.getMidpoint( { 0, 0 }, 2, 2 ) end )
 				assert_error( function() mlib.line.getMidpoint( { 0, 0 }, { 2, 2 } ) end )
 			end )
@@ -127,8 +127,8 @@ context( 'line', function()
 				assert_fuzzyEqual( mlib.line.getLength( 0, 0, { 1, 1 } ), math.sqrt( 2 ) )
 				assert_error( function() mlib.line.getLength( 0, '0', 1, 1 ) end )
 			end )
-			test( 'Errors if compatibility_mode is true', function()
-				mlib.compatibility_mode = true
+			test( 'Errors if compatibilityMode is true', function()
+				mlib.compatibilityMode = true
 				assert_error( function() mlib.line.getLength( { 0, 0 }, 1, 1 ) end )
 				assert_error( function() mlib.line.getLength( { 0, 0 }, { 1, 1 } ) end )
 			end )
@@ -150,8 +150,8 @@ context( 'line', function()
 				assert_fuzzyEqual( mlib.line.getIntercept( { 0, 0 }, { 1, 1 } ), 0 )
 				assert_error( function() mlib.line.getIntercept( { '1', 2 }, 1, 1 ) end )
 			end )
-			test( 'Errors if compatibility_mode is true', function()
-				mlib.compatibility_mode = true
+			test( 'Errors if compatibilityMode is true', function()
+				mlib.compatibilityMode = true
 				assert_error( function() mlib.line.getIntercept( { 0, 0 }, 1, 1 ) end )
 				assert_error( function() mlib.line.getIntercept( { 0, 0 }, { 1, 1 } ) end )
 			end )
@@ -173,8 +173,8 @@ context( 'line', function()
 				assert_multipleFuzzyEqual( { mlib.line.getLineIntersection( { { 0, 0 }, { 2, 2 } }, { 0, 2, 2, 0 } ) }, { 1, 1 } )
 				assert_multipleFuzzyEqual( { mlib.line.getLineIntersection( { 0, 0, 2, 2 }, { { 0, 2 }, { 2, 0 } } ) }, { 1, 1 } )
 			end )
-			test( 'Errors if compatibility_mode is true', function()
-				mlib.compatibility_mode = true
+			test( 'Errors if compatibilityMode is true', function()
+				mlib.compatibilityMode = true
 				assert_error( function() mlib.line.getLineIntersection( { 0, 0, 2, 2 }, { 0, 2, 2, 0 } ) end )
 				assert_error( function() mlib.line.getLineIntersection( { { 0, 0 }, 2, 2 }, { 0, 2, 2, 0 } ) end )
 				assert_error( function() mlib.line.getLineIntersection( { { 0, 0 }, { 2, 2 } }, { 0, 2, 2, 0 } ) end )
