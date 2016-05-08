@@ -89,7 +89,7 @@ end
 
 local function check4Points( name, args, condition )
 	condition = condition or ''
-	err( 'line.getSlope: point %1:' .. condition .. 'expected a number, got %2', args, function( arg )
+	err( name .. ': point %1: ' .. condition .. 'expected a number, got %2', args, function( arg )
 		for i = 1, 4 do
 			if type( arg[i] ) ~= 'number' then return false, i, type( arg[i] ) end
 		end
@@ -171,35 +171,6 @@ function line.getPerpendicularSlope( ... )
 	return turbo.line.getPerpendicularSlope( slope )
 end
 
---- Get the midpoint between two points (see [line.getSlope](#line.getSlope) for other formats)
--- @tparam number x1 The x-coordinate of the first point
--- @tparam number y1 The y-coordinate of the first point
--- @tparam number x2 The x-coordinate of the second point
--- @tparam number y2 The y-coordinate of the second point
--- @treturn number mx The x-coordinate of the midpoint
--- @treturn number my The y-coordinate of the midpoint
--- @see line.getSlope
-function line.getMidpoint( ... )
-	local points = varargs( ... )
-	if not mlib.compatibilityMode then points = flattenPoints( points ) end
-	check4Points( 'line.getMidpoint', points )
-	return turbo.line.getMidpoint( unpack( points ) )
-end
-
---- Get the distance between two points (see [line.getSlope](#line.getSlope) for other formats)
--- @tparam number x1 The x-coordinate of the first point
--- @tparam number y1 The y-coordinate of the first point
--- @tparam number x2 The x-coordinate of the second point
--- @tparam number y2 The y-coordinate of the second point
--- @treturn number d The length of the line (segment, technically speaking)
--- @see line.getSlope
-function line.getLength( ... )
-	local points = varargs( ... )
-	if not mlib.compatibilityMode then points = flattenPoints( points ) end
-	check4Points( 'line.getLength', points )
-	return turbo.line.getLength( unpack( points ) )
-end
-
 --- Get the y-intercept of a line
 -- @tparam number|boolean m The slope of the line
 -- @tparam number x An x-coordinate on the line
@@ -266,6 +237,80 @@ function line.getLineIntersection( line1, line2 )
 end
 
 mlib.line = line
+-- @section end
+-- }}}
+-- {{{ mlib.vector
+
+--- mlib.vector
+-- - vector functions
+-- @section milb.vector
+local vector = {}
+
+--- Get the midpoint between two points (see [line.getSlope](#line.getSlope) for other formats)
+-- @tparam table point1 The first point in the form `{ x1, y1 }`
+-- @tparam table point2 The second point in the form `{ x2, y2 }`
+-- @treturn table midpoint The midpoint in the form `{ mx, my }`
+-- @see line.getSlope
+function vector.getMidpoint( ... )
+	local points
+	if mlib.compatibilityMode then
+		local p1, p2 = ...
+		err( 'vector.getMidpoint: arg 1: expected a table in compatibility mode, got %type%', p1, 'table' )
+		err( 'vector.getMidpoint: arg 2: expected a table in compatibility mode, got %type%', p2, 'table' )
+		err( 'vector.getMidpoint: expected 2 arguments, got %1', { ... }, function( args )
+			local i = #i
+			return i == 2, i
+		end )
+		err( 'vector.getMidpoint: arg 1: expected table to have [1] and [2] be numbers, got %1 and %2', p1, function( p1 )
+			local t1, t2 = type( p1[1] ), type( p1[2] )
+			return t1 == 'number' and t2 == 'number', t1, t2
+		end )
+		err( 'vector.getMidpoint: arg 2: expected table to have [1] and [2] be numbers, got %1 and %2', p2, function( p2 )
+			local t1, t2 = type( p2[1] ), type( p2[2] )
+			return t1 == 'number' and t2 == 'number', t1, t2
+		end )
+		points = { p1, p2 }
+	else
+		points = varargs( ... )
+	end
+	points = flattenPoints( points )
+	check4Points( 'vector.getMidpoint', points )
+	return turbo.vector.getMidpoint( { points[1], points[2] }, { points[3], points[4] } )
+end
+
+--- Get the distance between two points (see [line.getSlope](#line.getSlope) for other formats)
+-- @tparam table p1 The first point in the form `{ x1, y1 }`
+-- @tparam table p1 The second point in the form `{ x2, y2 }`
+-- @treturn number d The length of the segment
+-- @see line.getSlope
+function vector.getLength( ... )
+	local points
+	if mlib.compatibilityMode then
+		local p1, p2 = ...
+		err( 'vector.getLength: arg 1: expected a table in compatibility mode, got %type%', p1, 'table' )
+		err( 'vector.getLength: arg 2: expected a table in compatibility mode, got %type%', p2, 'table' )
+		err( 'vector.getLength: expected 2 arguments, got %1', { ... }, function( args )
+			local i = #args
+			return i == 2, i
+		end )
+		err( 'vector.getLength: arg 1: expected table to have [1] and [2] be numbers, got %1 and %2', p1, function( p1 )
+			local t1, t2 = type( p1[1] ), type( p1[2] )
+			return t1 == 'number' and t2 == 'number', t1, t2
+		end )
+		err( 'vector.getLength: arg 2: expected table to have [1] and [2] be numbers, got %1 and %2', p2, function( p2 )
+			local t1, t2 = type( p2[1] ), type( p2[2] )
+			return t1 == 'number' and t2 == 'number', t1, t2
+		end )
+		points = { p1, p2 }
+	else
+		points = varargs( ... )
+	end
+	points = flattenPoints( points )
+	check4Points( 'vector.getLength', points )
+	return turbo.vector.getLength( { points[1], points[2] }, { points[3], points[4] } )
+end
+
+mlib.vector = vector
 -- @section end
 -- }}}
 

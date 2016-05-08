@@ -46,29 +46,6 @@ local function lineGetPerpendicularSlope( m )
 	else return -1 / m end
 end
 
---- Get the midpoint between two points
--- @function turbo.line.getMidpoint
--- @tparam number x1
--- @tparam number y1
--- @tparam number x2
--- @tparam number y2
--- @treturn number mx
--- @treturn number my
-local function lineGetMidpoint( x1, y1, x2, y2 )
-	return ( x1 + x2 ) / 2, ( y1 + y2 ) / 2
-end
-
---- Get the distance between two points
--- @function turbo.line.getLength
--- @tparam number x1
--- @tparam number y1
--- @tparam number x2
--- @tparam number y2
--- @treturn number d
-local function lineGetLength( x1, y1, x2, y2 )
-	return ( ( x1 - x2 ) ^ 2 + ( y1 - y2 ) ^ 2 ) ^ .5
-end
-
 --- Get the y-intercept of a line
 -- @function turbo.line.getIntercept
 -- @tparam number|boolean m slope
@@ -95,14 +72,40 @@ local function lineGetLineIntersection( line1, line2 )
 end
 -- @section end
 -- }}}
+-- {{{ turbo.vector
+
+--- turbo.vector
+-- - vector functions
+-- @section turbo.vector
+
+--- Get the midpoint between two points
+-- @function turbo.vector.getMidpoint
+-- @tparam table p1 `{ x1, y1 }`
+-- @tparam table p2 `{ x2, y2 }`
+-- @treturn table m `{ mx, my }`
+local function vectorGetMidpoint( p1, p2 )
+	return { ( p1[1] + p2[1] ) / 2, ( p1[2] + p2[2] ) / 2 }
+end
+
+--- Get the distance between two points
+-- @function turbo.vector.getLength
+-- @tparam table p1 `{ x1, y1 }`
+-- @tparam table p2 `{ x2, y2 }`
+-- @treturn number d
+local function vectorGetLength( p1, p2 )
+	return ( ( p1[1] - p2[1] ) ^ 2 + ( p1[2] - p2[2] ) ^ 2 ) ^ .5
+end
+-- }}}
 
 return {
 	line = {
 		getSlope = lineGetSlope,
 		getPerpendicularSlope = lineGetPerpendicularSlope,
-		getMidpoint = lineGetMidpoint,
-		getLength = lineGetLength,
 		getIntercept = lineGetIntercept,
 		getLineIntersection = lineGetLineIntersection,
 	},
+	vector = {
+		getMidpoint = vectorGetMidpoint,
+		getLength = vectorGetLength,
+	}
 }
