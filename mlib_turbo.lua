@@ -59,16 +59,43 @@ end
 
 --- Get the intersection of two lines
 -- @function turbo.line.getLineIntersection
--- @tparam table line1 A line in the form { slope, b }
+-- @tparam table line1 A line in the form { slope, x1, y1 }. x and y coordinates are required for handling vertical lines
 -- @tparam table line2 Another line in the same form
--- @treturn boolean|number x The x-coordinate of the intersection (`false` if they don't intersect)
+-- @treturn[1] number x The x-coordinate of the intersection
+-- @treturn[2] boolean intersects `true`/`false` if the lines do/don't intersect (vertical and horizontal lines)
 -- @terturn number y The y-coordinate of the intersection
 local function lineGetLineIntersection( line1, line2 )
-	local m1, b1 = unpack( line1 )
-	local m2, b2 = unpack( line2 )
-	local x = ( b1 - b2 ) / ( m2 - m1 )
-	local y = m1 * x + b1
+	local m1, x1, y1 = unpack( line1 )
+	local m2, x2, y2 = unpack( line2 )
+	local x, y
+	local b1, b2 = lineGetIntercept( m1, x1, y1 ), lineGetIntercept( m2, x2, y2 )
+	if type( m1 ) == 'number' and type( m2 ) == 'number' then
+		if m1 == m2 then
+			return b1 == b2
+		end
+		x = ( b1 - b2 ) / ( m2 - m1 )
+		y = m1 * x + b1
+	else
+		local m, b
+		if type( m1 ) == 'boolean' and type( m2 ) == 'number' then
+			x = x1
+			m, b = m2, b2
+		elseif type( m1 ) == 'number' and type( m2 ) == 'boolean' then
+			x = x2
+			m, b = m1, b1
+		else
+			if x1 ~= x2 then return false
+			else return true end
+		end
+		return x, m * x + b
+	end
 	return x, y
+end
+
+--- Get the point on a line closest to a given point
+-- @function turbo.line.getClosestPoint
+local function lineGetClosestPoint( m, b, x, y )
+	local pm = lineGetPerpendicularSlope( m )
 end
 -- @section end
 -- }}}
@@ -100,6 +127,7 @@ end
 local function segmentGetLength( x1, y1, x2, y2 )
 	return ( ( x1 - x2 ) ^ 2 + ( y1 - y2 ) ^ 2 ) ^ .5
 end
+-- @section end
 -- }}}
 
 return {
