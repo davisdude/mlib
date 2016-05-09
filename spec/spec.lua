@@ -14,6 +14,14 @@ make_assertion( 'multipleFuzzyEqual', 'multiple values are approximately equal',
 	end
 	return true
 end )
+make_assertion( 'errorIs', 'error checking', function( f, message, magic )
+	magic = magic or false
+	local p, e = pcall( f )
+	if not magic then
+		message = message:gsub( '([%.%^%$%%%-%*%+])', '%%%1' ):gsub( '%[(.-)%]', '%%[%1%%]' ):gsub( '%((.-)%)', '%%(%1%%)' )
+	end
+	return not p and not not e:find( message )
+end )
 -- }}}
 -- {{{ line
 context( 'line', function()
@@ -26,12 +34,17 @@ context( 'line', function()
 			test( 'Gives the slope of a line given 4 numbers', function()
 				assert_fuzzyEqual( mlib.line.getSlope( 0, 0, 1, 1 ), 1 )
 				assert_fuzzyEqual( mlib.line.getSlope( 0, 1, 1, 0 ), -1 )
+				assert_fuzzyEqual( mlib.line.getSlope{ 0, 0, 1, 1 }, 1 )
 			end )
 			test( 'Gives the slope of a line given a table and 2 numbers', function()
 				assert_fuzzyEqual( mlib.line.getSlope( { 0, 0 }, 1, 1 ), 1 )
 				assert_fuzzyEqual( mlib.line.getSlope( 0, 1, { 1, 0 } ), -1 )
 				-- 3rd argument is skipped
 				assert_fuzzyEqual( mlib.line.getSlope( { 0, 0, 5 }, { 1, 1 } ), 1 )
+				-- When a table with > 2 values and another are given, arguments are skipped
+				assert_fuzzyEqual( mlib.line.getSlope( { 0, 0, 1, 10 }, { 1, 1 } ), 1 )
+				-- This is also acceptable
+				assert_fuzzyEqual( mlib.line.getSlope( { 0 }, 0, 1, 1 ), 1 )
 			end )
 			test( 'Gives the slope of a line given 2 tables', function()
 				assert_fuzzyEqual( mlib.line.getSlope( { 0, 0 }, { 1, 1 } ), 1 )
@@ -46,14 +59,27 @@ context( 'line', function()
 				assert_false( mlib.line.getSlope( { 50, 30 }, { 50, 20 } ) )
 			end )
 			test( 'Errors if the given input is incorrect', function()
-				assert_error( function() mlib.line.getSlope( '1', 0, 0, 0 ) end )
-				assert_error( function() mlib.line.getSlope( 1, 1 ) end )
+				assert_errorIs( function() mlib.line.getSlope( '1', 0, 0, 0 ) end,
+					'MLib: line.getSlope: point 1: expected a number, got string'
+				)
+				assert_errorIs( function() mlib.line.getSlope( 1, 1 ) end,
+					'MLib: line.getSlope: point 3: expected a number, got nil'
+				)
 			end )
-			test( 'Errors if compatibilityMode is true', function()
+			test( 'Error handling', function()
 				mlib.compatibilityMode = true
-				assert_error( function() mlib.line.getSlope( { 0, 0 }, 1, 1 ) end )
-				assert_error( function() mlib.line.getSlope( { 0, 0 }, { 1, 1 } ) end )
-				assert_error( function() mlib.line.getSlope( { 0, 0, 1, 1 } ) end )
+				assert_errorIs( function() mlib.line.getSlope( { 0, 0 }, 1, 1 ) end,
+					'MLib: line.getSlope: point 1: in compatibility mode expected a number, got table'
+				)
+				assert_errorIs( function() mlib.line.getSlope( 0, 0, { 1, 1 } ) end,
+					'MLib: line.getSlope: point 3: in compatibility mode expected a number, got table'
+				)
+				assert_errorIs( function() mlib.line.getSlope( { 0, 0, 1, 1 } ) end,
+					'MLib: line.getSlope: point 1: in compatibility mode expected a number, got table'
+				)
+				assert_errorIs( function() mlib.line.getSlope( 0, '0', 1, 1 ) end,
+					'MLib: line.getSlope: point 2: in compatibility mode expected a number, got string'
+				)
 			end )
 		end )
 		context( 'turbo', function()
@@ -71,7 +97,9 @@ context( 'line', function()
 				assert_fuzzyEqual( mlib.line.getPerpendicularSlope( 0, 0, 1, 1 ), -1 )
 				assert_fuzzyEqual( mlib.line.getPerpendicularSlope( { 0, 0 }, 1, 1 ), -1 )
 				assert_fuzzyEqual( mlib.line.getPerpendicularSlope( { 0, 0 }, { 1, 1 } ), -1 )
-				assert_error( function() mlib.line.getPerpendicularSlope( '1', 0, 0, 0 ) end )
+				assert_errorIs( function() mlib.line.getPerpendicularSlope( '1', 0, 0, 0 ) end,
+					'MLib: line.getPerpendicularSlope: point 1: expected a number, got string'
+				)
 			end )
 			test( '0 if the line is vertical', function()
 				assert_fuzzyEqual( mlib.line.getPerpendicularSlope( 0, 0, 0, 1 ), 0 )
@@ -83,8 +111,12 @@ context( 'line', function()
 			end )
 			test( 'Errors if compatibilityMode is not changed', function()
 				mlib.compatibilityMode = true
-				assert_error( function() mlib.line.getPerpendicularSlope( { 0, 0 }, 1, 1 ) end )
-				assert_error( function() mlib.line.getPerpendicularSlope( { 0, 0 }, { 1, 1 } ) end )
+				assert_errorIs( function() mlib.line.getPerpendicularSlope( { 0, 0 }, 1, 1 ) end,
+					'MLib: line.getPerpendicularSlope: arg 1: in compatibility mode expected a number, got table'
+				)
+				assert_errorIs( function() mlib.line.getPerpendicularSlope( 0, 0, 1, 1 ) end,
+					'MLib: line.getPerpendicularSlope: arg 2: in compatibility mode expected nil, got number'
+				)
 			end )
 		end )
 		context( 'turbo', function()
@@ -97,22 +129,35 @@ context( 'line', function()
 	-- {{{ line.getIntercept
 	context( 'getIntercept', function()
 		context( 'mlib', function()
+			test( 'Gets the y-intercept of a line given turbo format', function()
+				assert_fuzzyEqual( mlib.line.getIntercept( 1, 0, 0 ), 0 )
+				assert_fuzzyEqual( mlib.line.getIntercept( 2, 1, 4 ), 2 )
+			end )
 			test( 'Gets the y-intercept of a line with formats of line.getSlope', function()
 				assert_fuzzyEqual( mlib.line.getIntercept( 0, 0, 1, 1 ), 0 )
 				assert_fuzzyEqual( mlib.line.getIntercept( { 0, 0 }, 1, 1 ), 0 )
 				assert_fuzzyEqual( mlib.line.getIntercept( 0, 0, { 1, 1 } ), 0 )
 				assert_fuzzyEqual( mlib.line.getIntercept( { 0, 0 }, { 1, 1 } ), 0 )
-				assert_error( function() mlib.line.getIntercept( { '1', 2 }, 1, 1 ) end )
+				assert_errorIs( function() mlib.line.getIntercept( { '1', 2 }, 1, 1 ) end,
+					'MLib: line.getIntercept: point 1: expected a number, got string'
+				)
 			end )
 			test( 'Errors if compatibilityMode is true', function()
 				mlib.compatibilityMode = true
-				assert_error( function() mlib.line.getIntercept( { 0, 0 }, 1, 1 ) end )
-				assert_error( function() mlib.line.getIntercept( { 0, 0 }, { 1, 1 } ) end )
+				assert_errorIs( function() mlib.line.getIntercept( { 0, 0 }, 1, 1 ) end,
+					'MLib: line.getIntercept: arg 1: in compatibility mode expected a number or boolean, got table'
+				)
+				assert_errorIs( function() mlib.line.getIntercept( 0, 0, { 1, 1 } ) end,
+					'MLib: line.getIntercept: arg 3: in compatibility mode expected a number, got table'
+				)
+				assert_errorIs( function() mlib.line.getIntercept( { 1, 0, 0 } ) end,
+					'MLib: line.getIntercept: arg 1: in compatibility mode expected a number or boolean, got table'
+				)
 			end )
 		end )
 		context( 'turbo', function()
 			test( 'Gets the y-intercept of a line given the slope and a point', function()
-				assert_fuzzyEqual( turbo.line.getIntercept( 1, 1, 1 ), 0 )
+				assert_fuzzyEqual( turbo.line.getIntercept( 1, 0, 0 ), 0 )
 			end )
 		end )
 	end )
@@ -134,10 +179,33 @@ context( 'line', function()
 			end )
 			test( 'Errors if compatibilityMode is true', function()
 				mlib.compatibilityMode = true
-				assert_error( function() mlib.line.getLineIntersection( { 0, 0, 2, 2 }, { 0, 2, 2, 0 } ) end )
-				assert_error( function() mlib.line.getLineIntersection( { { 0, 0 }, 2, 2 }, { 0, 2, 2, 0 } ) end )
-				assert_error( function() mlib.line.getLineIntersection( { { 0, 0 }, { 2, 2 } }, { 0, 2, 2, 0 } ) end )
-				assert_error( function() mlib.line.getLineIntersection( { 0, 0, 2, 2 }, { { 0, 2 }, { 2, 0 } } ) end )
+				-- arg 1
+				assert_errorIs( function() mlib.line.getLineIntersection( { 0, 0, 2, 2 }, { 0, 2, 2, 0 } ) end,
+					'MLib: line.getLineIntersection: arg 1: in compatibility mode expected a table with a length of 3, got a table with a length of 4'
+				)
+				assert_errorIs( function() mlib.line.getLineIntersection( { { 0, 0 }, 2, 2 }, { 0, 2, 2, 0 } ) end,
+					'MLib: line.getLineIntersection: arg 1: in compatibility mode expected a table with [1], [2], and [3] to all be numbers, got table, number, number'
+				)
+				assert_errorIs( function() mlib.line.getLineIntersection( { 0, 0, { 2, 2 } }, { 0, 2, 2, 0 } ) end,
+					'MLib: line.getLineIntersection: arg 1: in compatibility mode expected a table with [1], [2], and [3] to all be numbers, got number, number, table'
+				)
+				assert_errorIs( function() mlib.line.getLineIntersection( { 0, 0, 2, 2 }, { 0, 2, 2, 0 } ) end,
+					'MLib: line.getLineIntersection: arg 1: in compatibility mode expected a table with a length of 3, got a table with a length of 4'
+				)
+
+				-- arg 2
+				assert_errorIs( function() mlib.line.getLineIntersection( { 0, 0, 2 }, { 0, 2, 2, 0 } ) end,
+					'MLib: line.getLineIntersection: arg 2: in compatibility mode expected a table with a length of 3, got a table with a length of 4'
+				)
+				assert_errorIs( function() mlib.line.getLineIntersection( { 0, 0, 2 }, { { 0, 2 }, 2, 0 } ) end,
+					'MLib: line.getLineIntersection: arg 2: in compatibility mode expected a table with [1], [2], and [3] to all be numbers, got table, number, number'
+				)
+				assert_errorIs( function() mlib.line.getLineIntersection( { 0, 0, 2 }, { 0, 2, { 2, 0 } } ) end,
+					'MLib: line.getLineIntersection: arg 2: in compatibility mode expected a table with [1], [2], and [3] to all be numbers, got number, number, table'
+				)
+				assert_errorIs( function() mlib.line.getLineIntersection( { 0, 0, 2 }, { 0, 2, 2, 0 } ) end,
+					'MLib: line.getLineIntersection: arg 2: in compatibility mode expected a table with a length of 3, got a table with a length of 4'
+				)
 			end )
 		end )
 		context( 'turbo', function()
@@ -162,12 +230,18 @@ context( 'segment', function()
 				assert_multipleFuzzyEqual( { mlib.segment.getMidpoint( { 0, 0 }, { 2, 2 } ) }, { 1, 1 } )
 				assert_multipleFuzzyEqual( { mlib.segment.getMidpoint( { 0, 0 }, 2, 2 ) }, { 1, 1 } )
 				assert_multipleFuzzyEqual( { mlib.segment.getMidpoint( 0, 0, { 2, 2 } ) }, { 1, 1 } )
-				assert_error( function() mlib.segment.getMidpoint( 0, 0, '2', 2 ) end )
+				assert_errorIs( function() mlib.segment.getMidpoint( 0, 0, '2', 2 ) end,
+					'MLib: segment.getMidpoint: point 3: expected a number, got string'
+				)
 			end )
 			test( 'Errors if compatibilityMode is true', function()
 				mlib.compatibilityMode = true
-				assert_error( function() mlib.segment.getMidpoint( { 0, 0 }, 2, 2 ) end )
-				assert_error( function() mlib.segment.getMidpoint( { 0, 0, 2, 2 } ) end )
+				assert_errorIs( function() mlib.segment.getMidpoint( { 0, 0 }, 2, 2 ) end,
+					'MLib: segment.getMidpoint: point 1: in compatibility mode expected a number, got table'
+				)
+				assert_errorIs( function() mlib.segment.getMidpoint( { 0, 0, 2, 2 } ) end,
+					'MLib: segment.getMidpoint: point 1: in compatibility mode expected a number, got table'
+				)
 			end )
 		end )
 		context( 'turbo', function()
@@ -185,12 +259,18 @@ context( 'segment', function()
 				assert_fuzzyEqual( mlib.segment.getLength( { 0, 0 }, { 1, 1 } ), math.sqrt( 2 ) )
 				assert_fuzzyEqual( mlib.segment.getLength( { 0, 0 }, 1, 1 ), math.sqrt( 2 ) )
 				assert_fuzzyEqual( mlib.segment.getLength( 0, 0, { 1, 1 } ), math.sqrt( 2 ) )
-				assert_error( function() mlib.segment.getLength( 0, '0', 1, 1 ) end )
+				assert_errorIs( function() mlib.segment.getLength( 0, '0', 1, 1 ) end,
+					'MLib: segment.getLength: point 2: expected a number, got string'
+				)
 			end )
 			test( 'Errors if compatibilityMode is true', function()
 				mlib.compatibilityMode = true
-				assert_error( function() mlib.segment.getLength( { 0, 0 }, 1, 1 ) end )
-				assert_error( function() mlib.segment.getLength( { 0, 0, 1, 1 } ) end )
+				assert_errorIs( function() mlib.segment.getLength( { 0, 0 }, 1, 1 ) end,
+					'MLib: segment.getLength: point 1: in compatibility mode expected a number, got table'
+				)
+				assert_errorIs( function() mlib.segment.getLength( { 0, 0, 1, 1 } ) end,
+					'MLib: segment.getLength: point 1: in compatibility mode expected a number, got table'
+				)
 			end )
 		end )
 		context( 'turbo', function()

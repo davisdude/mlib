@@ -63,7 +63,7 @@ local function err( errCode, passed, ... )
 	if type( types[1] ) == 'function' then
 		local returns = { types[1]( passed ) }
 		for i = 2, #returns do errCode = errCode:gsub( '%%' .. i - 1, returns[i] ) end
-		assert( returns[1], errCode )
+		assert( returns[1], 'MLib: ' .. errCode )
 		return true
 	end
 	-- Types passed
@@ -127,6 +127,10 @@ local line = {}
 
 --- Get the slope of a line
 -- @function line.getSlope
+-- @tparam table points Table in the form `{ x1, y1, x2, y2 }`
+
+--- Get the slope of a line
+-- @function line.getSlope
 -- @tparam table p1 The coordinates in the form `{ x1, y1 }`
 -- @tparam number x2 The x-coordinate of the second point
 -- @tparam number y2 The y-coordinate of the second point
@@ -149,7 +153,7 @@ function line.getSlope( ... )
 		check4Points( 'line.getSlope', points )
 	else
 		points = { ... }
-		check4Points( 'line.getSlope', points, ' in compatibility mode ' )
+		check4Points( 'line.getSlope', points, 'in compatibility mode ' )
 	end
 	return turbo.line.getSlope( unpack( points ) )
 end
@@ -169,16 +173,20 @@ end
 -- @treturn[2] boolean `false` if the line is vertical
 -- @see line.getSlope
 function line.getPerpendicularSlope( ... )
-	local args = varargs( ... )
 	local slope
-	if #args == 1 then
-		slope = args[1]
-	elseif not mlib.compatibilityMode then
-		local points = flattenPoints( args )
-		check4Points( 'line.getPerpendicularSlope', points )
-		slope = mlib.line.getSlope( points )
+	if not mlib.compatibilityMode then
+		local points = flattenPoints( varargs( ... ) )
+		if #points == 1 then
+			slope = points[1]
+		else
+			check4Points( 'line.getPerpendicularSlope', points )
+			slope = mlib.line.getSlope( points )
+		end
 	else
-		check4Points( 'line.getPerpendicularSlope', points, ' in compatibilty mode' )
+		local args = { ... }
+		err( 'line.getPerpendicularSlope: arg 1: in compatibility mode expected a number, got %type%', args[1], 'number' )
+		err( 'line.getPerpendicularSlope: arg 2: in compatibility mode expected nil, got %type%', args[2], 'nil' )
+		slope = args[1]
 	end
 	return turbo.line.getPerpendicularSlope( slope )
 end
@@ -211,6 +219,9 @@ function line.getIntercept( ... )
 		end
 	else
 		m, x, y = ...
+		err( 'line.getIntercept: arg 1: in compatibility mode expected a number or boolean, got %type%', m, 'number', 'boolean' )
+		err( 'line.getIntercept: arg 2: in compatibility mode expected a number, got %type%', x, 'number' )
+		err( 'line.getIntercept: arg 3: in compatibility mode expected a number, got %type%', y, 'number' )
 	end
 	return turbo.line.getIntercept( m, x, y )
 end
@@ -231,19 +242,17 @@ end
 function line.getLineIntersection( line1, line2 )
 	err( 'line.getLineIntersection: arg 1: expected a table, got %type%', line1, 'table' )
 	err( 'line.getLineIntersection: arg 2: expected a table, got %type%', line2, 'table' )
-	local points1 = flattenPoints( line1 )
-	local points2 = flattenPoints( line2 )
 	local m1, x1, x2, m2, x2, y2
 
 	if mlib.compatibilityMode then
-		err( 'line.getLineIntersection: arg 1: expected a table with [1], [2], and [3] to all be numbers, got %1, %2, %3 in compatibility mode', line1, function( line )
+		err( 'line.getLineIntersection: arg 1: in compatibility mode expected a table with [1], [2], and [3] to all be numbers, got %1, %2, %3', line1, function( line )
 			return checkTypes( line, { 'number', 'number', 'number' } )
 		end )
-		err( 'line.getLineIntersection: arg 1: expected a table with [1], [2], and [3] to all be numbers, got %1, %2, %3 in compatibility mode', line2, function( line )
+		err( 'line.getLineIntersection: arg 2: in compatibility mode expected a table with [1], [2], and [3] to all be numbers, got %1, %2, %3', line2, function( line )
 			return checkTypes( line, { 'number', 'number', 'number' } )
 		end )
-		assert( #line1 == 3, 'mlib: line.getLineIntersection: arg 1: expected a table with a length of 3, got a table with a length of ' .. #line1 )
-		assert( #line2 == 3, 'mlib: line.getLineIntersection: arg 2: expected a table with a length of 3, got a table with a length of ' .. #line2 )
+		assert( #line1 == 3, 'MLib: line.getLineIntersection: arg 1: in compatibility mode expected a table with a length of 3, got a table with a length of ' .. #line1 )
+		assert( #line2 == 3, 'MLib: line.getLineIntersection: arg 2: in compatibility mode expected a table with a length of 3, got a table with a length of ' .. #line2 )
 		m1, x1, y1 = unpack( line1 )
 		m2, x2, y2 = unpack( line2 )
 	else
@@ -307,7 +316,7 @@ function segment.getMidpoint( ... )
 	local points
 	if mlib.compatibilityMode then
 		points = { ... }
-		check4Points( 'segment.getMidpoint', points, ' in compatibility mode' )
+		check4Points( 'segment.getMidpoint', points, 'in compatibility mode ' )
 	else
 		points = flattenPoints( varargs( ... ) )
 		check4Points( 'segment.getMidpoint', points )
@@ -327,7 +336,7 @@ function segment.getLength( ... )
 	local points
 	if mlib.compatibilityMode then
 		points = { ... }
-		check4Points( 'segments.getLength', points, ' in compatibility mode' )
+		check4Points( 'segment.getLength', points, 'in compatibility mode ' )
 	else
 		points = flattenPoints( varargs( ... ) )
 		check4Points( 'segment.getLength', points )
