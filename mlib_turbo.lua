@@ -94,8 +94,18 @@ end
 
 --- Get the point on a line closest to a given point
 -- @function turbo.line.getClosestPoint
-local function lineGetClosestPoint( m, b, x, y )
+-- @tparam number m
+-- @tparam number b
+-- @tparam number x
+-- @tparam number y
+-- @tparam number px The point to which the closest point on the line should lie
+-- @tparam number py
+-- @treturn number cx The closest point to `( px, py )` which lies on the line
+-- @treturn number cy
+local function lineGetClosestPoint( m, b, x, y, cx, cy )
 	local pm = lineGetPerpendicularSlope( m )
+	local pb = lineGetIntercept( pm, cx, cy )
+	return lineGetLineIntersection( { pm, cx, cy }, { m, x, y } )
 end
 -- @section end
 -- }}}
@@ -136,6 +146,7 @@ return {
 		getPerpendicularSlope = lineGetPerpendicularSlope,
 		getIntercept = lineGetIntercept,
 		getLineIntersection = lineGetLineIntersection,
+		getClosestPoint = lineGetClosestPoint,
 	},
 	segment = {
 		getMidpoint = segmentGetMidpoint,

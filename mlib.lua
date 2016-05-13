@@ -26,18 +26,14 @@ local turbo = require 'mlib_turbo'
 local unpack = unpack or table.unpack
 
 local function validateNumber( n )
-	if type( n ) ~= 'number' then return false
-	elseif n ~= n then return false -- nan
-	elseif math.abs( n ) == math.huge then return false
-	else return true end
+	if type( n ) ~= 'number' then return false, n
+	elseif n ~= n then return false, n -- nan
+	elseif math.abs( n ) == math.huge then return false, n
+	else return true, n end
 end
 
--- Convert varargs into a table
-local function varargs( ... )
-	local args = {}
-	if select( '#', ... ) > 1 or type( ... ) ~= 'table' then args = { ... }
-	else args = ... end
-	return args
+local function validateSlope( m )
+	return validateNumber( m ) or m == false, m
 end
 
 -- checkTypes( { 'a', 'b', 'c' }, { 'string', 'string', 'string' } ) -- true, 'string', 'string', 'string'
@@ -61,9 +57,14 @@ local function err( errCode, passed, ... )
 	local errCode = errCode:gsub( '%%type%%', typeOfPassed )
 	-- Function passed
 	if type( types[1] ) == 'function' then
-		local returns = { types[1]( passed ) }
-		for i = 2, #returns do errCode = errCode:gsub( '%%' .. i - 1, returns[i] ) end
-		assert( returns[1], 'MLib: ' .. errCode )
+		local f = types[1]
+		-- Use select() to handle nils passed as a function
+		if not select( 1, f( passed ) ) then
+			for i = 2, select( '#', f( passed ) ) do
+				errCode = errCode:gsub( '%%' .. i - 1, tostring( select( i, f( passed ) ) ) )
+			end
+			error( 'MLib: ' .. errCode )
+		end
 		return true
 	end
 	-- Types passed
@@ -80,42 +81,13 @@ end
 local function checkFuzzy( x, y, delta )
 	return math.abs( x - y ) <= ( delta or .00001 )
 end
-
-local function validatePoint( arg )
-	return ( type( arg ) == 'number' ) or ( type( arg ) == 'table' and validateNumber( arg[1] ) and validateNumber( arg[2] ) )
-end
-
--- Converts points to a flat table
-local function flattenPoints( tab )
-	local points = {}
-	for _, v in ipairs( tab ) do
-		if type( v ) == 'table' then
-			points[#points + 1] = v[1]
-			points[#points + 1] = v[2]
-		else
-			points[#points + 1] = v
-		end
-	end
-	return points
-end
-
-local function check4Points( name, args, condition )
-	condition = condition or ''
-	err( name .. ': point %1: ' .. condition .. 'expected a number, got %2', args, function( arg )
-		for i = 1, 4 do
-			if type( arg[i] ) ~= 'number' then return false, i, type( arg[i] ) end
-		end
-		return true
-	end )
-end
 -- }}}
 -- {{{ mlib.line
-
 --- mlib.line
 -- - line functions
 -- @section milb.line
 local line = {}
-
+-- {{{ line.getSlope
 --- Get the slope of a line
 -- @function line.getSlope
 -- @tparam number x1 The x-coordinate of the first point
@@ -124,73 +96,52 @@ local line = {}
 -- @tparam number y2 The y-coordinate of the second point
 -- @treturn[1] number The slope of the line
 -- @treturn[2] boolean `false` if the line is vertical
-
---- Get the slope of a line
--- @function line.getSlope
--- @tparam table points Table in the form `{ x1, y1, x2, y2 }`
-
---- Get the slope of a line
--- @function line.getSlope
--- @tparam table p1 The coordinates in the form `{ x1, y1 }`
--- @tparam number x2 The x-coordinate of the second point
--- @tparam number y2 The y-coordinate of the second point
-
---- Get the slope of a line
--- @function line.getSlope
--- @tparam number x1 The x-coordinate of the second point
--- @tparam number y1 The y-coordinate of the second point
--- @tparam table p2 The coordinates in the form `{ x2, y2 }`
-
---- Get the slope of a line
--- @function line.getSlope
--- @tparam table p1 The coordinates in the form `{ x1, y1 }`
--- @tparam table p2 The coordinates in the form `{ x2, y2 }`
-function line.getSlope( ... )
-	local points
-	if not mlib.compatibilityMode then
-		points = varargs( ... )
-		points = flattenPoints( points )
-		check4Points( 'line.getSlope', points )
-	else
-		points = { ... }
-		check4Points( 'line.getSlope', points, 'in compatibility mode ' )
-	end
-	return turbo.line.getSlope( unpack( points ) )
+function line.getSlope( x1, y1, x2, y2 )
+	err( 'line.getSlope: arg 1: expected a number, got %type%', x1, 'number' )
+	err( 'line.getSlope: arg 2: expected a number, got %type%', y1, 'number' )
+	err( 'line.getSlope: arg 3: expected a number, got %type%', x2, 'number' )
+	err( 'line.getSlope: arg 4: expected a number, got %type%', y2, 'number' )
+	return turbo.line.getSlope( x1, y1, x2, y2 )
 end
-
+-- }}}
+-- {{{ line.getPerpendicularSlope
 --- Get the perpendicular slope of a line given slope
 -- @function line.getPerpendicularSlope
 -- @tparam number|boolean m The slope of the line (`false` if the line is vertical)
 -- @treturn number|booean pm The perpendicular slope (`false` if the new slope is vertical)
 
---- Get the perpendicular slope of a line in the forms of [`line.getSlope`](#line.getSlope)
--- @function line.getPerpendicularSlope
+--- Get the perpendicular slope of a line
 -- @tparam number x1 The x-coordinate of the first point
 -- @tparam number y1 The y-coordinate of the first point
 -- @tparam number x2 The x-coordinate of the second point
 -- @tparam number y2 The y-coordinate of the second point
 -- @treturn[1] number The slope of the line
 -- @treturn[2] boolean `false` if the line is vertical
--- @see line.getSlope
 function line.getPerpendicularSlope( ... )
+	local args = { ... }
 	local slope
-	if not mlib.compatibilityMode then
-		local points = flattenPoints( varargs( ... ) )
-		if #points == 1 then
-			slope = points[1]
-		else
-			check4Points( 'line.getPerpendicularSlope', points )
-			slope = mlib.line.getSlope( points )
-		end
-	else
-		local args = { ... }
-		err( 'line.getPerpendicularSlope: arg 1: in compatibility mode expected a number, got %type%', args[1], 'number' )
-		err( 'line.getPerpendicularSlope: arg 2: in compatibility mode expected nil, got %type%', args[2], 'nil' )
+	if mlib.compatibilityMode then
 		slope = args[1]
+		err( 'line.getPerpendicularSlope: arg 1: in compatibility mode expected a number or boolean (false), got %type%, %1', slope, validateSlope )
+		err( 'line.getPerpendicularSlope: in compatibility mode expected 1 arg, got %1', select( '#', ... ),
+			function( len ) return len <= 1, len end
+		)
+	else
+		if #args == 1 then
+			slope = args[1]
+			err( 'line.getPerpendicularSlope: arg 1: expected a number or boolean (false), got %type%, %1', slope, validateSlope )
+		else
+			err( 'line.getPerpendicularSlope: arg 1: expected a number with > 1 arg, got %type%, %1', args[1], validateNumber )
+			err( 'line.getPerpendicularSlope: arg 2: expected a number, got %type%, %1', args[2], validateNumber )
+			err( 'line.getPerpendicularSlope: arg 3: expected a number, got %type%, %1', args[3], validateNumber )
+			err( 'line.getPerpendicularSlope: arg 4: expected a number, got %type%, %1', args[4], validateNumber )
+			slope = mlib.line.getSlope( unpack( args ) )
+		end
 	end
 	return turbo.line.getPerpendicularSlope( slope )
 end
-
+-- }}}
+-- {{{ line.getIntercept
 --- Get the y-intercept of a line given slope, x, and y
 -- @function line.getIntercept
 -- @tparam number|boolean m The slope of the line
@@ -198,34 +149,40 @@ end
 -- @tparam number y An y-coordinate on the line
 -- @treturn number|boolean b The y-intercept (`false` if the line is vertical)
 
---- Get the y-intercept of a line in the forms of [`line.getSlope`](#line.getSlope)
+--- Get the y-intercept of a line
 -- @function line.getIntercept
 -- @tparam number x1 The x-coordinate of the first point
 -- @tparam number y1 The y-coordinate of the first point
 -- @tparam number x2 The x-coordinate of the second point
 -- @tparam number y2 The y-coordinate of the second point
 -- @treturn number b The y-intercept of the line
--- @see line.getSlope
 function line.getIntercept( ... )
+	local args = { ... }
 	local m, x, y
-	if not mlib.compatibilityMode then
-		local points = flattenPoints( varargs( ... ) )
-		if #points == 3 then
-			m, x, y = unpack( points )
-		else
-			check4Points( 'line.getIntercept', points )
-			m = mlib.line.getSlope( points )
-			x, y = points[1], points[2]
-		end
+	if mlib.compatibilityMode then
+		m, x, y = unpack( args )
+		err( 'line.getIntercept: arg 1: in compatibility mode expected a number or boolean (false), got %type%, %1', m, validateSlope )
+		err( 'line.getIntercept: arg 2: in compatibility mode expected a number, got %type%, %1', x, validateNumber )
+		err( 'line.getIntercept: arg 3: in compatibility mode expected a number, got %type%, %1', y, validateNumber )
 	else
-		m, x, y = ...
-		err( 'line.getIntercept: arg 1: in compatibility mode expected a number or boolean, got %type%', m, 'number', 'boolean' )
-		err( 'line.getIntercept: arg 2: in compatibility mode expected a number, got %type%', x, 'number' )
-		err( 'line.getIntercept: arg 3: in compatibility mode expected a number, got %type%', y, 'number' )
+		if #args == 3 then
+			m, x, y = unpack( args )
+			err( 'line.getIntercept: arg 1: expected a number or boolean (false), got %type%, %1', m, validateSlope )
+			err( 'line.getIntercept: arg 2: expected a number, got %type%, %1', x, validateNumber )
+			err( 'line.getIntercept: arg 3: expected a number, got %type%, %1', y, validateNumber )
+		else
+			err( 'line.getIntercept: arg 1: expected a number with > 3 arg, got %type%, %1', args[1], validateNumber )
+			err( 'line.getIntercept: arg 2: expected a number, got %type%, %1', args[2], validateNumber )
+			err( 'line.getIntercept: arg 3: expected a number, got %type%, %1', args[3], validateNumber )
+			err( 'line.getIntercept: arg 4: expected a number, got %type%, %1', args[4], validateNumber )
+			m = mlib.line.getSlope( unpack( args ) )
+			x, y = unpack( args )
+		end
 	end
 	return turbo.line.getIntercept( m, x, y )
 end
-
+-- }}}
+-- {{{ line.getLineIntersection
 --- Get the intersection of two lines in the form of `{ slope, x1, y1 }`
 -- @function line.getLineIntersection
 -- @tparam table line1 A line in the form `{ slope, x1, y1 }`
@@ -234,116 +191,152 @@ end
 -- @treturn[1] number y The y-coordinate of the intersection
 -- @treturn[2] boolean intersects `true`/`false` if the lines do/don't intersect (vertical/horizontal)
 
---- Get the intersection of two lines in the forms of [`line.getSlope`](#line.getSlope)
+--- Get the intersection of two lines in the forms of `{ x1, y1, x2, y2 }` or `{ slope, x, y }`
 -- @function line.getLineIntersection
--- @tparam table line1 The first line, in any form acceptable to [`line.getSlope`](#line.getSlope)
--- @tparam table line2 The second line, in any form acceptable to [`line.getSlope`](#line.getSlope)
--- @see line.getSlope
+-- @tparam table line1 The first line, in any either form
+-- @tparam table line2 The second line, in any either form
 function line.getLineIntersection( line1, line2 )
 	err( 'line.getLineIntersection: arg 1: expected a table, got %type%', line1, 'table' )
 	err( 'line.getLineIntersection: arg 2: expected a table, got %type%', line2, 'table' )
-	local m1, x1, x2, m2, x2, y2
-
+	local m1, x1, y1, m2, x2, y2
 	if mlib.compatibilityMode then
-		err( 'line.getLineIntersection: arg 1: in compatibility mode expected a table with [1], [2], and [3] to all be numbers, got %1, %2, %3', line1, function( line )
-			return checkTypes( line, { 'number', 'number', 'number' } )
-		end )
-		err( 'line.getLineIntersection: arg 2: in compatibility mode expected a table with [1], [2], and [3] to all be numbers, got %1, %2, %3', line2, function( line )
-			return checkTypes( line, { 'number', 'number', 'number' } )
-		end )
-		assert( #line1 == 3, 'MLib: line.getLineIntersection: arg 1: in compatibility mode expected a table with a length of 3, got a table with a length of ' .. #line1 )
-		assert( #line2 == 3, 'MLib: line.getLineIntersection: arg 2: in compatibility mode expected a table with a length of 3, got a table with a length of ' .. #line2 )
 		m1, x1, y1 = unpack( line1 )
 		m2, x2, y2 = unpack( line2 )
+		-- line 1
+		err( 'line.getLineIntersection: arg 1: in compatibility mode expected [1] to be a number or boolean (false), got %type%, %1', m1, validateSlope )
+		err( 'line.getLineIntersection: arg 1: in compatibility mode expected [2] to be a number, got %type%, %1', x1, validateNumber )
+		err( 'line.getLineIntersection: arg 1: in compatibility mode expected [3] to be a number, got %type%, %1', y1, validateNumber )
+		-- line 2
+		err( 'line.getLineIntersection: arg 2: in compatibility mode expected [1] to be a number or boolean (false), got %type%, %1', m2, validateSlope )
+		err( 'line.getLineIntersection: arg 2: in compatibility mode expected [2] to be a number, got %type%, %1', x2, validateNumber )
+		err( 'line.getLineIntersection: arg 2: in compatibility mode expected [3] to be a number, got %type%, %1', y2, validateNumber )
 	else
 		-- line 1
 		if #line1 == 3 then
-			err( 'line.getLineIntersection: arg 1: expected a table with [1], [2], and [3] to all be numbers, got %1, %2, %3', line1, function( line )
-				return checkTypes( line, { 'number', 'number', 'number' } )
-			end )
 			m1, x1, y1 = unpack( line1 )
-		elseif #line1 == 4 then
-			err( 'line.getLineIntersection: arg 1: expected a table with [1], [2], [3], and [4] to all be numbers, got %1, %2, %3, %4', line1, function( line )
-				return checkTypes( line, { 'number', 'number', 'number', 'number' } )
-			end )
-			local a, b, c, d = unpack( line1 )
-			x1, y1 = a, b
-			m1 = mlib.line.getSlope( a, b, c, d )
+			err( 'line.getLineIntersection: arg 1: expected [1] to be a number or boolean (false), got %type%, %1', m1, validateSlope )
+			err( 'line.getLineIntersection: arg 1: expected [2] to be a number, got %type%, %1', x1, validateNumber )
+			err( 'line.getLineIntersection: arg 1: expected [3] to be a number, got %type%, %1', y1, validateNumber )
 		else
-			error( 'mlib: line.getLineIntersection: arg 1: incorrect table format' )
+			err( 'line.getLineIntersection: arg 1: expected [1] to be a number with # > 3, got %type%, %1', line1[1], validateNumber )
+			err( 'line.getLineIntersection: arg 1: expected [2] to be a number, got %type%, %1', line1[2], validateNumber )
+			err( 'line.getLineIntersection: arg 1: expected [3] to be a number, got %type%, %1', line1[3], validateNumber )
+			err( 'line.getLineIntersection: arg 1: expected [4] to be a number, got %type%, %1', line1[4], validateNumber )
+			m1 = mlib.line.getSlope( unpack( line1 ) )
+			x1, y1 = unpack( line1 )
 		end
-
 		-- line 2
 		if #line2 == 3 then
-			err( 'line.getLineIntersection: arg 1: expected a table with [1], [2], and [3] to all be numbers, got %1, %2, %3 in compatibility mode', line2, function( line )
-				return checkTypes( line, { 'number', 'number', 'number' } )
-			end )
 			m2, x2, y2 = unpack( line2 )
-		elseif #line2 == 4 then
-			err( 'line.getLineIntersection: arg 1: expected a table with [1], [2], [3], and [4] to all be numbers, got %1, %2, %3, %4', line2, function( line )
-				return checkTypes( line, { 'number', 'number', 'number', 'number' } )
-			end )
-			local a, b, c, d = unpack( line2 )
-			x2, y2 = a, b
-			m2 = mlib.line.getSlope( a, b, c, d )
+			err( 'line.getLineIntersection: arg 2: expected [1] to be a number or boolean (false), got %type%, %1', m2, validateSlope )
+			err( 'line.getLineIntersection: arg 2: expected [2] to be a number, got %type%, %1', x2, validateNumber )
+			err( 'line.getLineIntersection: arg 2: expected [3] to be a number, got %type%, %1', y2, validateNumber )
 		else
-			error( 'mlib: line.getLineIntersection: arg 1: incorrect table format' )
+			err( 'line.getLineIntersection: arg 2: expected [1] to be a number with # > 3, got %type%, %1', line2[1], validateNumber )
+			err( 'line.getLineIntersection: arg 2: expected [2] to be a number, got %type%, %1', line2[2], validateNumber )
+			err( 'line.getLineIntersection: arg 2: expected [3] to be a number, got %type%, %1', line2[3], validateNumber )
+			err( 'line.getLineIntersection: arg 2: expected [4] to be a number, got %type%, %1', line2[4], validateNumber )
+			m2 = mlib.line.getSlope( unpack( line2 ) )
+			x2, y2 = unpack( line2 )
 		end
 	end
-
 	return turbo.line.getLineIntersection( { m1, x1, y1 }, { m2, x2, y2 } )
 end
+-- }}}
+-- {{{ line.getClosestPoint
+--- Get the point on a line closest to a given point
+-- @function line.getClosestPoint
+-- @tparam number m The slope of the line
+-- @tparam number b The y-intercept of the line
+-- @tparam number x An x-coordinate on the line (needed for vertical lines)
+-- @tparam number y A y-coordinate on the line
+-- @tparam number px The x-coordinate of the point to which the closest point on the line should lie
+-- @tparam number py The y-coordiate of the point to which the closest point on the line should lie
+-- @treturn number cx The x-coordinate of the closest point to `( px, py )` which lies on the line
+-- @treturn number cy The y-coordinate of the closest point to `( px, py )` which lies on the line
 
+--- Get the point on a line closest to a given point
+-- @function line.getClosestPoint
+-- @tparam table points A table of points, given in the form `{ x1, y1, x2, y2 }`
+-- @tparam px number The x-coordinate of the point to which the closest point on the line should lie
+-- @tparam py number The y-coordinate of the point to which the closest point on the line should lie
+function line.getClosestPoint( ... )
+	local m, b, x, y, px, py
+	if mlib.compatibilityMode then
+		m, b, x, y, px, py = ...
+		err( 'line.getClosestPoint: arg 1: in compatibility mode expected a number or boolean, got %type%', m, 'number', 'boolean' )
+		err( 'line.getClosestPoint: arg 2: in compatibility mode expected a number or boolean, got %type%', b, 'number', 'boolean' )
+		err( 'line.getClosestPoint: arg 3: in compatibility mode expected a number, got %type%', x, 'number' )
+		err( 'line.getClosestPoint: arg 4: in compatibility mode expected a number, got %type%', y, 'number' )
+		err( 'line.getClosestPoint: arg 5: in compatibility mode expected a number, got %type%', px, 'number' )
+		err( 'line.getClosestPoint: arg 6: in compatibility mode expected a number, got %type%', py, 'number' )
+	else
+		local args = { ... }
+		if #args == 3 then
+			err( 'line.getClosestPoint: arg 1: expected a table for 3 args, got %type%', args[1], 'table' )
+			err( 'line.getClosestPoint: arg 1: expected [1] to be a number, got %type%, %1', args[1][1], validateNumber )
+			err( 'line.getClosestPoint: arg 1: expected [2] to be a number, got %type%, %1', args[1][2], validateNumber )
+			err( 'line.getClosestPoint: arg 1: expected [3] to be a number, got %type%, %1', args[1][3], validateNumber )
+			err( 'line.getClosestPoint: arg 1: expected [4] to be a number, got %type%, %1', args[1][4], validateNumber )
+			m = mlib.line.getSlope( unpack( args[1] ) )
+			b = mlib.line.getSlope( unpack( args[1] ) )
+			x, y = unpack( args[1] )
+			px, py = args[2], args[3]
+			err( 'line.getClosestPoint: arg 2: expected a number, got %type%', px, validateNumber )
+			err( 'line.getClosestPoint: arg 3: expected a number, got %type%', py, validateNumber )
+		else
+			m, b, x, y, px, py = unpack( args )
+			err( 'line.getClosestPoint: arg 1: expected a number or boolean with > 3 arg, got %type%', m, validateSlope )
+			-- Can use validate slope for y-intercept, as it follows same formats
+			err( 'line.getClosestPoint: arg 2: expected a number or boolean with > 3 arg, got %type%', b, validateSlope )
+			err( 'line.getClosestPoint: arg 3: expected a number, got %type%', x, 'number' )
+			err( 'line.getClosestPoint: arg 4: expected a number, got %type%', y, 'number' )
+			err( 'line.getClosestPoint: arg 5: expected a number, got %type%', px, 'number' )
+			err( 'line.getClosestPoint: arg 6: expected a number, got %type%', py, 'number' )
+		end
+	end
+	return turbo.line.getClosestPoint( m, b, x, y, px, py )
+end
+-- }}}
 mlib.line = line
 -- @section end
 -- }}}
 -- {{{ mlib.segment
-
 --- mlib.segment
 -- - segment functions
 -- @section milb.segment
 local segment = {}
-
---- Get the midpoint between two points (see [`line.getSlope`](#line.getSlope) for other formats)
+-- {{{ segment.getMidpoint
+--- Get the midpoint between two points
 -- @tparam number x1 The x-coordinate of the first point
 -- @tparam number y1 The y-coordinate of the first point
 -- @tparam number x2 The x-coordinate of the second point
 -- @tparam number y2 The y-coordinate of the second point
 -- @treturn number mx The x-coordinate of the midpoint
 -- @treturn number my The y-coordinate of the midpoint
--- @see line.getSlope
-function segment.getMidpoint( ... )
-	local points
-	if mlib.compatibilityMode then
-		points = { ... }
-		check4Points( 'segment.getMidpoint', points, 'in compatibility mode ' )
-	else
-		points = flattenPoints( varargs( ... ) )
-		check4Points( 'segment.getMidpoint', points )
-	end
-	return turbo.segment.getMidpoint( unpack( points ) )
+function segment.getMidpoint( x1, y1, x2, y2 )
+	err( 'segment.getMidpoint: arg 1: expected a number, got %type%', x1, 'number' )
+	err( 'segment.getMidpoint: arg 2: expected a number, got %type%', y1, 'number' )
+	err( 'segment.getMidpoint: arg 3: expected a number, got %type%', x2, 'number' )
+	err( 'segment.getMidpoint: arg 4: expected a number, got %type%', y2, 'number' )
+	return turbo.segment.getMidpoint( x1, y1, x2, y2 )
 end
-
---- Get the distance between two points (see [`line.getSlope`](#line.getSlope) for other formats)
+-- }}}
+-- {{{ segment.getLength
+--- Get the distance between two points
 -- @tparam number x1 The x-coordinate of the first point
 -- @tparam number y1 The y-coordinate of the first point
 -- @tparam number x2 The x-coordinate of the second point
 -- @tparam number y2 The y-coordinate of the second point
--- @treturn number mx The x-coordinate of the midpoint
--- @treturn number my The y-coordinate of the midpoint
--- @see line.getSlope
-function segment.getLength( ... )
-	local points
-	if mlib.compatibilityMode then
-		points = { ... }
-		check4Points( 'segment.getLength', points, 'in compatibility mode ' )
-	else
-		points = flattenPoints( varargs( ... ) )
-		check4Points( 'segment.getLength', points )
-	end
-	return turbo.segment.getLength( unpack( points ) )
+-- @treturn number d the length of the segment
+function segment.getLength( x1, y1, x2, y2 )
+	err( 'segment.getLength: arg 1: expected a number, got %type%', x1, 'number' )
+	err( 'segment.getLength: arg 2: expected a number, got %type%', y1, 'number' )
+	err( 'segment.getLength: arg 3: expected a number, got %type%', x2, 'number' )
+	err( 'segment.getLength: arg 4: expected a number, got %type%', y2, 'number' )
+	return turbo.segment.getLength( x1, y1, x2, y2 )
 end
-
+-- }}}
 mlib.segment = segment
 -- @section end
 -- }}}
