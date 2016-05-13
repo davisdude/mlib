@@ -83,11 +83,13 @@ local function checkFuzzy( x, y, delta )
 end
 -- }}}
 -- {{{ mlib.line
+
 --- mlib.line
 -- - line functions
 -- @section milb.line
 local line = {}
 -- {{{ line.getSlope
+
 --- Get the slope of a line
 -- @function line.getSlope
 -- @tparam number x1 The x-coordinate of the first point
@@ -105,6 +107,7 @@ function line.getSlope( x1, y1, x2, y2 )
 end
 -- }}}
 -- {{{ line.getPerpendicularSlope
+
 --- Get the perpendicular slope of a line given slope
 -- @function line.getPerpendicularSlope
 -- @tparam number|boolean m The slope of the line (`false` if the line is vertical)
@@ -142,6 +145,7 @@ function line.getPerpendicularSlope( ... )
 end
 -- }}}
 -- {{{ line.getIntercept
+
 --- Get the y-intercept of a line given slope, x, and y
 -- @function line.getIntercept
 -- @tparam number|boolean m The slope of the line
@@ -183,6 +187,7 @@ function line.getIntercept( ... )
 end
 -- }}}
 -- {{{ line.getLineIntersection
+
 --- Get the intersection of two lines in the form of `{ slope, x1, y1 }`
 -- @function line.getLineIntersection
 -- @tparam table line1 A line in the form `{ slope, x1, y1 }`
@@ -244,6 +249,7 @@ function line.getLineIntersection( line1, line2 )
 end
 -- }}}
 -- {{{ line.getClosestPoint
+
 --- Get the point on a line closest to a given point
 -- @function line.getClosestPoint
 -- @tparam number m The slope of the line
@@ -302,11 +308,13 @@ mlib.line = line
 -- @section end
 -- }}}
 -- {{{ mlib.segment
+
 --- mlib.segment
 -- - segment functions
 -- @section milb.segment
 local segment = {}
 -- {{{ segment.getMidpoint
+
 --- Get the midpoint between two points
 -- @tparam number x1 The x-coordinate of the first point
 -- @tparam number y1 The y-coordinate of the first point
@@ -323,6 +331,7 @@ function segment.getMidpoint( x1, y1, x2, y2 )
 end
 -- }}}
 -- {{{ segment.getLength
+
 --- Get the distance between two points
 -- @tparam number x1 The x-coordinate of the first point
 -- @tparam number y1 The y-coordinate of the first point
