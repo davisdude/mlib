@@ -245,10 +245,10 @@ context( 'line', function()
 	context( 'line.getClosestPoint', function()
 		context( 'mlib', function()
 			test( 'Gives the closest point on a line to regular, vertical, and horizontal lines', function()
-				assert_multipleFuzzyEqual( { mlib.line.getClosestPoint( 1, 0, 0, 0, 0, 4 ) }, { 2, 2 } )
-				assert_multipleFuzzyEqual( { mlib.line.getClosestPoint( -1, 4, 2, 2, 4, 2 ) }, { 3, 1 } )
-				assert_multipleFuzzyEqual( { mlib.line.getClosestPoint( 0, 2, 0, 2, 4, -2 ) }, { 4, 2 } )
-				assert_multipleFuzzyEqual( { mlib.line.getClosestPoint( false, false, 4, 0, 2, 2 ) }, { 4, 2 } )
+				assert_multipleFuzzyEqual( { mlib.line.getClosestPoint( 1, 0, 0, 0, 4 ) }, { 2, 2 } )
+				assert_multipleFuzzyEqual( { mlib.line.getClosestPoint( -1, 2, 2, 4, 2 ) }, { 3, 1 } )
+				assert_multipleFuzzyEqual( { mlib.line.getClosestPoint( 0, 0, 2, 4, -2 ) }, { 4, 2 } )
+				assert_multipleFuzzyEqual( { mlib.line.getClosestPoint( false, 4, 0, 2, 2 ) }, { 4, 2 } )
 				assert_multipleFuzzyEqual( { mlib.line.getClosestPoint( { 0, 0, 1, 1 }, 0, 2 ) }, { 1, 1 } )
 				assert_multipleFuzzyEqual( { mlib.line.getClosestPoint( { 2, 2, 2, 4 }, 4, -2 ) }, { 2, -2 } )
 			end )
@@ -276,54 +276,48 @@ context( 'line', function()
 					'MLib: line.getClosestPoint: arg 3: expected a number, got string'
 				)
 				-- 4 args; no compat
-				assert_errorIs( function() mlib.line.getClosestPoint( '1', 0, 0, 0, 0, 4 ) end,
+				assert_errorIs( function() mlib.line.getClosestPoint( '1', 0, 0, 0, 4 ) end,
 					'MLib: line.getClosestPoint: arg 1: expected a number or boolean with > 3 arg, got string'
 				)
-				assert_errorIs( function() mlib.line.getClosestPoint( 1, '0', 0, 0, 0, 4 ) end,
-					'MLib: line.getClosestPoint: arg 2: expected a number or boolean with > 3 arg, got string'
+				assert_errorIs( function() mlib.line.getClosestPoint( 1, '0', 0, 0, 4 ) end,
+					'MLib: line.getClosestPoint: arg 2: expected a number, got string'
 				)
-				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, '0', 0, 0, 4 ) end,
+				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, '0', 0, 4 ) end,
 					'MLib: line.getClosestPoint: arg 3: expected a number, got string'
 				)
-				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, 0, '0', 0, 4 ) end,
+
+				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, 0, '0', 4 ) end,
 					'MLib: line.getClosestPoint: arg 4: expected a number, got string'
 				)
-
-				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, 0, 0, '0', 4 ) end,
+				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, 0, 0, '4' ) end,
 					'MLib: line.getClosestPoint: arg 5: expected a number, got string'
-				)
-				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, 0, 0, 0, '4' ) end,
-					'MLib: line.getClosestPoint: arg 6: expected a number, got string'
 				)
 				-- Compatibility mode
 				mlib.compatibilityMode = true
-				assert_errorIs( function() mlib.line.getClosestPoint( '1', 0, 0, 0, 0, 4 ) end,
+				assert_errorIs( function() mlib.line.getClosestPoint( '1', 0, 0, 0, 4 ) end,
 					'MLib: line.getClosestPoint: arg 1: in compatibility mode expected a number or boolean, got string'
 				)
-				assert_errorIs( function() mlib.line.getClosestPoint( 1, '0', 0, 0, 0, 4 ) end,
-					'MLib: line.getClosestPoint: arg 2: in compatibility mode expected a number or boolean, got string'
+				assert_errorIs( function() mlib.line.getClosestPoint( 1, '0', 0, 0, 4 ) end,
+					'MLib: line.getClosestPoint: arg 2: in compatibility mode expected a number, got string'
 				)
-				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, '0', 0, 0, 4 ) end,
+				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, '0', 0, 4 ) end,
 					'MLib: line.getClosestPoint: arg 3: in compatibility mode expected a number, got string'
 				)
-				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, 0, '0', 0, 4 ) end,
+
+				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, 0, '0', 4 ) end,
 					'MLib: line.getClosestPoint: arg 4: in compatibility mode expected a number, got string'
 				)
-
-				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, 0, 0, '0', 4 ) end,
+				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, 0, 0, '4' ) end,
 					'MLib: line.getClosestPoint: arg 5: in compatibility mode expected a number, got string'
-				)
-				assert_errorIs( function() mlib.line.getClosestPoint( 1, 0, 0, 0, 0, '4' ) end,
-					'MLib: line.getClosestPoint: arg 6: in compatibility mode expected a number, got string'
 				)
 			end )
 		end )
 		context( 'turbo', function()
 			test( 'Gives the closest point on a line to regular, vertical, and horizontal lines', function()
-				assert_multipleFuzzyEqual( { turbo.line.getClosestPoint( 1, 0, 0, 0, 0, 4 ) }, { 2, 2 } )
-				assert_multipleFuzzyEqual( { turbo.line.getClosestPoint( -1, 4, 2, 2, 4, 2 ) }, { 3, 1 } )
-				assert_multipleFuzzyEqual( { turbo.line.getClosestPoint( 0, 2, 0, 2, 4, -2 ) }, { 4, 2 } )
-				assert_multipleFuzzyEqual( { turbo.line.getClosestPoint( false, false, 4, 0, 2, 2 ) }, { 4, 2 } )
+				assert_multipleFuzzyEqual( { turbo.line.getClosestPoint( 1, 0, 0, 0, 4 ) }, { 2, 2 } )
+				assert_multipleFuzzyEqual( { turbo.line.getClosestPoint( -1, 2, 2, 4, 2 ) }, { 3, 1 } )
+				assert_multipleFuzzyEqual( { turbo.line.getClosestPoint( 0, 0, 2, 4, -2 ) }, { 4, 2 } )
+				assert_multipleFuzzyEqual( { turbo.line.getClosestPoint( false, 4, 0, 2, 2 ) }, { 4, 2 } )
 			end )
 		end )
 	end )
@@ -385,6 +379,79 @@ context( 'segment', function()
 		context( 'turbo', function()
 			test( 'Gets the distance between two points given two points', function()
 				assert_fuzzyEqual( turbo.segment.getLength( 0, 0, 1, 1 ), math.sqrt( 2 ) )
+			end )
+		end )
+	end )
+	-- }}}
+	-- {{{ segment.getLength2
+	context( 'getLength2', function()
+		context( 'turbo', function()
+			test( 'Gets the distance between two points', function()
+				assert_fuzzyEqual( turbo.segment.getLength2( 0, 0, 1, 1 ), 2 )
+				assert_fuzzyEqual( turbo.segment.getLength2( 0, 0, 0, 4 ), 16 )
+			end )
+		end )
+	end )
+	-- }}}
+	-- {{{ segment.checkPoint
+	context( 'checkPoint', function()
+		context( 'turbo', function()
+			test( 'Checks if a point is on a line segment', function()
+				assert_true( turbo.segment.checkPoint( 1, 1, 0, 0, 2, 2 ) )
+				assert_true( turbo.segment.checkPoint( 0, 0, 0, 0, 2, 2 ) )
+				assert_true( turbo.segment.checkPoint( 2, 2, 0, 0, 2, 2 ) )
+				assert_false( turbo.segment.checkPoint( -1, -1, 0, 0, 2, 2 ) )
+				assert_false( turbo.segment.checkPoint( 3, 2, 0, 0, 2, 2 ) )
+			end )
+		end )
+	end )
+	-- }}}
+	-- {{{ segment.getLineIntersection
+	context( 'getLineIntersection', function()
+		context( 'turbo', function()
+			test( 'Gets the intersection of a line and segment', function()
+				assert_multipleFuzzyEqual( { turbo.segment.getLineIntersection( { 1, 0, 0 }, { 0, 2, 2, 0 } ) }, { 1, 1 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getLineIntersection( { false, 0, 0 }, { -2, 2, 2, 0 } ) }, { 0, 1 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getLineIntersection( { -1 / 3, -2, 4 }, { 1, 1, 1, 3 } ) }, { 1, 3 } )
+				assert_false( turbo.segment.getLineIntersection( { 1, 0, 0 }, { 0, 2, -2, 4 } ) )
+				assert_false( turbo.segment.getLineIntersection( { false, 0, 0 }, { 4, 2, 3, 4 } ) )
+				assert_false( turbo.segment.getLineIntersection( { -1 / 3, -2, 4 }, { 1, 2, -2, 3 } ) )
+				assert_false( turbo.segment.getLineIntersection( { -2, 2, 0 }, { 0, 0, 0, 3 } ) )
+			end )
+		end )
+	end )
+	-- }}}
+	-- {{{ segment.getSegmentIntersection
+	context( 'getSegmentIntersection', function()
+		context( 'turbo', function()
+			test( 'Gives the intersection of two line segments', function()
+				assert_multipleFuzzyEqual( { turbo.segment.getSegmentIntersection( { 0, 0, 5, 5 }, { 1, 5, 4, 2 } ) }, { 3, 3 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getSegmentIntersection( { 5, 2, 5, 5 }, { 1, 5, 7, 2 } ) }, { 5, 3 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getSegmentIntersection( { 2, 4, 8, 0 }, { 2, 2, 7, 2 } ) }, { 5, 2 } )
+				assert_false( turbo.segment.getSegmentIntersection( { 0, 0, 5, 5 }, { 4, 2, 6, 4 } ) )
+				assert_false( turbo.segment.getSegmentIntersection( { 5, 2, 5, 5 }, { 1, 5, 8, -1 } ) )
+				assert_false( turbo.segment.getSegmentIntersection( { 2, 2, 4, 2 }, { 2, 4, 6, 1 } ) )
+			end )
+			test( 'Returns both points if the lines are colinear', function()
+				assert_multipleFuzzyEqual( { turbo.segment.getSegmentIntersection( { 3, 3, 1, 5 }, { 4, 2, 0, 6 } ) }, { 3, 3, 1, 5 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getSegmentIntersection( { 3, 3, 0, 6 }, { 1, 5, 4, 2 } ) }, { 3, 3, 1, 5 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getSegmentIntersection( { 3, 3, 0, 6 }, { 4, 2, 1, 5 } ) }, { 3, 3, 1, 5 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getSegmentIntersection( { 0, 6, 3, 3 }, { 1, 5, 4, 2 } ) }, { 3, 3, 1, 5 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getSegmentIntersection( { 0, 6, 3, 3 }, { 4, 2, 1, 5 } ) }, { 3, 3, 1, 5 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getSegmentIntersection( { 4, 2, 0, 6 }, { 3, 3, 1, 5 } ) }, { 3, 3, 1, 5 } )
+				assert_false( turbo.segment.getSegmentIntersection( { 4, 2, 6, 0 }, { 0, 6, 1, 5 } ) )
+			end )
+		end )
+	end )
+	-- }}}
+	-- {{{ segment.getClosestPoint
+	context( 'getClosestPoint', function()
+		context( 'turbo', function()
+			test( 'Gives the closest point on a segment to a point', function()
+				assert_multipleFuzzyEqual( { turbo.segment.getClosestPoint( 7, 1, 0, 0, 6, 8 ) }, { 3, 4 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getClosestPoint( -1, 7, 0, 0, 6, 8 ) }, { 3, 4 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getClosestPoint( -3, 1, 0, 0, 6, 8 ) }, { 0, 0 } )
+				assert_multipleFuzzyEqual( { turbo.segment.getClosestPoint( 13, 11, 0, 0, 6, 8 ) }, { 6, 8 } )
 			end )
 		end )
 	end )

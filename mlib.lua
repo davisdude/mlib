@@ -253,7 +253,6 @@ end
 --- Get the point on a line closest to a given point
 -- @function line.getClosestPoint
 -- @tparam number m The slope of the line
--- @tparam number b The y-intercept of the line
 -- @tparam number x An x-coordinate on the line (needed for vertical lines)
 -- @tparam number y A y-coordinate on the line
 -- @tparam number px The x-coordinate of the point to which the closest point on the line should lie
@@ -267,15 +266,14 @@ end
 -- @tparam px number The x-coordinate of the point to which the closest point on the line should lie
 -- @tparam py number The y-coordinate of the point to which the closest point on the line should lie
 function line.getClosestPoint( ... )
-	local m, b, x, y, px, py
+	local m, x, y, px, py
 	if mlib.compatibilityMode then
-		m, b, x, y, px, py = ...
+		m, x, y, px, py = ...
 		err( 'line.getClosestPoint: arg 1: in compatibility mode expected a number or boolean, got %type%', m, 'number', 'boolean' )
-		err( 'line.getClosestPoint: arg 2: in compatibility mode expected a number or boolean, got %type%', b, 'number', 'boolean' )
-		err( 'line.getClosestPoint: arg 3: in compatibility mode expected a number, got %type%', x, 'number' )
-		err( 'line.getClosestPoint: arg 4: in compatibility mode expected a number, got %type%', y, 'number' )
-		err( 'line.getClosestPoint: arg 5: in compatibility mode expected a number, got %type%', px, 'number' )
-		err( 'line.getClosestPoint: arg 6: in compatibility mode expected a number, got %type%', py, 'number' )
+		err( 'line.getClosestPoint: arg 2: in compatibility mode expected a number, got %type%', x, 'number' )
+		err( 'line.getClosestPoint: arg 3: in compatibility mode expected a number, got %type%', y, 'number' )
+		err( 'line.getClosestPoint: arg 4: in compatibility mode expected a number, got %type%', px, 'number' )
+		err( 'line.getClosestPoint: arg 5: in compatibility mode expected a number, got %type%', py, 'number' )
 	else
 		local args = { ... }
 		if #args == 3 then
@@ -291,17 +289,15 @@ function line.getClosestPoint( ... )
 			err( 'line.getClosestPoint: arg 2: expected a number, got %type%', px, validateNumber )
 			err( 'line.getClosestPoint: arg 3: expected a number, got %type%', py, validateNumber )
 		else
-			m, b, x, y, px, py = unpack( args )
+			m, x, y, px, py = unpack( args )
 			err( 'line.getClosestPoint: arg 1: expected a number or boolean with > 3 arg, got %type%', m, validateSlope )
-			-- Can use validate slope for y-intercept, as it follows same formats
-			err( 'line.getClosestPoint: arg 2: expected a number or boolean with > 3 arg, got %type%', b, validateSlope )
-			err( 'line.getClosestPoint: arg 3: expected a number, got %type%', x, 'number' )
-			err( 'line.getClosestPoint: arg 4: expected a number, got %type%', y, 'number' )
-			err( 'line.getClosestPoint: arg 5: expected a number, got %type%', px, 'number' )
-			err( 'line.getClosestPoint: arg 6: expected a number, got %type%', py, 'number' )
+			err( 'line.getClosestPoint: arg 2: expected a number, got %type%', x, 'number' )
+			err( 'line.getClosestPoint: arg 3: expected a number, got %type%', y, 'number' )
+			err( 'line.getClosestPoint: arg 4: expected a number, got %type%', px, 'number' )
+			err( 'line.getClosestPoint: arg 5: expected a number, got %type%', py, 'number' )
 		end
 	end
-	return turbo.line.getClosestPoint( m, b, x, y, px, py )
+	return turbo.line.getClosestPoint( m, x, y, px, py )
 end
 -- }}}
 mlib.line = line

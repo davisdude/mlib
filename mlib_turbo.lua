@@ -62,7 +62,7 @@ end
 -- @tparam table line1 A line in the form { slope, x1, y1 }. x and y coordinates are required for handling vertical lines
 -- @tparam table line2 Another line in the same form
 -- @treturn[1] number x The x-coordinate of the intersection
--- @treturn[2] boolean intersects `true`/`false` if the lines do/don't intersect (vertical and horizontal lines)
+-- @treturn[2] boolean intersects `false` if the lines don't intersect (vertical and horizontal lines)
 -- @terturn number y The y-coordinate of the intersection
 local function lineGetLineIntersection( line1, line2 )
 	local m1, x1, y1 = unpack( line1 )
@@ -95,17 +95,32 @@ end
 --- Get the point on a line closest to a given point
 -- @function turbo.line.getClosestPoint
 -- @tparam number m
--- @tparam number b
 -- @tparam number x
 -- @tparam number y
 -- @tparam number px The point to which the closest point on the line should lie
 -- @tparam number py
 -- @treturn number cx The closest point to `( px, py )` which lies on the line
 -- @treturn number cy
-local function lineGetClosestPoint( m, b, x, y, cx, cy )
+local function lineGetClosestPoint( m, x, y, cx, cy )
 	local pm = lineGetPerpendicularSlope( m )
-	local pb = lineGetIntercept( pm, cx, cy )
 	return lineGetLineIntersection( { pm, cx, cy }, { m, x, y } )
+end
+
+--- Check if a point lies on a line
+-- @function turbo.line.checkPoint
+-- @tparam number px The coordinates of the point to check
+-- @tparam number py
+-- @tparam number|boolean m
+-- @tparam number x
+-- @tparam number y
+-- @treturn boolean onLine
+local function lineCheckPoint( px, py, m, x, y )
+	if m then
+		local b = lineGetIntercept( m, x, y )
+		return checkFuzzy( y, m * x + b )
+	else
+		return checkFuzzy( px, x )
+	end
 end
 -- @section end
 -- }}}
@@ -137,6 +152,126 @@ end
 local function segmentGetLength( x1, y1, x2, y2 )
 	return ( ( x1 - x2 ) ^ 2 + ( y1 - y2 ) ^ 2 ) ^ .5
 end
+
+--- Get the length squared between two points
+-- @function turbo.segment.getLength2
+-- @tparam number x1
+-- @tparam number y1
+-- @tparam number x2
+-- @tparam number y2
+-- @treturn number d
+local function segmentGetLength2( x1, y1, x2, y2 )
+	return ( x1 - x2 ) ^ 2 + ( y1 - y2 ) ^ 2
+end
+
+--- Check if a point lies on a line
+-- @function turbo.segment.checkPoint
+-- @tparam number px The coordinates of the point to check
+-- @tparam number py
+-- @tparam number x1
+-- @tparam number y1
+-- @tparam number x2
+-- @tparam number y2
+-- @treturn boolean onSegment
+local function segmentCheckPoint( px, py, x1, y1, x2, y2 )
+	local d = segmentGetLength( x1, y1, x2, y2 )
+	local d1 = segmentGetLength( x1, y1, px, py )
+	local d2 = segmentGetLength( px, py, x2, y2 )
+	return checkFuzzy( d, d1 + d2 )
+end
+
+--- Get the intersection of a line and a segment
+-- @function turbo.segment.getLineIntersection
+-- @tparam table line `{ m, x, y }`
+-- @tparam table segment `{ x1, y1, x2, y2 }`
+-- @treturn[1] number x The x-coordinate of the intersection
+-- @treturn[2] boolean intersects `false` if the line and segment don't intersect
+-- @terturn number y The y-coordinate of the intersection
+local function segmentGetLineIntersection( line, segment )
+	local sm = lineGetSlope( unpack( segment ) )
+	local x, y = lineGetLineIntersection( line, { sm, segment[1], segment[2] } )
+	if not x then return false end
+	if segmentCheckPoint( x, y, unpack( segment ) ) then return x, y
+	else return false end
+end
+
+--- Get the intersection between two segments
+-- @function turbo.segment.getSegmentIntersection
+-- @tparam table segment1 `{ x1, y1, x2, y2 }`
+-- @tparam table segment2
+-- @treturn[1] numbers intersections The table of intersections:
+--
+-- - `x, y`: one intersection
+--
+-- - `x1, y1, x2, y2`: colinear intersection (same slope/y-intercept and cross)
+--
+-- @treturn[2] boolean intersects `false` if the segments don't intersect
+local function segmentGetSegmentIntersection( segment1, segment2 )
+	local x, y = lineGetLineIntersection(
+		{ lineGetSlope( unpack( segment1 ) ), segment1[1], segment1[2] },
+		{ lineGetSlope( unpack( segment2 ) ), segment2[1], segment2[2] }
+	)
+	-- No intersection
+	if not x then return false
+	-- Same slope and y-intercept
+	elseif x == true then
+		local a = segmentCheckPoint( segment1[1], segment1[2], unpack( segment2 ) )
+		local b = segmentCheckPoint( segment1[3], segment1[4], unpack( segment2 ) )
+		local c = segmentCheckPoint( segment2[1], segment2[2], unpack( segment1 ) )
+		local d = segmentCheckPoint( segment2[3], segment2[4], unpack( segment1 ) )
+		-- segment1 lies completely within segment2
+		if a and b then
+			return unpack( segment1 )
+		elseif a and c then
+			return segment1[1], segment1[2], segment2[1], segment2[2]
+		elseif a and d then
+			return segment1[1], segment1[2], segment2[3], segment2[4]
+		elseif b and c then
+			return segment1[3], segment1[4], segment2[1], segment2[2]
+		elseif b and d then
+			return segment1[3], segment1[4], segment2[3], segment2[4]
+		-- segment2 lies completely within segment1
+		elseif c and d then
+			return unpack( segment2 )
+		else
+			return false
+		end
+	-- Regular intersection
+	else
+		if segmentCheckPoint( x, y, unpack( segment1 ) ) and segmentCheckPoint( x, y, unpack( segment2 ) ) then
+			return x, y
+		else
+			return false
+		end
+	end
+end
+
+--- Get the closest point on a segment
+-- @function turbo.segment.getClosestPoint
+-- @tparam number px The point to which the closest point on the line should lie
+-- @tparam number py
+-- @tparam number x1
+-- @tparam number y1
+-- @tparam number x2
+-- @tparam number y2
+-- @treturn number cx The closest point to `( px, py )` which lies on the line
+-- @treturn number cy
+local function segmentGetClosestPoint( px, py, x1, y1, x2, y2 )
+	local m, b = lineGetSlope( x1, y1, x2, y2 ), lineGetIntercept( x1, y1, x2, y2 )
+	local pm = lineGetPerpendicularSlope( m )
+	local x, y = lineGetLineIntersection( { m, x1, y1 }, { pm, px, py } )
+	if not x then return false end
+	if segmentCheckPoint( x, y, x1, y1, x2, y2 ) then
+		return x, y
+	else
+		local d1, d2 = segmentGetLength2( px, py, x1, y1 ), segmentGetLength( px, py, x2, y2 )
+		if d1 < d2 then
+			return x1, y1
+		else
+			return x2, y2
+		end
+	end
+end
 -- @section end
 -- }}}
 
@@ -147,9 +282,15 @@ return {
 		getIntercept = lineGetIntercept,
 		getLineIntersection = lineGetLineIntersection,
 		getClosestPoint = lineGetClosestPoint,
+		checkPoint = lineCheckPoint,
 	},
 	segment = {
 		getMidpoint = segmentGetMidpoint,
 		getLength = segmentGetLength,
+		getLength2 = segmentGetLength2,
+		checkPoint = segmentCheckPoint,
+		getLineIntersection = segmentGetLineIntersection,
+		getSegmentIntersection = segmentGetSegmentIntersection,
+		getClosestPoint = segmentGetClosestPoint,
 	}
 }
