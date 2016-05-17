@@ -25,7 +25,7 @@ end
 -- @section turbo.line
 
 --- Get the slope of a line
--- @function turbo.line.getSlope
+-- @function line.getSlope
 -- @tparam number x1
 -- @tparam number y1
 -- @tparam number x2
@@ -37,7 +37,7 @@ local function lineGetSlope( x1, y1, x2, y2 )
 end
 
 --- Get the perpendicular slope of a line
--- @function turbo.line.getPerpendicularSlope
+-- @function line.getPerpendicularSlope
 -- @tparam number|boolean m The slope of the line (`false` if the line is vertical)
 -- @treturn number|booean pm The perpendicular slope (`false` if the new slope is vertical)
 local function lineGetPerpendicularSlope( m )
@@ -47,7 +47,7 @@ local function lineGetPerpendicularSlope( m )
 end
 
 --- Get the y-intercept of a line
--- @function turbo.line.getIntercept
+-- @function line.getIntercept
 -- @tparam number|boolean m slope
 -- @tparam number x
 -- @tparam number y
@@ -58,12 +58,12 @@ local function lineGetIntercept( m, x, y )
 end
 
 --- Get the intersection of two lines
--- @function turbo.line.getLineIntersection
+-- @function line.getLineIntersection
 -- @tparam table line1 A line in the form { slope, x1, y1 }. x and y coordinates are required for handling vertical lines
 -- @tparam table line2 Another line in the same form
 -- @treturn[1] number x The x-coordinate of the intersection
+-- @treturn[1] number y The y-coordinate of the intersection
 -- @treturn[2] boolean intersects `false` if the lines don't intersect (vertical and horizontal lines)
--- @terturn number y The y-coordinate of the intersection
 local function lineGetLineIntersection( line1, line2 )
 	local m1, x1, y1 = unpack( line1 )
 	local m2, x2, y2 = unpack( line2 )
@@ -93,21 +93,21 @@ local function lineGetLineIntersection( line1, line2 )
 end
 
 --- Get the point on a line closest to a given point
--- @function turbo.line.getClosestPoint
+-- @function line.getClosestPoint
+-- @tparam number px The point to which the closest point on the line should lie
+-- @tparam number py
 -- @tparam number m
 -- @tparam number x
 -- @tparam number y
--- @tparam number px The point to which the closest point on the line should lie
--- @tparam number py
 -- @treturn number cx The closest point to `( px, py )` which lies on the line
 -- @treturn number cy
-local function lineGetClosestPoint( m, x, y, cx, cy )
+local function lineGetClosestPoint( px, py, m, x, y )
 	local pm = lineGetPerpendicularSlope( m )
-	return lineGetLineIntersection( { pm, cx, cy }, { m, x, y } )
+	return lineGetLineIntersection( { pm, px, py }, { m, x, y } )
 end
 
 --- Check if a point lies on a line
--- @function turbo.line.checkPoint
+-- @function line.checkPoint
 -- @tparam number px The coordinates of the point to check
 -- @tparam number py
 -- @tparam number|boolean m
@@ -117,7 +117,7 @@ end
 local function lineCheckPoint( px, py, m, x, y )
 	if m then
 		local b = lineGetIntercept( m, x, y )
-		return checkFuzzy( y, m * x + b )
+		return checkFuzzy( py, m * px + b )
 	else
 		return checkFuzzy( px, x )
 	end
@@ -131,7 +131,7 @@ end
 -- @section turbo.segment
 
 --- Get the midpoint between two points
--- @function turbo.segment.getMidpoint
+-- @function segment.getMidpoint
 -- @tparam number x1
 -- @tparam number y1
 -- @tparam number x2
@@ -143,7 +143,7 @@ local function segmentGetMidpoint( x1, y1, x2, y2 )
 end
 
 --- Get the distance between two points
--- @function turbo.segment.getLength
+-- @function segment.getLength
 -- @tparam number x1
 -- @tparam number y1
 -- @tparam number x2
@@ -153,8 +153,8 @@ local function segmentGetLength( x1, y1, x2, y2 )
 	return ( ( x1 - x2 ) ^ 2 + ( y1 - y2 ) ^ 2 ) ^ .5
 end
 
---- Get the length squared between two points
--- @function turbo.segment.getLength2
+--- Get the squared length between two points
+-- @function segment.getLength2
 -- @tparam number x1
 -- @tparam number y1
 -- @tparam number x2
@@ -164,8 +164,8 @@ local function segmentGetLength2( x1, y1, x2, y2 )
 	return ( x1 - x2 ) ^ 2 + ( y1 - y2 ) ^ 2
 end
 
---- Check if a point lies on a line
--- @function turbo.segment.checkPoint
+--- Check if a point lies on a segment
+-- @function segment.checkPoint
 -- @tparam number px The coordinates of the point to check
 -- @tparam number py
 -- @tparam number x1
@@ -181,12 +181,12 @@ local function segmentCheckPoint( px, py, x1, y1, x2, y2 )
 end
 
 --- Get the intersection of a line and a segment
--- @function turbo.segment.getLineIntersection
+-- @function segment.getLineIntersection
 -- @tparam table line `{ m, x, y }`
 -- @tparam table segment `{ x1, y1, x2, y2 }`
 -- @treturn[1] number x The x-coordinate of the intersection
+-- @treturn[1] number y The y-coordinate of the intersection
 -- @treturn[2] boolean intersects `false` if the line and segment don't intersect
--- @terturn number y The y-coordinate of the intersection
 local function segmentGetLineIntersection( line, segment )
 	local sm = lineGetSlope( unpack( segment ) )
 	local x, y = lineGetLineIntersection( line, { sm, segment[1], segment[2] } )
@@ -196,14 +196,16 @@ local function segmentGetLineIntersection( line, segment )
 end
 
 --- Get the intersection between two segments
--- @function turbo.segment.getSegmentIntersection
+-- @function segment.getSegmentIntersection
 -- @tparam table segment1 `{ x1, y1, x2, y2 }`
 -- @tparam table segment2
--- @treturn[1] numbers intersections The table of intersections:
+-- @treturn[1] numbers intersections The Intersections of the segments
 --
 -- - `x, y`: one intersection
 --
 -- - `x1, y1, x2, y2`: colinear intersection (same slope/y-intercept and cross)
+--
+-- __NOTE__ That these are *not* in tables.
 --
 -- @treturn[2] boolean intersects `false` if the segments don't intersect
 local function segmentGetSegmentIntersection( segment1, segment2 )
@@ -247,7 +249,7 @@ local function segmentGetSegmentIntersection( segment1, segment2 )
 end
 
 --- Get the closest point on a segment
--- @function turbo.segment.getClosestPoint
+-- @function segment.getClosestPoint
 -- @tparam number px The point to which the closest point on the line should lie
 -- @tparam number py
 -- @tparam number x1
