@@ -266,7 +266,7 @@ local function segmentGetClosestPoint( px, py, x1, y1, x2, y2 )
 	if segmentCheckPoint( x, y, x1, y1, x2, y2 ) then
 		return x, y
 	else
-		local d1, d2 = segmentGetLength2( px, py, x1, y1 ), segmentGetLength( px, py, x2, y2 )
+		local d1, d2 = segmentGetLength2( px, py, x1, y1 ), segmentGetLength2( px, py, x2, y2 )
 		if d1 < d2 then
 			return x1, y1
 		else
