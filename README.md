@@ -67,7 +67,7 @@ And __then__ run one of the above commands. If none of those work, just take my 
   - [mlib.line.getSlope](#mliblinegetslope)
 - [mlib.segment](#mlibsegment)
   - [mlib.segment.checkPoint](#mlibsegmentcheckpoint)
-  - [mlib.segment.getPerpendicularBisector](#mliblinegetperpendicularbisector)
+  - [mlib.segment.getPerpendicularBisector](#mlibsegmentgetperpendicularbisector)
   - [mlib.segment.getIntersection](#mlibsegmentgetintersection)
 - [mlib.polygon](#mlibpolygon)
   - [mlib.polygon.checkPoint](#mlibpolygoncheckpoint)
