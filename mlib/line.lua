@@ -102,7 +102,7 @@ local function getYIntercept( ... )
 
 	-- Handle varargs
 	-- Given slope, x, y
-	if len <= 3 then
+	if len == 3 then
 		m, x, y = ...
 
 		-- Validate params

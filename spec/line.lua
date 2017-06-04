@@ -145,7 +145,7 @@ context( 'line', function()
 				line.getYIntercept( 1, '1', 2 )
 			end )
 
-			assert_error_equals( 'MLib.line.getYIntercept: y: ' .. pointError .. 'nil', function()
+			assert_error_equals( 'MLib.line.getYIntercept: x2: ' .. pointError .. 'nil', function()
 				line.getYIntercept( 1, 1 )
 			end )
 		end )
