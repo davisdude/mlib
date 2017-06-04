@@ -13,7 +13,7 @@ local unpack = unpack or table.unpack
 local function checkParam( cond, module, funcName, reason, ... )
 	if not cond then
 		for i = 1, select( '#', ... ) do
-			local x = select( i, ... )
+			local x = tostring( select( i, ... ) )
 			reason = reason:gsub( '%%' .. i, function() return x end )
 		end
 
@@ -28,6 +28,7 @@ local function checkPoint( x, y, xName, yName, module, funcName )
 	checkParam( ty == 'number', module, funcName, '%1: Expected number, got %2.', yName, ty )
 end
 
+-- Check slope
 local function checkSlope( m, paramName, module, funcName )
 	local tm = type( m )
 	if tm ~= 'number' then
