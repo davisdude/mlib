@@ -1,4 +1,7 @@
--- MLib/line.lua
+-- MLib 0.12.0
+-- https://github.com/davisdude/mlib
+-- mlib/line.lua
+-- MIT License
 
 -- Load utils
 local path = (...):gsub( '%.[^%.]+$', '' ) .. '.'

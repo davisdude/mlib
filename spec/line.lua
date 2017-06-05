@@ -1,3 +1,8 @@
+-- MLib 0.12.0
+-- https://github.com/davisdude/mlib
+-- spec/line.lua
+-- MIT License
+
 local telescope = require( 'telescope' )
 local line = require( 'mlib.line' )
 

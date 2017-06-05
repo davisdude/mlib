@@ -1,4 +1,7 @@
--- MLib/util.lua
+-- MLib 0.12.0
+-- https://github.com/davisdude/mlib
+-- mlib/util.lua
+-- MIT License
 
 -- Handle floating point errors
 local function checkFuzzy( x, y, delta )
