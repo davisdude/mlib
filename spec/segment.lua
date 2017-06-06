@@ -189,6 +189,37 @@ context( 'Segment', function()
 		end )
 	end )
 
+	context( 'getSegmentIntersection', function()
+		test( 'Returns the point of intersection if segments intersect', function()
+			assert_shallow_equal( { Segment.getSegmentIntersection( { 0,0, 1,1 }, { 0,2, 2,0 } ) }, { 1,1 } )
+			assert_shallow_equal( { Segment.getSegmentIntersection( { 0,0, 5,0 }, { 0,-1, 4,7 } ) }, { .5, 0 } )
+			assert_shallow_equal( { Segment.getSegmentIntersection( { 0,0, 0,5 }, { -2,0, 6,4 } ) }, { 0,1 } )
+		end )
+
+		test( 'Returns false if the segments don\'t intersect', function()
+			assert_false( Segment.getSegmentIntersection( { 0,0, 1,1 }, { 0,2, 2,4 } ) )
+		end )
+
+		test( 'Returns true/false for overlapping segments', function()
+			assert_true( Segment.getSegmentIntersection( { 0,0, 2,2 }, { 1,1, 3,3 } ) )
+			assert_false( Segment.getSegmentIntersection( { 0,0, 2,2 }, { 3,3, 4,4 } ) )
+		end )
+
+		test( 'Error handling', function()
+			assert_error_equals( 'MLib.segment.getSegmentIntersection: segment1: Expected table, got nil', function()
+				Segment.getSegmentIntersection()
+			end )
+
+			assert_error_equals( 'MLib.segment.getSegmentIntersection: segment1: x1: ' .. pointError .. 'nil', function()
+				Segment.getSegmentIntersection( {}, {} )
+			end )
+
+			assert_error_equals( 'MLib.segment.getSegmentIntersection: segment2: y2: ' .. pointError .. 'nil', function()
+				Segment.getSegmentIntersection( { 1,1, 1,2 }, { 1,2, 1 } )
+			end )
+		end )
+	end )
+
 	context( 'All functions checked', function()
 		for i in pairs( Segment ) do
 			test( tostring( i .. ' tested' ), function()
