@@ -159,6 +159,14 @@ context( 'Segment', function()
 		end )
 
 		test( 'Error handling', function()
+			assert_error_equals( 'MLib.segment.getLineIntersection: segment: Expected table, got nil', function()
+				Segment.getLineIntersection()
+			end )
+
+			assert_error_equals( 'MLib.segment.getLineIntersection: line: Expected table, got nil', function()
+				Segment.getLineIntersection( {} )
+			end )
+
 			assert_error_equals( 'MLib.segment.getLineIntersection: segment: x1: ' .. pointError .. 'nil', function()
 				Segment.getLineIntersection( {}, {} )
 			end )
