@@ -4,7 +4,7 @@
 -- MIT License
 
 -- Load Utils
-local path = (...):gsub( '%.[^%.]+$', '' ) .. '.'
+local path = (...):gsub( '/', '.' ):gsub( '%.[^%.]+$', '' ) .. '.'
 local Util = require( path .. 'util' )
 local Line = require( path .. 'line' )
 local module = 'segment'
