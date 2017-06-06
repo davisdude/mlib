@@ -28,7 +28,9 @@ A math and shape intersection library for Lua.
 	- [segment.getLineIntersection](#segmentgetlineintersection)
 	- [segment.getSegmentIntersection](#segmentgetsegmentintersection)
 
-### line.areLinesParallel
+### line
+
+#### line.areLinesParallel
 
 Checks if lines two lines are parallel.
 
@@ -59,7 +61,7 @@ Checks if lines two lines are parallel.
 - Returns:
 	- `boolean parallel`: Whether the lines are parallel (`true`) or not (`false`).
 
-### line.checkPoint
+#### line.checkPoint
 
 Checks if a point is on a line.
 
@@ -117,7 +119,7 @@ Checks if a point is on a line.
 - Returns:
 	- `boolean onLine`: Whether the point is on the line (`true`) or not (`false`).
 
-### line.getClosestPoint
+#### line.getClosestPoint
 
 Checks if a point is on a line.
 
@@ -159,7 +161,7 @@ Checks if a point is on a line.
 	- `number x`: The position on the x-axis of the closest point on the line.
 	- `number y`: The position on the y-axis of the closest point on the line.
 
-### line.getLineIntersection
+#### line.getLineIntersection
 
 Checks if lines two lines are parallel.
 
@@ -189,7 +191,7 @@ Checks if lines two lines are parallel.
 		- `boolean (false):` The lines do not intersect anywhere
 	- `number y`: The position on the y-axis of where the lines intersect.
 
-### line.getPerpendicularSlope
+#### line.getPerpendicularSlope
 
 Gets the perpendicular slope to a line.
 
@@ -224,9 +226,11 @@ Gets the perpendicular slope to a line.
 		- `number`: The slope of the perpendicular line.
 		- `boolean (false)`: The slope if the perpendicular line is vertical.
 
-### line.getSlope
+#### line.getSlope
 
 Gets the slope of a line.
+
+---
 
 - Synopsis:
 `m = mlib.line.getSlope( x1, y1, x2, y2 )`
@@ -242,7 +246,7 @@ Gets the slope of a line.
 		- `number`: The slope of the line.
 		- `boolean (false)`: The slope if the line is vertical.
 
-### line.getYIntercept
+#### line.getYIntercept
 
 Gets the y-intercept of a line.
 
@@ -279,7 +283,7 @@ Gets the y-intercept of a line.
 		- `number`: The y-intercept of the line.
 		- `boolean (false)`: The y-intercept if the line is vertical.
 
-### line.isVertical
+#### line.isVertical
 
 Checks if the line is vertical
 
@@ -312,9 +316,9 @@ Checks if the line is vertical
 - Returns:
 	- `boolean vertical`: Whether the line is vertical (`true`) or not (`false`).
 
-### segment.getDistance2
-### segment.getDistance
-### segment.getMidpoint
-### segment.checkPoint
-### segment.getLineIntersection
-### segment.getSegmentIntersection
+#### segment.getDistance2
+#### segment.getDistance
+#### segment.getMidpoint
+#### segment.checkPoint
+#### segment.getLineIntersection
+#### segment.getSegmentIntersection
