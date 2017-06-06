@@ -90,7 +90,7 @@ local function getLineIntersection( segment, line )
 	-- Get intersection
 	local ix, iy = Line.getLineIntersection( { x1, y1, x2, y2 }, { m, x, y } )
 
-	-- Check if intersection point is on segment
+	-- Check if lines intersect
 	if ix then
 		-- Non-overlapping lines
 		if ix ~= true then
@@ -105,10 +105,49 @@ local function getLineIntersection( segment, line )
 	return false
 end
 
+local function getSegmentIntersection( segment1, segment2 )
+	-- Validate params
+	local tsegment1, tsegment2 = type( segment1 ), type( segment2 )
+	Util.checkParam( tsegment1 == 'table', module, 'getSegmentIntersection',
+		'segment1: Expected table, got %1', tsegment1
+	)
+	Util.checkParam( tsegment2 == 'table', module, 'getSegmentIntersection',
+		'segment2: Expected table, got %1', tsegment2
+	)
+
+	local x1, y1, x2, y2 = Util.unpack( segment1 )
+	local x3, y3, x4, y4 = Util.unpack( segment2 )
+	Util.checkPoint( x1, y1, 'segment1: x1', 'segment1: y1', module, 'getSegmentIntersection' )
+	Util.checkPoint( x2, y2, 'segment1: x2', 'segment1: y2', module, 'getSegmentIntersection' )
+	Util.checkPoint( x3, y3, 'segment2: x1', 'segment2: y1', module, 'getSegmentIntersection' )
+	Util.checkPoint( x4, y4, 'segment2: x2', 'segment2: y2', module, 'getSegmentIntersection' )
+
+	-- Get intersection of lines created by segments
+	local ix, iy = Line.getLineIntersection( segment1, segment2 )
+
+	-- Check if lines created by segments intersect
+	if ix then
+		-- Non-overlapping lines
+		if ix ~= true then
+			-- Ensure point is on both segments
+			if checkPoint( ix, iy, x1, y1, x2, y2 ) and checkPoint( ix, iy, x3, y3, x4, y4 ) then
+				return ix, iy
+			end
+		-- Overlapping segments
+		else
+			-- Segments intersect if one's points lies the other segment
+			return checkPoint( x1, y1, x3, y3, x4, y4 ) or checkPoint( x2, y2, x3, y3, x4, y4 )
+			    or checkPoint( x3, y3, x1, y1, x2, y2 ) or checkPoint( x4, y4, x1, y1, x2, y2 )
+		end
+	end
+	return false
+end
+
 return {
 	getDistance2 = getDistance2,
 	getDistance = getDistance,
 	getMidpoint = getMidpoint,
 	checkPoint = checkPoint,
 	getLineIntersection = getLineIntersection,
+	getSegmentIntersection = getSegmentIntersection,
 }
