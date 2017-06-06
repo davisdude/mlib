@@ -9,12 +9,18 @@ A math and shape intersection library for Lua.
 
 ## Usage
 
-Using MLib and all modules is simple. Simply copy the director to the desired location, then `require` either [`mlib/init.lua`](mlib/init.lua), or the directory [`mlib`](mlib) that contains [`init.lua`](mlib/init.lua). The latter method is the preferred method, though both are acceptable.
+Using MLib and all of its modules is simple. Simply copy the director to the desired location, then `require` either [`mlib/init.lua`](mlib/init.lua), or the directory [`mlib`](mlib) that contains [`init.lua`](mlib/init.lua). The latter method is the preferred method, though both are acceptable.
 
 ```lua
 local mlib = require( 'path.to.mlib' )
 -- OR
 local mlib = require( 'path.to.mlib.init' )
+```
+
+Alternatively, if you only wish to use one aspect of MLib, simply `require` that desired module.
+
+```lua
+local Line = require( 'path.to.mlib.line' )
 ```
 
 ## Functions
