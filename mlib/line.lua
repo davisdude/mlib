@@ -3,20 +3,20 @@
 -- mlib/line.lua
 -- MIT License
 
--- Load utils
+-- Load Utils
 local path = (...):gsub( '%.[^%.]+$', '' ) .. '.'
-local util = require( path .. 'util' )
+local Util = require( path .. 'Util' )
 local module = 'line'
 
 -- Get the slope of a line given its points
 local function getSlope( x1, y1, x2, y2 )
 	-- Validate params
-	util.checkPoint( x1, y1, 'x1', 'y1', module, 'getSlope' )
-	util.checkPoint( x2, y2, 'x2', 'y2', module, 'getSlope' )
+	Util.checkPoint( x1, y1, 'x1', 'y1', module, 'getSlope' )
+	Util.checkPoint( x2, y2, 'x2', 'y2', module, 'getSlope' )
 
 	-- `false` is used for vertical lines instead of `nil` to
 	-- avoid ambiguity
-	if util.checkFuzzy( x1, x2 ) then
+	if Util.checkFuzzy( x1, x2 ) then
 		return false
 	else
 		return ( y2 - y1 ) / ( x2 - x1 )
@@ -38,14 +38,14 @@ local function isVertical( ... )
 		m = ...
 
 		-- Validate params
-		util.checkSlope( m, 'm', module, 'isVertical' )
+		Util.checkSlope( m, 'm', module, 'isVertical' )
 	-- Given x1, y1, x2, y2
 	else
 		local x1, y1, x2, y2 = ...
 
 		-- Validate params
-		util.checkPoint( x1, y1, 'x1', 'y1', module, 'isVertical' )
-		util.checkPoint( x2, y2, 'x2', 'y2', module, 'isVertical' )
+		Util.checkPoint( x1, y1, 'x1', 'y1', module, 'isVertical' )
+		Util.checkPoint( x2, y2, 'x2', 'y2', module, 'isVertical' )
 
 		m = getSlope( x1, y1, x2, y2 )
 	end
@@ -68,14 +68,14 @@ local function getPerpendicularSlope( ... )
 
 		-- Validate params
 		-- Slope can be number or boolean (false = parallel)
-		util.checkSlope( m, 'm', module, 'getPerpendicularSlope' )
+		Util.checkSlope( m, 'm', module, 'getPerpendicularSlope' )
 	-- Given x1, y1, x2, y2
 	else
 		local x1, y1, x2, y2 = ...
 
 		-- Validate params
-		util.checkPoint( x1, y1, 'x1', 'y1', module, 'getPerpendicularSlope' )
-		util.checkPoint( x2, y2, 'x2', 'y2', module, 'getPerpendicularSlope' )
+		Util.checkPoint( x1, y1, 'x1', 'y1', module, 'getPerpendicularSlope' )
+		Util.checkPoint( x2, y2, 'x2', 'y2', module, 'getPerpendicularSlope' )
 
 		m = getSlope( x1, y1, x2, y2 )
 	end
@@ -84,7 +84,7 @@ local function getPerpendicularSlope( ... )
 	-- Non-vertical line
 	if not isVertical( m ) then
 		-- Non-horizontal line
-		if not util.checkFuzzy( m, 0 ) then
+		if not Util.checkFuzzy( m, 0 ) then
 			return -1 / m
 		-- Horizontal line
 		else
@@ -109,15 +109,15 @@ local function getYIntercept( ... )
 		m, x, y = ...
 
 		-- Validate params
-		util.checkSlope( m, 'm', module, 'getYIntercept' )
-		util.checkPoint( x, y, 'x', 'y', module, 'getYIntercept' )
+		Util.checkSlope( m, 'm', module, 'getYIntercept' )
+		Util.checkPoint( x, y, 'x', 'y', module, 'getYIntercept' )
 	else
 	-- Given x1, y1, x2, y2
 		local x1, y1, x2, y2 = ...
 
 		-- Validate params
-		util.checkPoint( x1, y1, 'x1', 'y1', module, 'getYIntercept' )
-		util.checkPoint( x2, y2, 'x2', 'y2', module, 'getYIntercept' )
+		Util.checkPoint( x1, y1, 'x1', 'y1', module, 'getYIntercept' )
+		Util.checkPoint( x2, y2, 'x2', 'y2', module, 'getYIntercept' )
 
 		m = getSlope( x1, y1, x2, y2 )
 		x, y = x1, y1
@@ -138,7 +138,7 @@ end
 -- Check if a point is on a line
 local function checkPoint( px, py, ... )
 	-- Validate test points
-	util.checkPoint( px, py, 'px', 'py', module, 'checkPoint' )
+	Util.checkPoint( px, py, 'px', 'py', module, 'checkPoint' )
 
 	-- Allow for varargs
 	local len = select( '#', ... )
@@ -152,12 +152,12 @@ local function checkPoint( px, py, ... )
 		m, b = ...
 
 		-- Validate params
-		util.checkSlope( m, 'm', module, 'checkPoint' )
-		util.checkYIntercept( b, 'b', module, 'checkPoint' )
+		Util.checkSlope( m, 'm', module, 'checkPoint' )
+		Util.checkYIntercept( b, 'b', module, 'checkPoint' )
 
 		-- Cannot have vertical lines with two params (no way to check)
 		local mtype = type( m )
-		util.checkParam( mtype == 'number', module, 'checkPoint',
+		Util.checkParam( mtype == 'number', module, 'checkPoint',
 			'Cannot use two parameter variation to check point for vertical lines.'
 		)
 	-- Given slope, x, y
@@ -167,8 +167,8 @@ local function checkPoint( px, py, ... )
 		m, x, y = ...
 
 		-- Validate params
-		util.checkSlope( m, 'm', module, 'checkPoint' )
-		util.checkPoint( x, y, 'x', 'y', module, 'checkPoint' )
+		Util.checkSlope( m, 'm', module, 'checkPoint' )
+		Util.checkPoint( x, y, 'x', 'y', module, 'checkPoint' )
 
 		b = getYIntercept( m, x, y )
 	-- Given x1, y1, x2, y2
@@ -176,8 +176,8 @@ local function checkPoint( px, py, ... )
 		local x1, y1, x2, y2 = ...
 
 		-- Validate params
-		util.checkPoint( x1, y1, 'x1', 'y1', module, 'checkPoint' )
-		util.checkPoint( x2, y2, 'x2', 'y2', module, 'checkPoint' )
+		Util.checkPoint( x1, y1, 'x1', 'y1', module, 'checkPoint' )
+		Util.checkPoint( x2, y2, 'x2', 'y2', module, 'checkPoint' )
 
 		m = getSlope( x1, y1, x2, y2 )
 		b = getYIntercept( x1, y1, x2, y2 )
@@ -187,10 +187,10 @@ local function checkPoint( px, py, ... )
 	-- Check if point is on line
 	-- Non-vertical line
 	if not isVertical( m ) then
-		return util.checkFuzzy( py, m * px + b )
+		return Util.checkFuzzy( py, m * px + b )
 	else
 	-- Vertical line
-		return util.checkFuzzy( px, x )
+		return Util.checkFuzzy( px, x )
 	end
 end
 
@@ -198,30 +198,30 @@ end
 local function areLinesParallel( line1, line2 )
 	-- Check params
 	local t1, t2 = type( line1 ), type( line2 )
-	util.checkParam( t1 == 'table', module, 'areLinesParallel', 'line1: Expected table, got %1', t1 )
-	util.checkParam( t2 == 'table', module, 'areLinesParallel', 'line2: Expected table, got %1', t2 )
+	Util.checkParam( t1 == 'table', module, 'areLinesParallel', 'line1: Expected table, got %1', t1 )
+	Util.checkParam( t2 == 'table', module, 'areLinesParallel', 'line2: Expected table, got %1', t2 )
 
 	-- Slope 1 and 2; assigned later
 	local m1, m2
 
 	local len1, len2 = #line1, #line2
 	if len1 == 1 or len1 == 3 then
-		m1 = util.unpack( line1 )
-		util.checkSlope( m1, 'line1: m', module, 'areLinesParallel' )
+		m1 = Util.unpack( line1 )
+		Util.checkSlope( m1, 'line1: m', module, 'areLinesParallel' )
 	else
-		local x1, y1, x2, y2 = util.unpack( line1 )
-		util.checkPoint( x1, y1, 'line1: x1', 'line1: y1', module, 'areLinesParallel' )
-		util.checkPoint( x2, y2, 'line1: x2', 'line1: y2', module, 'areLinesParallel' )
+		local x1, y1, x2, y2 = Util.unpack( line1 )
+		Util.checkPoint( x1, y1, 'line1: x1', 'line1: y1', module, 'areLinesParallel' )
+		Util.checkPoint( x2, y2, 'line1: x2', 'line1: y2', module, 'areLinesParallel' )
 		m1 = getSlope( x1, y1, x2, y2 )
 	end
 
 	if len2 == 1 or len2 == 2 or len2 == 3 then
-		m2 = util.unpack( line2 )
-		util.checkSlope( m2, 'line2: m', module, 'areLinesParallel' )
+		m2 = Util.unpack( line2 )
+		Util.checkSlope( m2, 'line2: m', module, 'areLinesParallel' )
 	else
-		local x1, y1, x2, y2 = util.unpack( line2 )
-		util.checkPoint( x1, y1, 'line2: x1', 'line2: y1', module, 'areLinesParallel' )
-		util.checkPoint( x2, y2, 'line2: x2', 'line2: y2', module, 'areLinesParallel' )
+		local x1, y1, x2, y2 = Util.unpack( line2 )
+		Util.checkPoint( x1, y1, 'line2: x1', 'line2: y1', module, 'areLinesParallel' )
+		Util.checkPoint( x2, y2, 'line2: x2', 'line2: y2', module, 'areLinesParallel' )
 		m2 = getSlope( x1, y1, x2, y2 )
 	end
 
@@ -229,7 +229,7 @@ local function areLinesParallel( line1, line2 )
 	local v1, v2 = isVertical( m1 ), isVertical( m2 )
 	-- Both non-vertical lines
 	if ( not v1 ) and ( not v2 ) then
-		return util.checkFuzzy( m1, m2 )
+		return Util.checkFuzzy( m1, m2 )
 	-- One vertical and one non-vertical
 	elseif ( not v1 ) or ( not v2 ) then
 		-- These lines will never be parallel
@@ -245,34 +245,34 @@ end
 local function getLineIntersection( line1, line2 )
 	-- Check params
 	local t1, t2 = type( line1 ), type( line2 )
-	util.checkParam( t1 == 'table', module, 'getLineIntersection', 'line1: Expected table, got %1', t1 )
-	util.checkParam( t2 == 'table', module, 'getLineIntersection', 'line2: Expected table, got %1', t2 )
+	Util.checkParam( t1 == 'table', module, 'getLineIntersection', 'line1: Expected table, got %1', t1 )
+	Util.checkParam( t2 == 'table', module, 'getLineIntersection', 'line2: Expected table, got %1', t2 )
 
 	-- Slope 1 and 2, x and y point on line1 and line2; assigned later
 	local m1, m2, x1, y1, x2, y2
 
 	local len1, len2 = #line1, #line2
 	if len1 == 3 then
-		m1, x1, y1 = util.unpack( line1 )
-		util.checkSlope( m1, 'line1: m', module, 'getLineIntersection' )
-		util.checkPoint( x1, y1, 'line1: x', 'line1: y', module, 'getLineIntersection' )
+		m1, x1, y1 = Util.unpack( line1 )
+		Util.checkSlope( m1, 'line1: m', module, 'getLineIntersection' )
+		Util.checkPoint( x1, y1, 'line1: x', 'line1: y', module, 'getLineIntersection' )
 	else
 		local p1x2, p1y2
-		x1, y1, p1x2, p1y2 = util.unpack( line1 )
-		util.checkPoint( x1, y1, 'line1: x1', 'line1: y1', module, 'getLineIntersection' )
-		util.checkPoint( p1x2, p1y2, 'line1: x2', 'line1: y2', module, 'getLineIntersection' )
+		x1, y1, p1x2, p1y2 = Util.unpack( line1 )
+		Util.checkPoint( x1, y1, 'line1: x1', 'line1: y1', module, 'getLineIntersection' )
+		Util.checkPoint( p1x2, p1y2, 'line1: x2', 'line1: y2', module, 'getLineIntersection' )
 		m1 = getSlope( x1, y1, p1x2, p1y2 )
 	end
 
 	if len2 == 3 then
-		m2, x2, y2 = util.unpack( line2 )
-		util.checkSlope( m2, 'line2: m', module, 'getLineIntersection' )
-		util.checkPoint( x2, y2, 'line2: x', 'line2: y', module, 'getLineIntersection' )
+		m2, x2, y2 = Util.unpack( line2 )
+		Util.checkSlope( m2, 'line2: m', module, 'getLineIntersection' )
+		Util.checkPoint( x2, y2, 'line2: x', 'line2: y', module, 'getLineIntersection' )
 	else
 		local p2x1, p2y1
-		p2x1, p2y1, x2, y2 = util.unpack( line2 )
-		util.checkPoint( p2x1, p2y1, 'line2: x1', 'line2: y1', module, 'getLineIntersection' )
-		util.checkPoint( x2, y2, 'line2: x2', 'line2: y2', module, 'getLineIntersection' )
+		p2x1, p2y1, x2, y2 = Util.unpack( line2 )
+		Util.checkPoint( p2x1, p2y1, 'line2: x1', 'line2: y1', module, 'getLineIntersection' )
+		Util.checkPoint( x2, y2, 'line2: x2', 'line2: y2', module, 'getLineIntersection' )
 		m2 = getSlope( p2x1, p2y1, x2, y2 )
 	end
 
@@ -286,7 +286,7 @@ local function getLineIntersection( line1, line2 )
 		-- Both non-vertical lines
 		if ( not v1 ) and ( not v2 ) then
 			-- Both non-horizontal lines
-			local line1equals0, line2equals0 = util.checkFuzzy( m1, 0 ), util.checkFuzzy( m2, 0 )
+			local line1equals0, line2equals0 = Util.checkFuzzy( m1, 0 ), Util.checkFuzzy( m2, 0 )
 			if not line1equals0 and not line2equals0 then
 				-- m1 x + b1 = m2 x + b2
 				-- x ( m1 - m2 ) = b2 - b1
@@ -330,16 +330,16 @@ local function getLineIntersection( line1, line2 )
 			return x, y
 		-- Two vertical lines
 		else
-			return util.checkFuzzy( x1, x2 )
+			return Util.checkFuzzy( x1, x2 )
 		end
 	-- Parallel lines
 	else
 		-- Non-vertical lines
 		if not isVertical( m1 ) then
-			return util.checkFuzzy( b1, b2 )
+			return Util.checkFuzzy( b1, b2 )
 		-- Vertical lines
 		else
-			return util.checkFuzzy( x1, x2 )
+			return Util.checkFuzzy( x1, x2 )
 		end
 	end
 end
@@ -347,7 +347,7 @@ end
 -- Get closest point on the line to point
 local function getClosestPoint( px, py, ... )
 	-- Validate params
-	util.checkPoint( px, py, 'px', 'py', module, 'getClosestPoint' )
+	Util.checkPoint( px, py, 'px', 'py', module, 'getClosestPoint' )
 	local len = select( '#', ... )
 	local m, x, y
 
@@ -356,15 +356,15 @@ local function getClosestPoint( px, py, ... )
 		m, x, y = ...
 
 		-- Validate params
-		util.checkSlope( m, 'm', module, 'getClosestPoint' )
-		util.checkPoint( x, y, 'x', 'y', module, 'getClosestPoint' )
+		Util.checkSlope( m, 'm', module, 'getClosestPoint' )
+		Util.checkPoint( x, y, 'x', 'y', module, 'getClosestPoint' )
 	-- Given x1, y1, x2, y2
 	elseif len == 4 then
 		local x1, y1, x2, y2 = ...
 
 		-- Validate params
-		util.checkPoint( x1, y1, 'x1', 'y1', module, 'getClosestPoint' )
-		util.checkPoint( x2, y2, 'x2', 'y2', module, 'getClosestPoint' )
+		Util.checkPoint( x1, y1, 'x1', 'y1', module, 'getClosestPoint' )
+		Util.checkPoint( x2, y2, 'x2', 'y2', module, 'getClosestPoint' )
 
 		m = getSlope( x1, y1, x2, y2 )
 		x, y = x1, y1
