@@ -5,7 +5,7 @@
 
 -- Load Utils
 local path = (...):gsub( '%.[^%.]+$', '' ) .. '.'
-local Util = require( path .. 'Util' )
+local Util = require( path .. 'util' )
 local Line = require( path .. 'line' )
 local module = 'segment'
 
