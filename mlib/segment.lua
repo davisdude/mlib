@@ -58,8 +58,8 @@ end
 local function getLineIntersection( segment, line )
 	-- Verify params
 	local tsegment, tline = type( segment ), type( line )
-	Util.checkParam( tsegment == 'table', module, 'getLineIntersection', 'segment: Expected table, got %1', tsegment )
-	Util.checkParam( tline == 'table', module, 'getLineIntersection', 'line: Expected table, got %1', tline )
+	Util.checkParam( tsegment == 'table', module, 'getLineIntersection', 'segment: Expected table, got %1.', tsegment )
+	Util.checkParam( tline == 'table', module, 'getLineIntersection', 'line: Expected table, got %1.', tline )
 
 	-- Parse segment
 	local x1, y1, x2, y2 = Util.unpack( segment )
@@ -109,10 +109,10 @@ local function getSegmentIntersection( segment1, segment2 )
 	-- Validate params
 	local tsegment1, tsegment2 = type( segment1 ), type( segment2 )
 	Util.checkParam( tsegment1 == 'table', module, 'getSegmentIntersection',
-		'segment1: Expected table, got %1', tsegment1
+		'segment1: Expected table, got %1.', tsegment1
 	)
 	Util.checkParam( tsegment2 == 'table', module, 'getSegmentIntersection',
-		'segment2: Expected table, got %1', tsegment2
+		'segment2: Expected table, got %1.', tsegment2
 	)
 
 	local x1, y1, x2, y2 = Util.unpack( segment1 )

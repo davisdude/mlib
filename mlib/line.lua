@@ -198,8 +198,8 @@ end
 local function areLinesParallel( line1, line2 )
 	-- Check params
 	local t1, t2 = type( line1 ), type( line2 )
-	Util.checkParam( t1 == 'table', module, 'areLinesParallel', 'line1: Expected table, got %1', t1 )
-	Util.checkParam( t2 == 'table', module, 'areLinesParallel', 'line2: Expected table, got %1', t2 )
+	Util.checkParam( t1 == 'table', module, 'areLinesParallel', 'line1: Expected table, got %1.', t1 )
+	Util.checkParam( t2 == 'table', module, 'areLinesParallel', 'line2: Expected table, got %1.', t2 )
 
 	-- Slope 1 and 2; assigned later
 	local m1, m2
