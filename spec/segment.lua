@@ -228,7 +228,7 @@ describe( 'Segment', function()
 
 	describe( 'All functions checked', function()
 		for i in pairs( Segment ) do
-			it( tostring( i .. ' ited' ), function()
+			it( tostring( i .. ' tested' ), function()
 				assert.True( checked[i] )
 			end )
 		end

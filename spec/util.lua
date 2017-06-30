@@ -107,7 +107,7 @@ describe( 'Util', function()
 
 	describe( 'All functions checked', function()
 		for i in pairs( Util ) do
-			it( tostring( i .. ' ited' ), function()
+			it( tostring( i .. ' tested' ), function()
 				assert.True( checked[i] )
 			end )
 		end

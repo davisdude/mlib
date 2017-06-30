@@ -338,7 +338,7 @@ describe( 'Line', function()
 
 	describe( 'All functions checked', function()
 		for i in pairs( Line ) do
-			it( tostring( i .. ' ited' ), function()
+			it( tostring( i .. ' tested' ), function()
 				assert.True( checked[i] )
 			end )
 		end
