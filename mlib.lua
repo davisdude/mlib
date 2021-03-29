@@ -1394,7 +1394,7 @@ return {
 
 		-- Aliases
 		copy = cloneVector,
-		subtract = subtractVector,
+		subtract = subVector,
 		multiply = mulVector,
 		divide = divVector,
 		equal = eqVector,
