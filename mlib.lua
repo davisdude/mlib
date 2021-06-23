@@ -553,8 +553,8 @@ end
 
 -- Gives the intersection of a line and a circle.
 local function getCircleLineIntersection( circleX, circleY, radius, x1, y1, x2, y2 )
-	slope = getSlope( x1, y1, x2, y2 )
-	intercept = getYIntercept( x1, y1, slope )
+	local slope = getSlope( x1, y1, x2, y2 )
+	local intercept = getYIntercept( x1, y1, slope )
 
 	if slope then
 		local a = ( 1 + slope ^ 2 )
@@ -986,7 +986,7 @@ end -- }}}
 local function getMean( ... )
 	local input = checkInput( ... )
 
-	mean = getSummation( 1, #input,
+	local mean = getSummation( 1, #input,
 		function( i, t )
 			return input[i]
 		end
@@ -1209,7 +1209,7 @@ local function dist2Vector(a, b)
 end
 
 local function distVector(a, b)
-	return sqrt(dis2Vector(a, b))
+	return sqrt(dist2Vector(a, b))
 end
 
 local function normalizeVector(a)
@@ -1242,7 +1242,7 @@ local function mirrorOnVector(a, b)
 end
 
 local function crossVector(a, b)
-	return a.x * v.y - a.y * v.x
+	return a.x * b.y - a.y * b.x
 end
 
 -- ref.: http://blog.signalsondisplay.com/?p=336
