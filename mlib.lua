@@ -85,7 +85,7 @@ end
 
 -- Like removeDuplicatePairs but specifically for numbers in a flat table
 local function removeDuplicatePointsFlat( tab )
-    for i = #tab, 1 -2 do
+    for i = #tab, 1, -2 do
         for ii = #tab - 2, 3, -2 do
             if i ~= ii then
                 local x1, y1 = tab[i], tab[i + 1]
