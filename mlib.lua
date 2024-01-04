@@ -32,7 +32,7 @@ end
 
 -- Deals with floats / verify false false values. This can happen because of significant figures.
 local function checkFuzzy( number1, number2 )
-	return ( number1 - .00001 <= number2 and number2 <= number1 + .00001 )
+	return ( number1 - .00001 <= number2 ) and ( number2 <= number1 + .00001 )
 end
 
 -- Remove multiple occurrences from a table.
