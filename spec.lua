@@ -63,6 +63,112 @@ context( 'mlib', function()
 		end
 	)
 
+	context( 'util', function()
+		context( 'checkInput', function()
+			local tab = {}
+			for i = 1, 10 do
+				tab[i] = math.random(0, 100)
+			end
+
+			test( 'Leaves tables as tables.', function()
+				assert_multiple_fuzzy_equal( _.util.checkInput( tab ), tab )
+			end )
+
+			test( 'Packs unpacked data into a table.', function()
+				assert_multiple_fuzzy_equal( _.util.checkInput( table.unpack( tab ) ), tab )
+			end )
+		end )
+
+		context( 'checkFuzzy', function()
+			test( 'Returns true if numbers are close to equal', function()
+				assert_true( _.util.checkFuzzy( 3, 3.00000001 ) )
+				assert_true( _.util.checkFuzzy( 5.5, 5.49999999 ) )
+			end )
+
+			test( 'Returns false if numbers are not close to equal.', function()
+				assert_false( _.util.checkFuzzy( 3, 3.1 ) )
+				assert_false( _.util.checkFuzzy( 5.5, 5.4 ) )
+			end )
+		end )
+
+		context( 'removeDuplicatePairs', function()
+			test( 'Leaves the table alone when no pairs are duplicated.', function()
+				assert_tables_fuzzy_equal( _.util.removeDuplicatePairs( { { 1, 2 }, { 3, 4 }, { 5, 6 } } ), { { 1, 2 }, { 3, 4 }, { 5, 6 } } )
+			end )
+
+			test( 'Removes duplicate pairs from the table when no pairs are duplicated.', function()
+				assert_tables_fuzzy_equal( _.util.removeDuplicatePairs( { { 1, 2 }, { 1, 2 }, { 5, 6 } } ), { { 1, 2 }, { 5, 6 } } )
+				assert_tables_fuzzy_equal( _.util.removeDuplicatePairs( { { 1, 2 }, { 3, 4 }, { 1, 2 } } ), { { 1, 2 }, { 3, 4 } } )
+			end )
+		end )
+
+		context( 'removeDuplicates4Points', function()
+			test( 'Leaves the table alone when no pairs are duplicated.', function()
+				assert_tables_fuzzy_equal( _.util.removeDuplicates4Points( { { 'chord', 1, 2, 3, 4 }, { 'enclosed', 1, 2, 3, 4 } } ), { { 'chord', 1, 2, 3, 4 }, { 'enclosed', 1, 2, 3, 4 } } )
+				assert_tables_fuzzy_equal( _.util.removeDuplicates4Points( { { 'chord', 1, 2, 3, 4 }, { 'chord', 2, 3, 4, 5 } } ), { { 'chord', 1, 2, 3, 4 }, { 'chord', 2, 3, 4, 5 } } )
+			end )
+
+			test( 'Removes duplicate pairs from the table when no pairs are duplicated.', function()
+				assert_tables_fuzzy_equal( _.util.removeDuplicates4Points( { { 'chord', 1, 2, 3, 4 }, { 'chord', 1, 2, 3, 4 } } ), { { 'chord', 1, 2, 3, 4 } } )
+			end )
+		end )
+
+		context( 'removeDuplicatePointsFlat', function()
+			test( 'Leaves the table alone when no pairs are duplicated.', function()
+				assert_multiple_fuzzy_equal( _.util.removeDuplicatePointsFlat( { 1, 2, 3, 4, 5, 6 } ), { 1, 2, 3, 4, 5, 6 } )
+				assert_multiple_fuzzy_equal( _.util.removeDuplicatePointsFlat( { 1, 2, 3, 1, 2, 3 } ), { 1, 2, 3, 1, 2, 3 } )
+			end )
+
+			test( 'Removes duplicate pairs from the table when no pairs are duplicated.', function()
+				assert_multiple_fuzzy_equal( _.util.removeDuplicatePointsFlat( { 1, 2, 3, 4, 1, 2 } ), { 1, 2, 3, 4 } )
+			end )
+		end )
+
+		context( 'validateNumber', function()
+			test( 'Valid numbers are true.', function()
+				for i = 1, 10 do
+					assert_true( _.util.validateNumber( math.random() * 100 ) )
+				end
+			end )
+
+			test( 'nan is false', function()
+				assert_false( _.util.validateNumber( 0 / 0 ) )
+			end )
+
+			test( 'Non-numbers are false', function()
+				assert_false( _.util.validateNumber( math.huge ) )
+				assert_false( _.util.validateNumber( 'asdf' ) )
+				assert_false( _.util.validateNumber( '1' ) )
+			end )
+		end )
+
+		context( 'getGreatestPoint', function()
+			test( 'Gets largest and smallest values of x.', function()
+				assert_multiple_fuzzy_equal( { _.util.getGreatestPoint( { 1, 2, 3, 4, 5, 6 } ) }, { 5, 1 } )
+				assert_multiple_fuzzy_equal( { _.util.getGreatestPoint( { 3, 4, 5, 6, 1, 2 } ) }, { 5, 1 } )
+			end )
+
+			test( 'Gets largest and smallest values of y.', function()
+				assert_multiple_fuzzy_equal( { _.util.getGreatestPoint( { 1, 2, 3, 4, 5, 6 }, 0 ) }, { 6, 2 } )
+				assert_multiple_fuzzy_equal( { _.util.getGreatestPoint( { 3, 4, 5, 6, 1, 2 }, 0 ) }, { 6, 2 } )
+			end )
+		end )
+
+		context( 'isWithinBounds', function()
+			test( 'Returns true if within bounds.', function()
+				for i = 1, 10 do
+					assert_true( _.util.isWithinBounds( 0, math.random( 0, 100 ), 100 ) )
+				end
+			end )
+
+			test( 'Returns false if not within bounds.', function()
+				for i = 1, 10 do
+					assert_false( _.util.isWithinBounds( 0, -1 * math.random( 0, 100 ), 100 ) )
+				end
+			end )
+		end )
+	end )
+
     context( 'point', function()
         context( 'rotate', function()
             test( 'Gives the rotated point.', function()
