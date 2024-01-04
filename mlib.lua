@@ -87,14 +87,14 @@ end
 
 -- Like removeDuplicatePairs but specifically for numbers in a flat table
 local function removeDuplicatePointsFlat( tab )
-    for i = #tab - 1, 1, -2 do
-        for ii = #tab - 3, 1, -2 do
+    for i = #tab - 3, 1, -2 do
+        for ii = #tab - 1, 1, -2 do
             if i ~= ii then
                 local x1, y1 = tab[i], tab[i + 1]
                 local x2, y2 = tab[ii], tab[ii + 1]
                 if checkFuzzy( x1, x2 ) and checkFuzzy( y1, y2 ) then
-                    table.remove( tab, i + 1 )
-                    table.remove( tab, i )
+                    table.remove( tab, ii + 1 )
+                    table.remove( tab, ii )
                 end
             end
         end
