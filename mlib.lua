@@ -62,13 +62,13 @@ local function removeDuplicates4Points( tab )
         for index2 = #tab, 1, -1 do
             local second = tab[index2]
             if index1 ~= index2 then
-                if type( first[1] ) ~= type( second[1] ) then return false end
-                if type( first[2] ) == 'number' and type( second[2] ) == 'number' and type( first[3] ) == 'number' and type( second[3] ) == 'number' then
-                    if checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
-                        table.remove( tab, index1 )
+                if first[1] ~= second[1] then return tab end
+                for i = 2, #first do
+                    if type( first[i] ) == 'number' and type( second[i] ) == 'number' then
+                        if checkFuzzy( first[i], second[i] ) then
+                            table.remove( tab, index1 )
+                        end
                     end
-                elseif checkFuzzy( first[1], second[1] ) and checkFuzzy( first[2], second[2] ) and checkFuzzy( first[3], second[3] ) then
-                    table.remove( tab, index1 )
                 end
             end
         end
