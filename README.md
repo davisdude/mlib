@@ -339,7 +339,7 @@ end
 -- 3: 	tangent 	5		6
 -- 4: 	tagnent 	4		5
 ```
-- For more see [mlib.circle.getSegmentIntersection](#mlibcirclegetsegmentintersection) or the [specs](spec.lua#L676)
+- For more see [mlib.circle.getSegmentIntersection](#mlibcirclegetsegmentintersection) or the [specs](spec.lua)
 
 ##### mlib.polygon.getLineIntersection
 - Returns the coordinates of where a line intersects a polygon.
@@ -388,7 +388,7 @@ end
 - Returns:
   - `intersections`: Table. Contains the intersections.
 - Notes:
-  - With collinear line segments, they are __not__ broken up. See the [specs](spec.lua#L508) for more.
+  - With collinear line segments, they are __not__ broken up. See the [specs](spec.lua) for more.
 
 ##### mlib.polygon.getSignedPolygonArea
 - Gets the signed area of the polygon. If the points are ordered counter-clockwise the area is positive. If the points are ordered clockwise the number is negative.
@@ -537,7 +537,7 @@ end
   - `c2x`, `c2y`: Numbers. The x and y coordinate of the second circle.
   - `radius2`: Number. The radius of the second circle.
 - Returns:
-  - `intersections`: Table. A table that contains the type and where the circle collides. See the [specs](spec.lua#L698) for more.
+  - `intersections`: Table. A table that contains the type and where the circle collides. See the [specs](spec.lua) for more.
 
 ##### mlib.circle.getCircumference
 - Returns the circumference of a circle.
@@ -565,7 +565,7 @@ end
 	    - `x1` and `x2` represent where the line intersects the circle.
 	  - Boolean (`false`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`)
 	    - No intersection.
-    - For more see the [specs](spec.lua#L660).
+    - For more see the [specs](spec.lua).
 
 ##### mlib.circle.getSegmentIntersection
 - Returns the intersections of a circle and a line segment.
@@ -588,7 +588,7 @@ end
 	    - `x1` and `x2` represent where the line segment intersects the circle.
 	  - Boolean (`false`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`), Boolean (`nil`)
 	    - No intersection.
-    - For more see the [specs](spec.lua#L676).
+    - For more see the [specs](spec.lua).
 
 ##### mlib.circle.isCircleCompletelyInside
 - Checks if one circle is completely inside of another circle.
@@ -813,7 +813,7 @@ local b = mlib.math.getRoot( 27, 3 )
 
 print( a, b ) --> 2, 3
 ```
-  - For more, see the [specs](spec.lua#L860).
+  - For more, see the [specs](spec.lua).
 
 ##### mlib.math.getSummation
 - Gets the summation of numbers.
@@ -828,7 +828,7 @@ print( a, b ) --> 2, 3
 	  - `previous`: Table. The previous values used.
 - Returns:
   - `Summation`: Number. The summation of the numbers.
-  - For more, see the [specs](spec.lua#L897).
+  - For more, see the [specs](spec.lua).
 
 ##### mlib.math.isPrime
 - Checks if a number is prime.
@@ -850,7 +850,7 @@ print( a, b ) --> 2, 3
   - `place (1)`: Number. The decimal place to round to. Defaults to 1.
 - Returns:
   - The rounded number.
-  - For more, see the [specs](spec.lua#L881).
+  - For more, see the [specs](spec.lua).
 
 #### Aliases
 | Alias                                         | Corresponding Function                                                            |
