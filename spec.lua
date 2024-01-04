@@ -158,13 +158,13 @@ context( 'mlib', function()
 		context( 'isWithinBounds', function()
 			test( 'Returns true if within bounds.', function()
 				for i = 1, 10 do
-					assert_true( _.util.isWithinBounds( 0, math.random( 0, 100 ), 100 ) )
+					assert_true( _.util.isWithinBounds( 0, math.random( 1, 100 ), 100 ) )
 				end
 			end )
 
 			test( 'Returns false if not within bounds.', function()
 				for i = 1, 10 do
-					assert_false( _.util.isWithinBounds( 0, -1 * math.random( 0, 100 ), 100 ) )
+					assert_false( _.util.isWithinBounds( 0, -1 * math.random( 1, 100 ), 100 ) )
 				end
 			end )
 		end )
