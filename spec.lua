@@ -1,5 +1,5 @@
--- run using 'lua tsc -f spec.lua'
-require 'telescope'
+-- run using 'tsc -f spec.lua'
+local telescope = require 'telescope'
 local _ = require 'mlib'
 
 context( 'mlib', function()
@@ -36,13 +36,13 @@ context( 'mlib', function()
 		return true
 	end
 
-	make_assertion( 'fuzzy_equal', 'fuzzy values to be equal to each other',
+	telescope.make_assertion( 'fuzzy_equal', 'fuzzy values to be equal to each other',
 		function( a, b )
 			return check_fuzzy( a, b )
 		end
 	)
 
-	make_assertion( 'multiple_fuzzy_equal', 'all fuzzy values to equal respective fuzzy value',
+	telescope.make_assertion( 'multiple_fuzzy_equal', 'all fuzzy values to equal respective fuzzy value',
 		function( a, b )
 			for i = 1, #a do
 				if type( a[i] ) ~= 'number' then
@@ -57,7 +57,7 @@ context( 'mlib', function()
 		end
 	)
 
-	make_assertion( 'tables_fuzzy_equal', 'all table values are equal',
+	telescope.make_assertion( 'tables_fuzzy_equal', 'all table values are equal',
 		function( Table1, Table2 )
 			return DeepCompare( Table1, Table2 )
 		end
